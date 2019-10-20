@@ -1,0 +1,40 @@
+<resources>
+    <string name="app_name">R-a-dio2</string>
+    <string name="title_home">Home</string>
+    <string name="title_dashboard">News</string>
+    <string name="title_notifications">Notifications</string>
+    <string name="title_nowplaying">Radio</string>
+
+    <string name="now_playing_notification_title_template">Now playing: %1$s</string>
+
+    <!-- TODO: remove this placeholder text -->
+    <string name="now_playing_notification_placeholder_text_template">You said %1$s and lorem ipsum
+        dolor sit amet, consectetur adipiscing elit. Etiam non enim magna. Morbi dictum, velit vel
+        semper venenatis, magna odio volutpat velit, at ullamcorper nulla lacus sed turpis.
+        Pellentesque vitae metus elit, nec tincidunt tellus. Integer sed nisl sem, ullamcorper
+        ornare lacus. Duis ac mauris sed massa congue volutpat. Donec sed erat sit amet turpis
+        viverra rhoncus sit amet nec magna. Donec lacinia ligula at libero volutpat volutpat nec nec
+        tortor.
+    </string>
+
+    <string name="action_share">Share</string>
+    <string name="action_reply">Reply</string>
+
+    <string name="new_message_notification_title_template">New message: %1$s</string>
+
+    <!-- TODO: remove this placeholder text -->
+    <string name="new_message_notification_placeholder_text_template">You said %1$s and lorem ipsum
+        dolor sit amet, consectetur adipiscing elit. Etiam non enim magna. Morbi dictum, velit vel
+        semper venenatis, magna odio volutpat velit, at ullamcorper nulla lacus sed turpis.
+        Pellentesque vitae metus elit, nec tincidunt tellus. Integer sed nisl sem, ullamcorper
+        ornare lacus. Duis ac mauris sed massa congue volutpat. Donec sed erat sit amet turpis
+        viverra rhoncus sit amet nec magna. Donec lacinia ligula at libero volutpat volutpat nec nec
+        tortor.
+    </string>
+    <string name="nowPlayingNotificationChannel">R/a/dio Stream Service</string>
+    <string name="MEDIA_ROOT_ID">radio_root_id</string>
+    <string name="STREAM_URL">https://relay0.r-a-d.io/main.mp3</string>
+    <string name="STREAM_URL_2">http://shelter.mahoro-net.org:8000/tsumugi</string>
+    <string name="NOTIFICATION_CHANNEL_ID">io.r_a_d.radio2.NOTIFICATIONS</string>
+    <string name="volume">Volume: </string>
+</resources>
