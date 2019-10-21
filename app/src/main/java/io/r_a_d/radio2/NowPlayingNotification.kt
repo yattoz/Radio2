@@ -37,6 +37,8 @@ class NowPlayingNotification {
     }
 
     fun create(c: Context, m: MediaSessionCompat) {
+        notificationManager = c.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+
         val notificationIntent = Intent(c, MainActivity::class.java)
         // The PendingIntent will launch the SAME activity
         // thanks to the launchMode specified in the Manifest : android:launchMode="singleTop"
@@ -81,7 +83,6 @@ class NowPlayingNotification {
         val deleteIntent = PendingIntent.getBroadcast(c, 0, delIntent, PendingIntent.FLAG_CANCEL_CURRENT)
         builder.setDeleteIntent(deleteIntent)
 
-        notificationManager = c.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
         // Create the notification with the update(c) call
         update(c)
