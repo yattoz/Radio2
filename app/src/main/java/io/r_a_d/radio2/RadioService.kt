@@ -4,10 +4,8 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
-import android.media.AudioDeviceInfo
 import android.support.v4.media.MediaBrowserCompat
 import android.util.Log
-import androidx.annotation.RequiresApi
 import androidx.media.MediaBrowserServiceCompat
 import android.media.AudioManager
 import android.os.*
@@ -22,9 +20,12 @@ import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory
 
 import android.net.Uri
 import android.support.v4.media.MediaMetadataCompat
+import android.telephony.PhoneStateListener
+import android.telephony.TelephonyManager
 import android.view.KeyEvent
-import com.google.android.exoplayer2.C
-import com.google.android.exoplayer2.audio.AudioAttributes
+import androidx.media.AudioAttributesCompat
+import androidx.media.AudioFocusRequestCompat
+import androidx.media.AudioManagerCompat
 import com.google.android.exoplayer2.metadata.icy.*
 import java.net.URLDecoder
 import kotlin.math.exp
@@ -68,7 +69,7 @@ class RadioService : MediaBrowserServiceCompat() {
                 1 -> { Log.d(radioTag, "Headset is plugged"); headsetPluggedIn = true  }
                 else -> Log.d(radioTag, "I have no idea what the headset state is")
                 }
-
+                /*
                 val am = getSystemService(AUDIO_SERVICE) as AudioManager
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
                 {
@@ -83,6 +84,8 @@ class RadioService : MediaBrowserServiceCompat() {
                 {
                     Log.d(radioTag, "Can't get state?")
                 }
+
+                 */
                 if(!PlayerStore.instance.isPlaying.value!! && headsetPluggedIn)
                     beginPlaying()
             }
@@ -113,6 +116,19 @@ class RadioService : MediaBrowserServiceCompat() {
     override fun onCreate() {
         super.onCreate()
 
+        // Define managers
+        telephonyManager = getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
+        telephonyManager?.listen(phoneStateListener, PhoneStateListener.LISTEN_CALL_STATE)
+        audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
+        //define the audioFocusRequest
+        val audioFocusRequestBuilder = AudioFocusRequestCompat.Builder(AudioManagerCompat.AUDIOFOCUS_GAIN)
+        audioFocusRequestBuilder.setOnAudioFocusChangeListener(focusChangeListener)
+        val audioAttributes = AudioAttributesCompat.Builder()
+        audioAttributes.setContentType(AudioAttributesCompat.CONTENT_TYPE_MUSIC)
+        audioAttributes.setUsage(AudioAttributesCompat.USAGE_MEDIA)
+        audioFocusRequestBuilder.setAudioAttributes(audioAttributes.build())
+        audioFocusRequest = audioFocusRequestBuilder.build()
+
         // This stuff is for the broadcast receiver
         val filter = IntentFilter()
         filter.addAction(AudioManager.ACTION_AUDIO_BECOMING_NOISY)
@@ -142,10 +158,9 @@ class RadioService : MediaBrowserServiceCompat() {
             Actions.PLAY.name -> beginPlaying()
             Actions.STOP.name -> stopPlaying()
             Actions.NPAUSE.name -> pausePlaying()
-            /*
-            ACTION_MUTE -> mutePlayer()
-            ACTION_UNMUTE -> unmutePlayer()
-             */
+            //// unused intents.
+            //Actions.MUTE.name -> setVolume(0)
+            //Actions.UN_MUTE.name -> setVolume(PlayerStore.instance.volume.value)
         }
         Log.d(radioTag, "intent received : " + intent.getStringExtra("action"))
         return super.onStartCommand(intent, flags, startId)
@@ -182,6 +197,40 @@ class RadioService : MediaBrowserServiceCompat() {
     }
 
     // ########################################
+    // ######## AUDIO FOCUS MANAGEMENT ########
+    //#########################################
+
+    // Define the managers
+    private var telephonyManager: TelephonyManager? = null
+    private lateinit var audioManager: AudioManager
+    private lateinit var audioFocusRequest: AudioFocusRequestCompat
+
+    private val phoneStateListener = object : PhoneStateListener() {
+        override fun onCallStateChanged(state: Int, incomingNumber: String) {
+            super.onCallStateChanged(state, incomingNumber)
+
+            if (state != TelephonyManager.CALL_STATE_IDLE) {
+                setVolume(0)
+            } else {
+                setVolume(PlayerStore.instance.volume.value!!)
+            }
+        }
+    }
+
+    // Define the listener that will control what happens when focus is changed such
+    // as when headphones are unplugged
+    private val focusChangeListener =
+        AudioManager.OnAudioFocusChangeListener { focusChange ->
+            when (focusChange) {
+                AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK -> setVolume(20) //20%
+                AudioManager.AUDIOFOCUS_LOSS_TRANSIENT -> setVolume(0)
+                AudioManager.AUDIOFOCUS_LOSS -> stopPlaying()
+                AudioManager.AUDIOFOCUS_GAIN -> setVolume(PlayerStore.instance.volume.value!!)
+                else -> {}
+            }
+        }
+
+    // ########################################
     // ######## MEDIA PLAYER / SESSION ########
     // ########################################
 
@@ -190,10 +239,11 @@ class RadioService : MediaBrowserServiceCompat() {
     private lateinit var metadataBuilder: MediaMetadataCompat.Builder
     private lateinit var player: SimpleExoPlayer
     private lateinit var radioMediaSource: ProgressiveMediaSource
+
     private fun setupMediaPlayer(){
         player = ExoPlayerFactory.newSimpleInstance(this)
         // Set audio attribute to manage audio focus - only works on API21+
-        manageAudioFocus()
+        // manageAudioFocus()
 
         player.addMetadataOutput {
             for (i in 0 until it.length()) {
@@ -229,7 +279,8 @@ class RadioService : MediaBrowserServiceCompat() {
         radioMediaSource = ProgressiveMediaSource.Factory(dataSourceFactory)
             .createMediaSource(Uri.parse(getString(R.string.STREAM_URL)))
     }
-
+    /*
+    // Note : dealing with audio focus manually (consistent for <API21).
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     private fun manageAudioFocus()
     {
@@ -239,6 +290,7 @@ class RadioService : MediaBrowserServiceCompat() {
         val audioAttributesBuilt = audioAttributes.build()
         player.setAudioAttributes(audioAttributesBuilt, true)
     }
+     */
 
     private fun createMediaSession() {
         mediaSession = MediaSessionCompat(this, "RadioMediaSession")
@@ -261,6 +313,12 @@ class RadioService : MediaBrowserServiceCompat() {
 
     fun beginPlaying()
     {
+        // the old requestAudioFocus is deprecated on API26+. Using AudioManagerCompat library for consistent code across versions
+        val result = AudioManagerCompat.requestAudioFocus(audioManager, audioFocusRequest)
+        if (result != AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
+            return
+        }
+
         if (!isForeground)
         {
             startForeground(radioServiceId, nowPlayingNotification.notification)
