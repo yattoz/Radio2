@@ -1,6 +1,5 @@
 package io.r_a_d.radio2
 
-import android.app.*
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -9,7 +8,6 @@ import android.media.AudioDeviceInfo
 import android.support.v4.media.MediaBrowserCompat
 import android.util.Log
 import androidx.annotation.RequiresApi
-import androidx.core.app.NotificationCompat
 import androidx.media.MediaBrowserServiceCompat
 import android.media.AudioManager
 import android.os.*
@@ -35,11 +33,11 @@ import kotlin.math.ln
 
 class RadioService : MediaBrowserServiceCompat() {
 
-    private val notificationId: Int = 1
     private var isForeground: Boolean = false
-    // Define the binder that gets use in conjunction with the main activity
     private val binder : IBinder = RadioBinder()
     private val radioTag = "======RadioService====="
+    private lateinit var nowPlayingNotification: NowPlayingNotification
+    private val radioServiceId = 1
 
     inner class RadioBinder : Binder() {
         fun getService(): RadioService = this@RadioService
@@ -114,7 +112,6 @@ class RadioService : MediaBrowserServiceCompat() {
 
     override fun onCreate() {
         super.onCreate()
-        notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
         // This stuff is for the broadcast receiver
         val filter = IntentFilter()
@@ -127,8 +124,8 @@ class RadioService : MediaBrowserServiceCompat() {
         setupMediaPlayer()
         createMediaSession()
 
-        createNotification()
-        updateNotification()
+        nowPlayingNotification = NowPlayingNotification()
+        nowPlayingNotification.create(this, mediaSession)
 
         PlayerStore.instance.isServiceStarted.value = true
         Log.d(radioTag, "created")
@@ -170,7 +167,7 @@ class RadioService : MediaBrowserServiceCompat() {
         if (mediaSession.controller.playbackState.state == PlaybackStateCompat.STATE_STOPPED)
         {
             Log.d(radioTag, "stated was stopped, killing notification")
-            notificationManager.cancel(notificationId)
+            nowPlayingNotification.clear()
         }
 
         player.stop()
@@ -213,7 +210,7 @@ class RadioService : MediaBrowserServiceCompat() {
                         //no need for URLDecoder.decode(entry.title!!.substring(...), "UTF-8") anymore
                         PlayerStore.instance.songTitle.value = URLDecoder.decode(entry.title!!.substring(hyphenPos + 3), "UTF-8")
                         PlayerStore.instance.songArtist.value = URLDecoder.decode(entry.title!!.substring(0, hyphenPos), "UTF-8")
-                        updateNotification()
+                        nowPlayingNotification.update(this)
                     } catch (e: Exception) {
                         PlayerStore.instance.songTitle.value = entry.title
                         PlayerStore.instance.songArtist.value = ""
@@ -258,104 +255,6 @@ class RadioService : MediaBrowserServiceCompat() {
         mediaSession.setPlaybackState(playbackStateBuilder.build())
     }
 
-
-
-    // ########################################
-    // ###### NOW PLAYING NOTIFICATION ########
-    // ########################################
-
-    // Define the notification in android's swipe-down menu
-    private lateinit var notification: Notification
-    private lateinit var notificationManager: NotificationManager
-    private lateinit var builder: NotificationCompat.Builder
-    private val notificationChannelId = "io.r_a_d.radio2.NOTIFICATIONS"
-
-    @RequiresApi(api = Build.VERSION_CODES.O)
-    private fun createNotificationChannel(): String {
-        val chanName = R.string.nowPlayingNotificationChannel
-        val chan = NotificationChannel(this.notificationChannelId, getString(chanName), NotificationManager.IMPORTANCE_LOW)
-        chan.lockscreenVisibility = Notification.VISIBILITY_PUBLIC
-
-        notificationManager.createNotificationChannel(chan)
-
-        return this.notificationChannelId
-    }
-
-    private fun createNotification() {
-        val notificationIntent = Intent(this, MainActivity::class.java)
-        // The PendingIntent will launch the SAME activity
-        // thanks to the launchMode specified in the Manifest : android:launchMode="singleTop"
-        val pendingIntent = PendingIntent.getActivity(
-            this, 0,
-            notificationIntent, 0
-        )
-        var channelID = ""
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            channelID = createNotificationChannel()
-        }
-        builder = NotificationCompat.Builder(this, channelID)
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            builder.setSmallIcon(R.drawable.lollipop_logo)
-            builder.color = -0x20b3c6
-        } else {
-            builder.setSmallIcon(R.drawable.normal_logo)
-        }
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            builder.setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
-        }
-
-        builder.setStyle(
-            androidx.media.app.NotificationCompat.MediaStyle()
-                .setMediaSession(mediaSession.sessionToken)
-                .setShowActionsInCompactView(0)
-        )
-        builder.priority = NotificationCompat.PRIORITY_LOW // we don't want the phone to ring every time the notification gets updated.
-
-
-        // The PendingIntent will launch the SAME activity
-        // thanks to the launchMode specified in the Manifest : android:launchMode="singleTop"
-        builder.setContentIntent(pendingIntent)
-
-
-        // can't seem to get it right.
-        val delIntent = Intent(this, BroadcastReceiver::class.java)
-        delIntent.putExtra("action", Actions.KILL.name)
-        val deleteIntent = PendingIntent.getBroadcast(this, 0, delIntent, PendingIntent.FLAG_CANCEL_CURRENT)
-        builder.setDeleteIntent(deleteIntent)
-    }
-
-    private fun updateNotification() {
-        builder.setContentTitle(PlayerStore.instance.songTitle.value)
-        builder.setContentText(PlayerStore.instance.songArtist.value)
-
-        // TODO define icon in notification. I thought it'd be nice to have the streamer picture.
-        // The streamer picture should be downloaded and converted to Bitmap in another thread, as network tasks are forbidden on main thread.
-        // See : https://developer.android.com/reference/android/os/NetworkOnMainThreadException
-        //// builder.setLargeIcon(icon)
-
-        if (builder.mActions.isEmpty()) {
-            val intent = Intent(this, RadioService::class.java)
-            val action: NotificationCompat.Action
-
-            action = if (PlayerStore.instance.isPlaying.value!!) {
-                intent.putExtra("action", Actions.NPAUSE.name)
-                val pendingButtonIntent = PendingIntent.getService(this, 1, intent, PendingIntent.FLAG_UPDATE_CURRENT)
-                NotificationCompat.Action.Builder(R.drawable.exo_controls_pause, "Pause", pendingButtonIntent).build()
-            } else {
-                intent.putExtra("action", Actions.PLAY.name)
-                val pendingButtonIntent = PendingIntent.getService(this, 1, intent, PendingIntent.FLAG_UPDATE_CURRENT)
-                NotificationCompat.Action.Builder(R.drawable.exo_controls_play,"Play", pendingButtonIntent).build()
-            }
-            builder.addAction(action)
-        }
-        builder.setAutoCancel(true)
-        notification = builder.build()
-        notificationManager.notify(notificationId, notification)
-    }
-
     // ########################################
     // ######### SERVICE START/STOP ###########
     // ########################################
@@ -364,7 +263,7 @@ class RadioService : MediaBrowserServiceCompat() {
     {
         if (!isForeground)
         {
-            startForeground(1, notification)
+            startForeground(radioServiceId, nowPlayingNotification.notification)
             isForeground = true
         }
 
@@ -376,8 +275,8 @@ class RadioService : MediaBrowserServiceCompat() {
         PlayerStore.instance.isMeantToPlay.value = true //necessary if restarted from notification
         // START PLAYBACK, LET'S ROCK
         player.playWhenReady = true
-        builder.mActions.clear()
-        updateNotification()
+
+        nowPlayingNotification.update(this, isUpdatingNotificationButton = true)
 
         playbackStateBuilder.setState(
             PlaybackStateCompat.STATE_PLAYING,
@@ -409,10 +308,10 @@ class RadioService : MediaBrowserServiceCompat() {
         else
         {
             //stopForeground(true)
+            Log.i(radioTag, "API23- must keep the notification bound. Destroy it by stopping the stream and removing the task.")
         }
 
-        builder.mActions.clear()
-        updateNotification()
+        nowPlayingNotification.update(this, isUpdatingNotificationButton = true)
 
         playbackStateBuilder.setState(
             PlaybackStateCompat.STATE_PAUSED,
@@ -432,8 +331,7 @@ class RadioService : MediaBrowserServiceCompat() {
         PlayerStore.instance.isMeantToPlay.value = false
         if (isForeground) {
             stopForeground(false)
-            builder.mActions.clear()
-            updateNotification()
+            nowPlayingNotification.update(this, isUpdatingNotificationButton = true)
 
             isForeground = false
             playbackStateBuilder.setState(

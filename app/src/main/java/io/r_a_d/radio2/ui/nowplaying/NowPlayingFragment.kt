@@ -60,6 +60,7 @@ class NowPlayingFragment : Fragment() {
         })
 
         seekBarVolume.setOnSeekBarChangeListener(nowPlayingViewModel.seekBarChangeListener)
+        seekBarVolume.progress = PlayerStore.instance.volume.value!!
 
         syncPlayPauseButtonImage(root)
 
