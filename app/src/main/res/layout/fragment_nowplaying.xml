@@ -5,18 +5,16 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:layout_margin="@dimen/activity_horizontal_margin"
     >
 
     <TextView
         android:id="@+id/text_song_artist"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginEnd="8dp"
         android:textAlignment="center"
         android:gravity="center"
         android:textSize="20sp"
-        android:textColor="@android:color/white"
         android:text=""
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="1.0"
@@ -27,13 +25,10 @@
         android:id="@+id/text_song_title"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginEnd="8dp"
         android:text=""
         android:textAlignment="center"
         android:gravity="center"
         android:textSize="20sp"
-        android:textColor="@android:color/white"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
@@ -42,50 +37,61 @@
 
     <ImageButton
         android:id="@+id/play_pause"
-        android:layout_width="146dp"
-        android:layout_height="140dp"
+        android:layout_width="150dp"
+        android:layout_height="150dp"
         android:layout_gravity="center_vertical|center_horizontal"
-        android:adjustViewBounds="false"
+        android:adjustViewBounds="true"
         android:background="?attr/selectableItemBackground"
         android:contentDescription="play-pause"
         android:contextClickable="false"
         android:cropToPadding="false"
-        app:layout_constraintBottom_toBottomOf="parent"
+        android:scaleType="centerCrop"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/text_song_title"
-        app:srcCompat="@drawable/arrow_small"
-        tools:targetApi="m"
-        tools:ignore="HardcodedText" />
+        app:layout_constraintTop_toBottomOf="@+id/text_song_title"
+        app:srcCompat="@drawable/ic_play"
+        tools:ignore="HardcodedText"
+        tools:targetApi="m" />
 
     <SeekBar
         android:id="@+id/seek_bar_volume"
         android:layout_width="match_parent"
         android:layout_height="30dp"
-        android:layout_marginLeft="50dp"
-        android:layout_marginTop="64dp"
-        android:layout_marginRight="50dp"
+        android:layout_marginLeft="40dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginRight="40dp"
         android:max="100"
-        android:maxHeight="20dp"
-        android:minHeight="20dp"
         android:progress="100"
+        android:progressDrawable="@drawable/seek_bar_progress"
         android:theme="@style/AppTheme"
+        android:thumb="@drawable/seek_bar_thumb"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.505"
+        app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/play_pause"/>
+        app:layout_constraintTop_toBottomOf="@+id/play_pause" />
 
     <TextView
         android:id="@+id/volume_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:gravity="center"
         android:text=""
-        android:layout_margin="8dp"
-        android:textAlignment="textEnd"
-        android:gravity="end"
-        android:textColor="@android:color/white"
-        android:textSize="14sp"
+        android:textAlignment="center"
+        app:layout_constraintBottom_toBottomOf="@+id/seek_bar_volume"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/seek_bar_volume"
+        app:layout_constraintTop_toTopOf="@id/seek_bar_volume" />
+
+    <ImageView
+        android:id="@+id/volume_icon"
+        android:layout_width="@dimen/seek_bar_thickness"
+        android:layout_height="@dimen/seek_bar_thickness"
+        android:contentDescription="@string/volume"
+        android:src="@drawable/ic_volume_high"
+        android:textSize="12sp"
+        app:layout_constraintBottom_toBottomOf="@+id/seek_bar_volume"
+        app:layout_constraintEnd_toStartOf="@+id/seek_bar_volume"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@id/seek_bar_volume" />
 
     <ProgressBar
@@ -94,10 +100,36 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
-        android:theme="@style/AppTheme.Emphasis"
-        app:layout_constraintTop_toBottomOf="@+id/seek_bar_volume"
-        android:layout_marginLeft="50dp"
-        android:layout_marginRight="50dp" />
+        android:progress="70"
+        android:progressDrawable="@drawable/progress_bar_progress"
+        android:indeterminateOnly="false"
+        app:layout_constraintTop_toBottomOf="@+id/seek_bar_volume" />
+
+    <TextView
+        android:id="@+id/endTime"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:gravity="start"
+        android:text="4:36"
+        android:textAlignment="textStart"
+        android:layout_marginTop="4dp"
+        app:layout_constraintEnd_toEndOf="@+id/progressBar"
+        app:layout_constraintTop_toBottomOf="@+id/progressBar" />
+
+    <TextView
+        android:id="@+id/startTime"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:gravity="end"
+        android:text="0:00"
+        android:textAlignment="textEnd"
+        android:layout_marginTop="4dp"
+        app:layout_constraintStart_toStartOf="@+id/progressBar"
+        app:layout_constraintTop_toBottomOf="@+id/progressBar" />
+
+    <!--         style="?android:attr/progressBarStyleHorizontal" -->
+    <!--         android:theme="@style/App" -->
+
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>
