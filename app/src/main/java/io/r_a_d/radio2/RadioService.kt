@@ -1,5 +1,6 @@
 package io.r_a_d.radio2
 
+import android.app.Service
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -27,7 +28,6 @@ import androidx.media.AudioAttributesCompat
 import androidx.media.AudioFocusRequestCompat
 import androidx.media.AudioManagerCompat
 import com.google.android.exoplayer2.metadata.icy.*
-import java.net.URLDecoder
 import kotlin.math.exp
 import kotlin.math.ln
 
@@ -35,14 +35,10 @@ import kotlin.math.ln
 class RadioService : MediaBrowserServiceCompat() {
 
     private var isForeground: Boolean = false
-    private val binder : IBinder = RadioBinder()
     private val radioTag = "======RadioService====="
     private lateinit var nowPlayingNotification: NowPlayingNotification
     private val radioServiceId = 1
 
-    inner class RadioBinder : Binder() {
-        fun getService(): RadioService = this@RadioService
-    }
 
     // Define the broadcast receiver to handle any broadcasts
     private val receiver = object : BroadcastReceiver() {
@@ -52,11 +48,6 @@ class RadioService : MediaBrowserServiceCompat() {
                 val i = Intent(context, RadioService::class.java)
                 i.putExtra("action", Actions.STOP.name)
                 context.startService(i)
-            }
-            if (action != null && action == Actions.KILL.name)
-            {
-                Log.d(radioTag, "received stop self")
-                stopSelf()
             }
             if (action != null && action == Intent.ACTION_HEADSET_PLUG)
             {
@@ -86,7 +77,9 @@ class RadioService : MediaBrowserServiceCompat() {
                 }
 
                  */
-                if(!PlayerStore.instance.isPlaying.value!! && headsetPluggedIn)
+                if((mediaSession.controller.playbackState.state == PlaybackStateCompat.STATE_STOPPED
+                    || mediaSession.controller.playbackState.state == PlaybackStateCompat.STATE_PAUSED)
+                    && headsetPluggedIn)
                     beginPlaying()
             }
         }
@@ -120,6 +113,7 @@ class RadioService : MediaBrowserServiceCompat() {
         telephonyManager = getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
         telephonyManager?.listen(phoneStateListener, PhoneStateListener.LISTEN_CALL_STATE)
         audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
+
         //define the audioFocusRequest
         val audioFocusRequestBuilder = AudioFocusRequestCompat.Builder(AudioManagerCompat.AUDIOFOCUS_GAIN)
         audioFocusRequestBuilder.setOnAudioFocusChangeListener(focusChangeListener)
@@ -132,7 +126,6 @@ class RadioService : MediaBrowserServiceCompat() {
         // This stuff is for the broadcast receiver
         val filter = IntentFilter()
         filter.addAction(AudioManager.ACTION_AUDIO_BECOMING_NOISY)
-        filter.addAction(Actions.KILL.name)
         filter.addAction(Intent.ACTION_HEADSET_PLUG)
         registerReceiver(receiver, filter)
 
@@ -158,16 +151,21 @@ class RadioService : MediaBrowserServiceCompat() {
             Actions.PLAY.name -> beginPlaying()
             Actions.STOP.name -> stopPlaying()
             Actions.NPAUSE.name -> pausePlaying()
+            Actions.VOLUME.name -> setVolume(intent.getIntExtra("value", 100))
+            Actions.KILL.name -> stopSelf()
             //// unused intents.
             //Actions.MUTE.name -> setVolume(0)
             //Actions.UN_MUTE.name -> setVolume(PlayerStore.instance.volume.value)
         }
         Log.d(radioTag, "intent received : " + intent.getStringExtra("action"))
-        return super.onStartCommand(intent, flags, startId)
+        super.onStartCommand(intent, flags, startId)
+        // The service must be re-created if it is destroyed by the system. This allows the user to keep actions like Bluetooth and headphones plug available.
+        return Service.START_STICKY_COMPATIBILITY
     }
 
     override fun onTaskRemoved(rootIntent: Intent) {
-        if (!PlayerStore.instance.isPlaying.value!!) {
+        if (mediaSession.controller.playbackState.state != PlaybackStateCompat.STATE_PLAYING) {
+            nowPlayingNotification.clear()
             stopSelf()
         }
         super.onTaskRemoved(rootIntent)
@@ -176,24 +174,11 @@ class RadioService : MediaBrowserServiceCompat() {
 
     override fun onDestroy() {
         super.onDestroy()
-        PlayerStore.instance.isServiceStarted.value = false
-
-        // We want to kill the notification on API24+ if the state is STOPPED (and not PAUSE)
-        if (mediaSession.controller.playbackState.state == PlaybackStateCompat.STATE_STOPPED)
-        {
-            Log.d(radioTag, "stated was stopped, killing notification")
-            nowPlayingNotification.clear()
-        }
-
         player.stop()
         player.release()
         unregisterReceiver(receiver)
-
+        PlayerStore.instance.isServiceStarted.value = false
         Log.d(radioTag, "destroyed")
-    }
-
-    override fun onBind(intent: Intent): IBinder {
-        return binder
     }
 
     // ########################################
@@ -217,8 +202,7 @@ class RadioService : MediaBrowserServiceCompat() {
         }
     }
 
-    // Define the listener that will control what happens when focus is changed such
-    // as when headphones are unplugged
+    // Define the listener that will control what happens when focus is changed
     private val focusChangeListener =
         AudioManager.OnAudioFocusChangeListener { focusChange ->
             when (focusChange) {
@@ -242,9 +226,6 @@ class RadioService : MediaBrowserServiceCompat() {
 
     private fun setupMediaPlayer(){
         player = ExoPlayerFactory.newSimpleInstance(this)
-        // Set audio attribute to manage audio focus - only works on API21+
-        // manageAudioFocus()
-
         player.addMetadataOutput {
             for (i in 0 until it.length()) {
                 val entry  = it.get(i)
@@ -252,20 +233,20 @@ class RadioService : MediaBrowserServiceCompat() {
                     Log.d(radioTag, "onMetadata: IcyHeaders $entry")
                 }
                 if (entry is IcyInfo) {
-                    Log.d(radioTag, "onMetadata: IcyInfo ${entry.rawMetadata}")
-                    val hyphenPos = entry.title!!.indexOf(" - ")
+                    Log.d(radioTag, "onMetadata: Title ----> ${entry.title}")
+                    // Note : Kotlin supports UTF-8 by default.
+                    val data = entry.title!!
+                    val hyphenPos = data.indexOf(" - ")
                     try {
                         if (hyphenPos < 0)
                             throw ArrayIndexOutOfBoundsException()
-                        //no need for URLDecoder.decode(entry.title!!.substring(...), "UTF-8") anymore
-                        PlayerStore.instance.songTitle.value = URLDecoder.decode(entry.title!!.substring(hyphenPos + 3), "UTF-8")
-                        PlayerStore.instance.songArtist.value = URLDecoder.decode(entry.title!!.substring(0, hyphenPos), "UTF-8")
+                        PlayerStore.instance.songTitle.value = data.substring(hyphenPos + 3)
+                        PlayerStore.instance.songArtist.value = data.substring(0, hyphenPos)
                         nowPlayingNotification.update(this)
                     } catch (e: Exception) {
-                        PlayerStore.instance.songTitle.value = entry.title
+                        PlayerStore.instance.songTitle.value = data
                         PlayerStore.instance.songArtist.value = ""
                     }
-
                 }
             }
         }
@@ -277,20 +258,8 @@ class RadioService : MediaBrowserServiceCompat() {
         )
         // This is the MediaSource representing the media to be played.
         radioMediaSource = ProgressiveMediaSource.Factory(dataSourceFactory)
-            .createMediaSource(Uri.parse(getString(R.string.STREAM_URL)))
+            .createMediaSource(Uri.parse(getString(R.string.STREAM_URL_RADIO)))
     }
-    /*
-    // Note : dealing with audio focus manually (consistent for <API21).
-    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-    private fun manageAudioFocus()
-    {
-        val audioAttributes = AudioAttributes.Builder()
-        audioAttributes.setContentType(C.CONTENT_TYPE_MUSIC)
-        audioAttributes.setUsage(C.USAGE_MEDIA)
-        val audioAttributesBuilt = audioAttributes.build()
-        player.setAudioAttributes(audioAttributesBuilt, true)
-    }
-     */
 
     private fun createMediaSession() {
         mediaSession = MediaSessionCompat(this, "RadioMediaSession")
@@ -319,6 +288,10 @@ class RadioService : MediaBrowserServiceCompat() {
             return
         }
 
+        if (mediaSession.controller.playbackState.state == PlaybackStateCompat.STATE_PLAYING)
+            return // nothing to do here
+        PlayerStore.instance.playbackState.value = PlaybackStateCompat.STATE_PLAYING
+
         if (!isForeground)
         {
             startForeground(radioServiceId, nowPlayingNotification.notification)
@@ -329,12 +302,9 @@ class RadioService : MediaBrowserServiceCompat() {
         // Prepare the player with the source.
         player.prepare(radioMediaSource)
 
-        PlayerStore.instance.isPlaying.value = true
-        PlayerStore.instance.isMeantToPlay.value = true //necessary if restarted from notification
         // START PLAYBACK, LET'S ROCK
         player.playWhenReady = true
-
-        nowPlayingNotification.update(this, isUpdatingNotificationButton = true)
+        nowPlayingNotification.update(this, true)
 
         playbackStateBuilder.setState(
             PlaybackStateCompat.STATE_PLAYING,
@@ -346,67 +316,47 @@ class RadioService : MediaBrowserServiceCompat() {
         Log.d(radioTag, "begin playing")
     }
 
-    // toggling function only meant to be called from the notification.
-    // when pausing the stream, the notification should not disappear because we might want to
-    // start the stream again from it.
     private fun pausePlaying()
     {
+        stopPlaying()
+    }
 
-        PlayerStore.instance.isPlaying.value = false
-        PlayerStore.instance.isMeantToPlay.value = false
+    // stop playing but keep the notification.
+    // API23+ can keep the notification. API22- must 'blink' it.
+    fun stopPlaying()
+    {
+        if (mediaSession.controller.playbackState.state == PlaybackStateCompat.STATE_STOPPED)
+            return // nothing to do here
+        PlayerStore.instance.playbackState.value = PlaybackStateCompat.STATE_STOPPED
+
+        // STOP THE PLAYBACK
         player.stop()
-
-        // Currently we allow the notification to be detached and removed for API24+.
-        // For lower APIs, the notification must stay bound.
-
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            stopForeground(STOP_FOREGROUND_DETACH)
-            isForeground = false
-        }
-        else
-        {
-            //stopForeground(true)
-            Log.i(radioTag, "API23- must keep the notification bound. Destroy it by stopping the stream and removing the task.")
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
+            stopForeground(false)
+        else {
+            stopForeground(true)
+            nowPlayingNotification.clear()
+            nowPlayingNotification.create(this, mediaSession)
+            //startForeground(radioServiceId, nowPlayingNotification.notification)
         }
 
-        nowPlayingNotification.update(this, isUpdatingNotificationButton = true)
-
+        nowPlayingNotification.update(this, true)
         playbackStateBuilder.setState(
-            PlaybackStateCompat.STATE_PAUSED,
+            PlaybackStateCompat.STATE_STOPPED,
             0,
             1.0f,
             SystemClock.elapsedRealtime()
         )
+        Log.d(radioTag, "stopped")
+        isForeground = false
         mediaSession.setPlaybackState(playbackStateBuilder.build())
-        Log.d(radioTag, "paused")
-    }
-
-    fun stopPlaying()
-    {
-        // STOP THE PLAYBACK
-        player.stop()
-        PlayerStore.instance.isPlaying.value = false
-        PlayerStore.instance.isMeantToPlay.value = false
-        if (isForeground) {
-            stopForeground(false)
-            nowPlayingNotification.update(this, isUpdatingNotificationButton = true)
-
-            isForeground = false
-            playbackStateBuilder.setState(
-                PlaybackStateCompat.STATE_STOPPED,
-                0,
-                1.0f,
-                SystemClock.elapsedRealtime()
-            )
-            mediaSession.setPlaybackState(playbackStateBuilder.build())
-            Log.d(radioTag, "stopped")
-        }
     }
 
     fun setVolume(v: Int) {
         // re-shaped volume setter with a logarithmic (ln) function.
-        // it sounds more natural this way. Adjust coefficient to change the slope.
-        val c : Float = 3.toFloat()
+        // I think it sounds more natural this way. Adjust coefficient to change the function shape.
+        // visualize it on any graphic calculator if you're unsure.
+        val c : Float = 2.toFloat()
         val x = v.toFloat()/100
         player.volume = -(1/c)* ln(1-(1- exp(-c))*x)
     }
@@ -425,31 +375,35 @@ class RadioService : MediaBrowserServiceCompat() {
         }
 
         override fun onMediaButtonEvent(mediaButtonEvent: Intent?): Boolean {
-            // explicit handling of Media Buttons (for example bluetooth commands)
-            val keyEvent = mediaButtonEvent?.getParcelableExtra<KeyEvent>(Intent.EXTRA_KEY_EVENT)
-            if (keyEvent == null || ((keyEvent.action) != KeyEvent.ACTION_DOWN)) {
-                return false
-            }
+            if (PlayerStore.instance.isServiceStarted.value!!) {
+                // explicit handling of Media Buttons (for example bluetooth commands)
+                val keyEvent =
+                    mediaButtonEvent?.getParcelableExtra<KeyEvent>(Intent.EXTRA_KEY_EVENT)
+                if (keyEvent == null || ((keyEvent.action) != KeyEvent.ACTION_DOWN)) {
+                    return false
+                }
 
-            when (keyEvent.keyCode) {
-                KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE, KeyEvent.KEYCODE_HEADSETHOOK -> {
-
-                    //if (keyEvent.repeatCount > 0) {
-                    //    return false
-                    //} else {
-                        if (PlayerStore.instance.isPlaying.value!!)
+                when (keyEvent.keyCode) {
+                    KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE, KeyEvent.KEYCODE_HEADSETHOOK -> {
+                        //// Is this some kind of debouncing ? I'm not sure.
+                        //if (keyEvent.repeatCount > 0) {
+                        //    return false
+                        //} else {
+                        if (mediaSession.controller.playbackState.state == PlaybackStateCompat.STATE_PLAYING)
                             pausePlaying()
                         else
                             beginPlaying()
-                    //}
-                    return true
+                        //}
+                        return true
+                    }
+                    KeyEvent.KEYCODE_MEDIA_STOP -> stopPlaying()
+                    KeyEvent.KEYCODE_MEDIA_PAUSE -> pausePlaying()
+                    KeyEvent.KEYCODE_MEDIA_PLAY -> beginPlaying()
+                    else -> return false // these actions are the only ones we acknowledge.
                 }
-                KeyEvent.KEYCODE_MEDIA_STOP -> stopPlaying()
-                KeyEvent.KEYCODE_MEDIA_PAUSE -> pausePlaying()
-                KeyEvent.KEYCODE_MEDIA_PLAY -> beginPlaying()
-                else -> return false // these actions are the only ones we acknowledge.
+                return true
             }
-            return true
+            return false
         }
     }
 }

@@ -3,11 +3,13 @@ package io.r_a_d.radio2.ui.nowplaying
 import android.annotation.SuppressLint
 import androidx.lifecycle.ViewModelProviders
 import android.os.Bundle
+import android.support.v4.media.session.PlaybackStateCompat
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageButton
+import android.widget.ProgressBar
 import android.widget.SeekBar
 import android.widget.TextView
 import androidx.lifecycle.Observer
@@ -42,6 +44,7 @@ class NowPlayingFragment : Fragment() {
         val songArtistText: TextView = root.findViewById(R.id.text_song_artist)
         val seekBarVolume: SeekBar = root.findViewById(R.id.seek_bar_volume)
         val volumeText: TextView = root.findViewById(R.id.volume_text)
+        val progressBar: ProgressBar = root.findViewById(R.id.progressBar)
 
         PlayerStore.instance.songTitle.observe(this, Observer {
             songTitleText.text = it
@@ -51,7 +54,7 @@ class NowPlayingFragment : Fragment() {
             songArtistText.text = it
         })
 
-        PlayerStore.instance.isPlaying.observe(this, Observer {
+        PlayerStore.instance.playbackState.observe(this, Observer {
             syncPlayPauseButtonImage(root)
         })
 
@@ -61,12 +64,17 @@ class NowPlayingFragment : Fragment() {
 
         seekBarVolume.setOnSeekBarChangeListener(nowPlayingViewModel.seekBarChangeListener)
         seekBarVolume.progress = PlayerStore.instance.volume.value!!
+        progressBar.max = 100
+        progressBar.progress = 70
 
         syncPlayPauseButtonImage(root)
 
+        // initialize the value for isPlaying when displaying the fragment
+        PlayerStore.instance.isPlaying.value = PlayerStore.instance.playbackState.value == PlaybackStateCompat.STATE_PLAYING
+
         val button: ImageButton = root.findViewById(R.id.play_pause)
         button.setOnClickListener{
-            PlayerStore.instance.isMeantToPlay.value = !PlayerStore.instance.isPlaying.value!!
+            PlayerStore.instance.isPlaying.value = PlayerStore.instance.playbackState.value == PlaybackStateCompat.STATE_STOPPED
         }
 
         return root
@@ -76,10 +84,10 @@ class NowPlayingFragment : Fragment() {
     {
         val img = v.findViewById<ImageButton>(R.id.play_pause)
 
-        if (PlayerStore.instance.isPlaying.value!!) {
-            img.setImageResource(R.drawable.pause_small)
+        if (PlayerStore.instance.playbackState.value == PlaybackStateCompat.STATE_STOPPED) {
+            img.setImageResource(R.drawable.exo_controls_play)
         } else {
-            img.setImageResource(R.drawable.arrow_small)
+            img.setImageResource(R.drawable.exo_controls_pause)
         }
     }
 

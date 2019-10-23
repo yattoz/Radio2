@@ -9,6 +9,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.support.v4.media.session.MediaSessionCompat
+import android.support.v4.media.session.PlaybackStateCompat
 import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
 
@@ -76,26 +77,31 @@ class NowPlayingNotification {
         // thanks to the launchMode specified in the Manifest : android:launchMode="singleTop"
         builder.setContentIntent(pendingIntent)
 
-
-        // can't seem to get it right.
-        val delIntent = Intent(c, BroadcastReceiver::class.java)
+        // got it right
+        val delIntent = Intent(c, RadioService::class.java)
         delIntent.putExtra("action", Actions.KILL.name)
-        val deleteIntent = PendingIntent.getBroadcast(c, 0, delIntent, PendingIntent.FLAG_CANCEL_CURRENT)
+        val deleteIntent = PendingIntent.getService(c, 0, delIntent, PendingIntent.FLAG_CANCEL_CURRENT)
         builder.setDeleteIntent(deleteIntent)
 
-
-        // Create the notification with the update(c) call
+        // Create the notification with the update(c) call (calls .notify at the end)
         update(c)
     }
-
 
     fun update(c: Context, isUpdatingNotificationButton: Boolean = false) {
 
         if (isUpdatingNotificationButton)
             builder.mActions.clear()
 
-        builder.setContentTitle(PlayerStore.instance.songTitle.value)
-        builder.setContentText(PlayerStore.instance.songArtist.value)
+        // Title : Title of notification (usu. songArtist is first)
+        // Text : Text of the notification (usu. songTitle is second)
+        builder.setContentTitle(PlayerStore.instance.songArtist.value)
+        builder.setContentText(PlayerStore.instance.songTitle.value)
+        // As subText, we show when the player is stopped. This is a friendly reminder that the metadata won't get updated.
+        // Maybe later we could replace it by a nice progressBar? Would it be interesting to have one here? I don't know.
+        if (PlayerStore.instance.playbackState.value == PlaybackStateCompat.STATE_STOPPED)
+            builder.setSubText("Stopped")
+        else
+            builder.setSubText(null)
 
         // TODO define icon in notification. I thought it'd be nice to have the streamer picture.
         // The streamer picture should be downloaded and converted to Bitmap in another thread, as network tasks are forbidden on main thread.
@@ -106,7 +112,7 @@ class NowPlayingNotification {
             val intent = Intent(c, RadioService::class.java)
             val action: NotificationCompat.Action
 
-            action = if (PlayerStore.instance.isPlaying.value!!) {
+            action = if (PlayerStore.instance.playbackState.value == PlaybackStateCompat.STATE_PLAYING) {
                 intent.putExtra("action", Actions.NPAUSE.name)
                 val pendingButtonIntent = PendingIntent.getService(c, 1, intent, PendingIntent.FLAG_UPDATE_CURRENT)
                 NotificationCompat.Action.Builder(R.drawable.exo_controls_pause, "Pause", pendingButtonIntent).build()
@@ -117,7 +123,6 @@ class NowPlayingNotification {
             }
             builder.addAction(action)
         }
-        builder.setAutoCancel(true)
         notification = builder.build()
         notificationManager.notify(notificationId, notification)
     }

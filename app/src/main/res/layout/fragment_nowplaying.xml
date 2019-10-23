@@ -5,15 +5,16 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/colorPrimaryDark">
+    >
 
     <TextView
-        android:id="@+id/text_song_title"
+        android:id="@+id/text_song_artist"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
         android:layout_marginEnd="8dp"
         android:textAlignment="center"
+        android:gravity="center"
         android:textSize="20sp"
         android:textColor="@android:color/white"
         android:text=""
@@ -23,19 +24,20 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
-        android:id="@+id/text_song_artist"
+        android:id="@+id/text_song_title"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
         android:layout_marginEnd="8dp"
         android:text=""
         android:textAlignment="center"
+        android:gravity="center"
         android:textSize="20sp"
         android:textColor="@android:color/white"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/text_song_title"/>
+        app:layout_constraintTop_toBottomOf="@+id/text_song_artist"/>
 
 
     <ImageButton
@@ -48,27 +50,30 @@
         android:contentDescription="play-pause"
         android:contextClickable="false"
         android:cropToPadding="false"
-        android:onClick="togglePlayPause"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@+id/text_song_title"
-        app:srcCompat="@drawable/arrow_small" />
+        app:srcCompat="@drawable/arrow_small"
+        tools:targetApi="m"
+        tools:ignore="HardcodedText" />
 
     <SeekBar
         android:id="@+id/seek_bar_volume"
-        android:layout_width="250dp"
+        android:layout_width="match_parent"
         android:layout_height="30dp"
-        android:layout_marginTop="68dp"
-        android:minHeight="20dp"
-        android:maxHeight="20dp"
+        android:layout_marginLeft="50dp"
+        android:layout_marginTop="64dp"
+        android:layout_marginRight="50dp"
         android:max="100"
+        android:maxHeight="20dp"
+        android:minHeight="20dp"
         android:progress="100"
-        android:progressTint="@color/rblue"
-        android:thumbTint="@color/orange"
+        android:theme="@style/AppTheme"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.505"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/play_pause" />
+        app:layout_constraintTop_toBottomOf="@+id/play_pause"/>
 
     <TextView
         android:id="@+id/volume_text"
@@ -77,6 +82,7 @@
         android:text=""
         android:layout_margin="8dp"
         android:textAlignment="textEnd"
+        android:gravity="end"
         android:textColor="@android:color/white"
         android:textSize="14sp"
         app:layout_constraintEnd_toEndOf="parent"
@@ -87,8 +93,11 @@
         style="?android:attr/progressBarStyleHorizontal"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:theme="@style/AppTheme.Emphasis"
         app:layout_constraintTop_toBottomOf="@+id/seek_bar_volume"
-        tools:layout_editor_absoluteX="0dp" />
+        android:layout_marginLeft="50dp"
+        android:layout_marginRight="50dp" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>
