@@ -59,4 +59,11 @@ dependencies {
 
     // jsoup HTML parser library @ https://jsoup.org/
     implementation 'org.jsoup:jsoup:1.12.1'
+
+    // Anko is a JetBrains library to facilitate A LOT OF THINGS. We use it for background task.
+    // (in particular it can create layouts programmatically but I'm too lazy for that).
+    // See more at : https://github.com/Kotlin/anko
+    ext.anko_version='0.10.8'
+    implementation "org.jetbrains.anko:anko-commons:$anko_version"
+
 }

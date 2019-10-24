@@ -7,25 +7,36 @@ import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
-import android.content.ComponentName
-import android.content.Context
 import android.content.Intent
-import android.content.ServiceConnection
-import android.os.IBinder
-import android.support.v4.media.session.PlaybackStateCompat
 import android.util.Log
-import android.view.Menu
 import com.google.android.material.bottomnavigation.LabelVisibilityMode.LABEL_VISIBILITY_LABELED
 import androidx.lifecycle.Observer
-import androidx.navigation.NavController
+import java.util.*
+
+
+class Tick  : TimerTask() {
+    override fun run() {
+        PlayerStore.instance.currentTime.postValue(System.currentTimeMillis())
+    }
+}
 
 
 class MainActivity : AppCompatActivity() {
+
+    private lateinit var mainApiData : ApiData
+    private val clockTicker: Timer = Timer()
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setTheme(R.style.AppTheme)
+        clockTicker.schedule(
+            Tick(),
+            500,
+            500
+        )
+
+        mainApiData = ApiData(getString(R.string.MAIN_API))
 
         setContentView(R.layout.activity_main)
         val navView: BottomNavigationView = findViewById(R.id.nav_view)
@@ -52,16 +63,40 @@ class MainActivity : AppCompatActivity() {
         }
 
         PlayerStore.instance.isPlaying.observe(this, Observer { newValue ->
-            if (PlayerStore.instance.isPlaying.value!!)
+            if (newValue)
                 actionOnService(Actions.PLAY)
             else
                 actionOnService(Actions.STOP)
         })
 
         PlayerStore.instance.volume.observe(this, Observer { newValue ->
-            //if ( PlayerStore.instance.isBound.value!!)
             actionOnService(Actions.VOLUME, newValue)
         })
+
+
+        PlayerStore.instance.currentTime.observe(this, Observer {
+            if (it > PlayerStore.instance.stopTime.value!!)
+                mainApiData.fetch()
+        })
+
+        mainApiData.result.observe(this, Observer {
+            if (it.isNull("main")) // must check the initialization of the app when it is set to empty...
+                return@Observer
+            val res = it.getJSONObject("main")
+            val streamerPictureUrl =
+                "${getString(R.string.MAIN_API)}/dj-image/${res.getJSONObject("dj").getString("djimage")}"
+            mainApiData.fetchImage(streamerPictureUrl)
+            PlayerStore.instance.updateApi(res)
+        })
+
+
+        PlayerStore.instance.initPicture(this) // TODO test
+        mainApiData.fetch()
+    }
+
+    override fun onDestroy() {
+        clockTicker.cancel()
+        super.onDestroy()
     }
 
     // ####################################

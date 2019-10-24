@@ -7,4 +7,5 @@
     <dimen name="seek_bar_thumb_size">12dp</dimen>
     <dimen name="seek_bar_thumb_height">20dp</dimen>
     <dimen name="progress_bar_thickness">16dp</dimen>
+    <dimen name="streamerPictureSize">120dp</dimen>
 </resources>

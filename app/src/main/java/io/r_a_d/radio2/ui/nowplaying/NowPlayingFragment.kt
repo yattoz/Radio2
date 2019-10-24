@@ -10,9 +10,8 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.*
 import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.SavedStateViewModelFactory
 import io.r_a_d.radio2.*
+
 
 
 class NowPlayingFragment : Fragment() {
@@ -42,6 +41,9 @@ class NowPlayingFragment : Fragment() {
         val seekBarVolume: SeekBar = root.findViewById(R.id.seek_bar_volume)
         val volumeText: TextView = root.findViewById(R.id.volume_text)
         val progressBar: ProgressBar = root.findViewById(R.id.progressBar)
+        val streamerPictureImageView: ImageView = root.findViewById(R.id.streamerPicture)
+
+
 
         PlayerStore.instance.songTitle.observe(this, Observer {
             songTitleText.text = it
@@ -59,10 +61,39 @@ class NowPlayingFragment : Fragment() {
             volumeText.text = "$it%"
         })
 
+        PlayerStore.instance.streamerPicture.observe(this, Observer {pic ->
+            streamerPictureImageView.setImageBitmap(pic)
+        })
+
+        // fuck it, do it on main thread
+        PlayerStore.instance.currentTime.observe(this, Observer {
+            val dd = (PlayerStore.instance.currentTime.value!! - PlayerStore.instance.startTime.value!!).toInt()
+            progressBar.progress = dd
+        })
+
+        PlayerStore.instance.stopTime.observe(this, Observer {
+            val dd = (PlayerStore.instance.stopTime.value!! - PlayerStore.instance.startTime.value!!).toInt()
+            progressBar.max = dd
+        })
+
+        PlayerStore.instance.stopTime.observe(this, Observer {
+            val t : TextView= root.findViewById(R.id.endTime)
+            val minutes: String = ((PlayerStore.instance.stopTime.value!! - PlayerStore.instance.startTime.value!!)/60/1000).toString()
+            val seconds: String = ((PlayerStore.instance.stopTime.value!! - PlayerStore.instance.startTime.value!!)/1000%60).toString()
+            t.text = "$minutes:${if (seconds.toInt() < 10) "0" else ""}$seconds"
+        })
+
+        PlayerStore.instance.currentTime.observe(this, Observer {
+            val t : TextView= root.findViewById(R.id.currentTime)
+            val minutes: String = ((PlayerStore.instance.currentTime.value!! - PlayerStore.instance.startTime.value!!)/60/1000).toString()
+            val seconds: String = ((PlayerStore.instance.currentTime.value!! - PlayerStore.instance.startTime.value!!)/1000%60).toString()
+            t.text = "$minutes:${if (seconds.toInt() < 10) "0" else ""}$seconds"
+        })
+
         seekBarVolume.setOnSeekBarChangeListener(nowPlayingViewModel.seekBarChangeListener)
         seekBarVolume.progress = PlayerStore.instance.volume.value!!
-        progressBar.max = 100
-        progressBar.progress = 70
+        progressBar.max = 1000
+        progressBar.progress = 0
 
         syncPlayPauseButtonImage(root)
 
