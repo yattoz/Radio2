@@ -4,7 +4,8 @@ enum class Actions
 {
     PLAY,
     STOP,
-    NPAUSE,
+    PAUSE,
     VOLUME,
-    KILL
+    KILL,
+    NOTIFY
 }

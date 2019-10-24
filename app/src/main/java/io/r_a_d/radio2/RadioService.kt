@@ -1,6 +1,5 @@
 package io.r_a_d.radio2
 
-import android.app.Service
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -30,11 +29,11 @@ import androidx.media.AudioManagerCompat
 import com.google.android.exoplayer2.metadata.icy.*
 import kotlin.math.exp
 import kotlin.math.ln
+import kotlin.system.exitProcess
 
 
 class RadioService : MediaBrowserServiceCompat() {
 
-    private var isForeground: Boolean = false
     private val radioTag = "======RadioService====="
     private lateinit var nowPlayingNotification: NowPlayingNotification
     private val radioServiceId = 1
@@ -135,6 +134,7 @@ class RadioService : MediaBrowserServiceCompat() {
 
         nowPlayingNotification = NowPlayingNotification()
         nowPlayingNotification.create(this, mediaSession)
+        startForeground(radioServiceId, nowPlayingNotification.notification)
 
         PlayerStore.instance.isServiceStarted.value = true
         Log.d(radioTag, "created")
@@ -150,9 +150,10 @@ class RadioService : MediaBrowserServiceCompat() {
         when (intent.getStringExtra("action")) {
             Actions.PLAY.name -> beginPlaying()
             Actions.STOP.name -> stopPlaying()
-            Actions.NPAUSE.name -> pausePlaying()
+            Actions.PAUSE.name -> pausePlaying()
             Actions.VOLUME.name -> setVolume(intent.getIntExtra("value", 100))
-            Actions.KILL.name -> stopSelf()
+            Actions.KILL.name -> {stopForeground(true); stopSelf()}
+            Actions.NOTIFY.name -> nowPlayingNotification.update(this)
             //// unused intents.
             //Actions.MUTE.name -> setVolume(0)
             //Actions.UN_MUTE.name -> setVolume(PlayerStore.instance.volume.value)
@@ -160,7 +161,7 @@ class RadioService : MediaBrowserServiceCompat() {
         Log.d(radioTag, "intent received : " + intent.getStringExtra("action"))
         super.onStartCommand(intent, flags, startId)
         // The service must be re-created if it is destroyed by the system. This allows the user to keep actions like Bluetooth and headphones plug available.
-        return Service.START_STICKY_COMPATIBILITY
+        return START_STICKY
     }
 
     override fun onTaskRemoved(rootIntent: Intent) {
@@ -179,6 +180,8 @@ class RadioService : MediaBrowserServiceCompat() {
         unregisterReceiver(receiver)
         PlayerStore.instance.isServiceStarted.value = false
         Log.d(radioTag, "destroyed")
+        // if the service is destroyed, the application had become useless.
+        exitProcess(0)
     }
 
     // ########################################
@@ -272,6 +275,7 @@ class RadioService : MediaBrowserServiceCompat() {
         playbackStateBuilder.setActions(PlaybackStateCompat.ACTION_PLAY_PAUSE)
             .setState(PlaybackStateCompat.STATE_STOPPED, 0, 1.0f, SystemClock.elapsedRealtime())
 
+        // TODO : use the mediasession metadata to update the notification instead of triggering manual updates
         metadataBuilder = MediaMetadataCompat.Builder()
         mediaSession.setPlaybackState(playbackStateBuilder.build())
     }
@@ -291,12 +295,6 @@ class RadioService : MediaBrowserServiceCompat() {
         if (mediaSession.controller.playbackState.state == PlaybackStateCompat.STATE_PLAYING)
             return // nothing to do here
         PlayerStore.instance.playbackState.value = PlaybackStateCompat.STATE_PLAYING
-
-        if (!isForeground)
-        {
-            startForeground(radioServiceId, nowPlayingNotification.notification)
-            isForeground = true
-        }
 
         // Reinitialize media player. Otherwise the playback doesn't resume when beginPlaying. Dunno why.
         // Prepare the player with the source.
@@ -331,14 +329,6 @@ class RadioService : MediaBrowserServiceCompat() {
 
         // STOP THE PLAYBACK
         player.stop()
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
-            stopForeground(false)
-        else {
-            stopForeground(true)
-            nowPlayingNotification.clear()
-            nowPlayingNotification.create(this, mediaSession)
-            //startForeground(radioServiceId, nowPlayingNotification.notification)
-        }
 
         nowPlayingNotification.update(this, true)
         playbackStateBuilder.setState(
@@ -348,7 +338,7 @@ class RadioService : MediaBrowserServiceCompat() {
             SystemClock.elapsedRealtime()
         )
         Log.d(radioTag, "stopped")
-        isForeground = false
+
         mediaSession.setPlaybackState(playbackStateBuilder.build())
     }
 
@@ -375,33 +365,30 @@ class RadioService : MediaBrowserServiceCompat() {
         }
 
         override fun onMediaButtonEvent(mediaButtonEvent: Intent?): Boolean {
-            if (PlayerStore.instance.isServiceStarted.value!!) {
-                // explicit handling of Media Buttons (for example bluetooth commands)
-                val keyEvent =
-                    mediaButtonEvent?.getParcelableExtra<KeyEvent>(Intent.EXTRA_KEY_EVENT)
-                if (keyEvent == null || ((keyEvent.action) != KeyEvent.ACTION_DOWN)) {
-                    return false
+            // explicit handling of Media Buttons (for example bluetooth commands)
+            // Note : the service is always in foreground, so always started.
+            val keyEvent =
+                mediaButtonEvent?.getParcelableExtra<KeyEvent>(Intent.EXTRA_KEY_EVENT)
+            if (keyEvent == null || ((keyEvent.action) != KeyEvent.ACTION_DOWN)) {
+                return false
+            }
+            when (keyEvent.keyCode) {
+                KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE, KeyEvent.KEYCODE_HEADSETHOOK -> {
+                    //// Is this some kind of debouncing ? I'm not sure.
+                    //if (keyEvent.repeatCount > 0) {
+                    //    return false
+                    //} else {
+                    if (mediaSession.controller.playbackState.state == PlaybackStateCompat.STATE_PLAYING)
+                        pausePlaying()
+                    else
+                        beginPlaying()
+                    //}
+                    return true
                 }
-
-                when (keyEvent.keyCode) {
-                    KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE, KeyEvent.KEYCODE_HEADSETHOOK -> {
-                        //// Is this some kind of debouncing ? I'm not sure.
-                        //if (keyEvent.repeatCount > 0) {
-                        //    return false
-                        //} else {
-                        if (mediaSession.controller.playbackState.state == PlaybackStateCompat.STATE_PLAYING)
-                            pausePlaying()
-                        else
-                            beginPlaying()
-                        //}
-                        return true
-                    }
-                    KeyEvent.KEYCODE_MEDIA_STOP -> stopPlaying()
-                    KeyEvent.KEYCODE_MEDIA_PAUSE -> pausePlaying()
-                    KeyEvent.KEYCODE_MEDIA_PLAY -> beginPlaying()
-                    else -> return false // these actions are the only ones we acknowledge.
-                }
-                return true
+                KeyEvent.KEYCODE_MEDIA_STOP -> stopPlaying()
+                KeyEvent.KEYCODE_MEDIA_PAUSE -> pausePlaying()
+                KeyEvent.KEYCODE_MEDIA_PLAY -> beginPlaying()
+                else -> return false // these actions are the only ones we acknowledge.
             }
             return false
         }

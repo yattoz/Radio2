@@ -45,9 +45,9 @@ class PlayerStore {
         stopTime.value = res.getLong("end_time")*1000
 
         // I noticed that the server has a big (5 seconds !!) offset for current time.
-        // It should be better to rely only on local time instead.
-        //currentTime.value = (res.getLong("current") - 5)*1000
-        currentTime.value = System.currentTimeMillis()
+        // But relying on local time makes it bug with poorly clocked devices
+        currentTime.value = (res.getLong("current") - 5)*1000
+        //currentTime.value = System.currentTimeMillis()
 
         val data = res.getString("np")
         val hyphenPos = data.indexOf(" - ")

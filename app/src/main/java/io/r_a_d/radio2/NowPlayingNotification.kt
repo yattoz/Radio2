@@ -64,13 +64,7 @@ class NowPlayingNotification {
             builder.setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
         }
 
-        builder.setStyle(
-            androidx.media.app.NotificationCompat.MediaStyle()
-                .setMediaSession(m.sessionToken)
-                .setShowActionsInCompactView(0)
-        )
         builder.priority = NotificationCompat.PRIORITY_LOW // we don't want the phone to ring every time the notification gets updated.
-
 
         // The PendingIntent will launch the SAME activity
         // thanks to the launchMode specified in the Manifest : android:launchMode="singleTop"
@@ -79,10 +73,17 @@ class NowPlayingNotification {
         // got it right
         val delIntent = Intent(c, RadioService::class.java)
         delIntent.putExtra("action", Actions.KILL.name)
-        val deleteIntent = PendingIntent.getService(c, 0, delIntent, PendingIntent.FLAG_CANCEL_CURRENT)
+        val deleteIntent = PendingIntent.getService(c, 0, delIntent, PendingIntent.FLAG_NO_CREATE)
         builder.setDeleteIntent(deleteIntent)
 
-        // Create the notification with the update(c) call (calls .notify at the end)
+        builder.setStyle(
+            androidx.media.app.NotificationCompat.DecoratedMediaCustomViewStyle()
+            //androidx.media.app.NotificationCompat.MediaStyle()
+                .setMediaSession(m.sessionToken)
+                .setShowActionsInCompactView(0)
+                .setCancelButtonIntent(deleteIntent)
+        )
+        builder.setColorized(true)
         update(c)
     }
 
@@ -97,34 +98,42 @@ class NowPlayingNotification {
         builder.setContentText(PlayerStore.instance.songTitle.value)
         // As subText, we show when the player is stopped. This is a friendly reminder that the metadata won't get updated.
         // Maybe later we could replace it by a nice progressBar? Would it be interesting to have one here? I don't know.
-        if (PlayerStore.instance.playbackState.value == PlaybackStateCompat.STATE_STOPPED)
+        if (PlayerStore.instance.playbackState.value == PlaybackStateCompat.STATE_STOPPED) {
             builder.setSubText("Stopped")
-        else
+            builder.setShowWhen(false)
+        }
+        else {
             builder.setSubText(null)
+            builder.setShowWhen(true)
+        }
 
-        // TODO define icon in notification. I thought it'd be nice to have the streamer picture.
-        // The streamer picture should be downloaded and converted to Bitmap in another thread, as network tasks are forbidden on main thread.
-        // See : https://developer.android.com/reference/android/os/NetworkOnMainThreadException
-        //// builder.setLargeIcon(icon)
+        builder.setLargeIcon(PlayerStore.instance.streamerPicture.value)
 
+        // Note : I was unreasonably triggered by the fact that the stop icon was smaller than the others.
+        // So I downloaded and used the icons from https://materialdesignicons.com/ (version Android 4, Holo Dark)
         if (builder.mActions.isEmpty()) {
             val intent = Intent(c, RadioService::class.java)
-            val action: NotificationCompat.Action
+            val playPauseAction: NotificationCompat.Action
 
-            action = if (PlayerStore.instance.playbackState.value == PlaybackStateCompat.STATE_PLAYING) {
-                intent.putExtra("action", Actions.NPAUSE.name)
+            playPauseAction = if (PlayerStore.instance.playbackState.value == PlaybackStateCompat.STATE_PLAYING) {
+                intent.putExtra("action", Actions.PAUSE.name)
                 val pendingButtonIntent = PendingIntent.getService(c, 1, intent, PendingIntent.FLAG_UPDATE_CURRENT)
-                NotificationCompat.Action.Builder(R.drawable.exo_controls_pause, "Pause", pendingButtonIntent).build()
+                NotificationCompat.Action.Builder(R.drawable.ic_pause, "Pause", pendingButtonIntent).build()
             } else {
                 intent.putExtra("action", Actions.PLAY.name)
                 val pendingButtonIntent = PendingIntent.getService(c, 1, intent, PendingIntent.FLAG_UPDATE_CURRENT)
-                NotificationCompat.Action.Builder(R.drawable.exo_controls_play,"Play", pendingButtonIntent).build()
+                NotificationCompat.Action.Builder(R.drawable.ic_play,"Play", pendingButtonIntent).build()
             }
-            builder.addAction(action)
+            builder.addAction(playPauseAction)
+            intent.putExtra("action", Actions.KILL.name)
+            val pendingButtonIntent = PendingIntent.getService(c, 2, intent, PendingIntent.FLAG_UPDATE_CURRENT)
+            val stopAction = NotificationCompat.Action.Builder(R.drawable.ic_stop,"Stop", pendingButtonIntent).build()
+            builder.addAction(stopAction)
         }
         notification = builder.build()
         notificationManager.notify(notificationId, notification)
     }
+
 
     fun clear()
     {

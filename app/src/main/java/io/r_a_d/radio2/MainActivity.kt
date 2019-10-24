@@ -14,9 +14,13 @@ import androidx.lifecycle.Observer
 import java.util.*
 
 
+
+
+
+
 class Tick  : TimerTask() {
     override fun run() {
-        PlayerStore.instance.currentTime.postValue(System.currentTimeMillis())
+        PlayerStore.instance.currentTime.postValue(PlayerStore.instance.currentTime.value!! + 500)
     }
 }
 
@@ -25,10 +29,11 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var mainApiData : ApiData
     private val clockTicker: Timer = Timer()
-
+    private val activityTag = "=====MainActivity======"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         setTheme(R.style.AppTheme)
         clockTicker.schedule(
             Tick(),
@@ -88,8 +93,6 @@ class MainActivity : AppCompatActivity() {
             mainApiData.fetchImage(streamerPictureUrl)
             PlayerStore.instance.updateApi(res)
         })
-
-
         PlayerStore.instance.initPicture(this) // TODO test
         mainApiData.fetch()
     }
@@ -112,9 +115,6 @@ class MainActivity : AppCompatActivity() {
             Log.d("MainActivity", "Sending intent ${a.name}")
             startService(i)
     }
-
-    private val activityTag = "=====MainActivity======"
-
 
     // ####################################
     // ###### SERVICE BINDER MANAGER ######
