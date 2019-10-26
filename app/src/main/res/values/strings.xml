@@ -31,4 +31,5 @@
     <string name="NOTIFICATION_CHANNEL_ID">io.r_a_d.radio2.NOTIFICATIONS</string>
     <string name="volume">Volume: </string>
     <string name="MAIN_API">https://r-a-d.io/api</string>
+    <string name="streamerNotificationChannel">New Streamer Notification</string>
 </resources>

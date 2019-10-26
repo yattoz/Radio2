@@ -23,6 +23,7 @@ import android.support.v4.media.MediaMetadataCompat
 import android.telephony.PhoneStateListener
 import android.telephony.TelephonyManager
 import android.view.KeyEvent
+import androidx.lifecycle.Observer
 import androidx.media.AudioAttributesCompat
 import androidx.media.AudioFocusRequestCompat
 import androidx.media.AudioManagerCompat
@@ -88,6 +89,12 @@ class RadioService : MediaBrowserServiceCompat() {
     // ############## LIFECYCLE CALLBACKS ###############
     // ##################################################
 
+    private val titleObserver: Observer<String> = Observer {
+        //if (PlayerStore.instance.playbackState.value != PlaybackStateCompat.STATE_PLAYING) {
+            nowPlayingNotification.update(this)
+        //}
+    }
+
     override fun onLoadChildren(
         parentId: String,
         result: Result<MutableList<MediaBrowserCompat.MediaItem>>
@@ -132,10 +139,13 @@ class RadioService : MediaBrowserServiceCompat() {
         setupMediaPlayer()
         createMediaSession()
 
+
+
         nowPlayingNotification = NowPlayingNotification()
         nowPlayingNotification.create(this, mediaSession)
         startForeground(radioServiceId, nowPlayingNotification.notification)
 
+        PlayerStore.instance.songTitle.observeForever(titleObserver)
         PlayerStore.instance.isServiceStarted.value = true
         Log.d(radioTag, "created")
     }
@@ -178,6 +188,7 @@ class RadioService : MediaBrowserServiceCompat() {
         player.stop()
         player.release()
         unregisterReceiver(receiver)
+        PlayerStore.instance.songTitle.removeObserver(titleObserver)
         PlayerStore.instance.isServiceStarted.value = false
         Log.d(radioTag, "destroyed")
         // if the service is destroyed, the application had become useless.

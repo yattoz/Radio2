@@ -8,14 +8,12 @@ import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import android.content.Intent
+import android.media.session.PlaybackState
+import android.support.v4.media.session.PlaybackStateCompat
 import android.util.Log
 import com.google.android.material.bottomnavigation.LabelVisibilityMode.LABEL_VISIBILITY_LABELED
 import androidx.lifecycle.Observer
 import java.util.*
-
-
-
-
 
 
 class Tick  : TimerTask() {
@@ -24,25 +22,34 @@ class Tick  : TimerTask() {
     }
 }
 
+class ApiFetchTick  : TimerTask() {
+    private val apiFetchTickTag = "======apiTick======"
+    override fun run() {
+        if (PlayerStore.instance.playbackState.value == PlaybackStateCompat.STATE_STOPPED)
+        {
+            val apiUrl = "https://r-a-d.io/api"
+            val mainApiData = ApiDataFetcher(apiUrl)
+            mainApiData.fetch()
+            Log.d(apiFetchTickTag, "mainApiData fetch")
+        }
+    }
+}
 
 class MainActivity : AppCompatActivity() {
 
-    private lateinit var mainApiData : ApiData
     private val clockTicker: Timer = Timer()
     private val activityTag = "=====MainActivity======"
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        // Pre-UI launch
+        val apiTicker = Timer()
+
+
+        // UI Launch
         setTheme(R.style.AppTheme)
-        clockTicker.schedule(
-            Tick(),
-            500,
-            500
-        )
-
-        mainApiData = ApiData(getString(R.string.MAIN_API))
-
         setContentView(R.layout.activity_main)
         val navView: BottomNavigationView = findViewById(R.id.nav_view)
         navView.labelVisibilityMode = LABEL_VISIBILITY_LABELED
@@ -54,6 +61,8 @@ class MainActivity : AppCompatActivity() {
             R.id.navigation_nowplaying, R.id.navigation_home, R.id.navigation_dashboard, R.id.navigation_notifications))
         setupActionBarWithNavController(navController, appBarConfiguration)
         navView.setupWithNavController(navController)
+
+        // Post-UI Launch
 
         if(!PlayerStore.instance.isServiceStarted.value!!)
         {
@@ -78,23 +87,29 @@ class MainActivity : AppCompatActivity() {
             actionOnService(Actions.VOLUME, newValue)
         })
 
+        val apiFetchTick = ApiFetchTick()
+        apiTicker.schedule(apiFetchTick,100,10 * 1000)
 
-        PlayerStore.instance.currentTime.observe(this, Observer {
-            if (it > PlayerStore.instance.stopTime.value!!)
-                mainApiData.fetch()
+        PlayerStore.instance.songTitle.observe(this, Observer {
+            if (PlayerStore.instance.playbackState.value != PlaybackStateCompat.STATE_PLAYING)
+            {
+                actionOnService(Actions.NOTIFY)
+                return@Observer // if it's not playing, it means that the song has changed thanks to API, so don't call it again!
+            }
+            ApiDataFetcher(getString(R.string.MAIN_API)).fetch()
+            Log.d(activityTag, "Song changed, API fetched")
         })
 
-        mainApiData.result.observe(this, Observer {
-            if (it.isNull("main")) // must check the initialization of the app when it is set to empty...
-                return@Observer
-            val res = it.getJSONObject("main")
-            val streamerPictureUrl =
-                "${getString(R.string.MAIN_API)}/dj-image/${res.getJSONObject("dj").getString("djimage")}"
-            mainApiData.fetchImage(streamerPictureUrl)
-            PlayerStore.instance.updateApi(res)
-        })
-        PlayerStore.instance.initPicture(this) // TODO test
-        mainApiData.fetch()
+        PlayerStore.instance.initPicture(this)
+
+        clockTicker.schedule(
+            Tick(),
+            500,
+            500
+        )
+
+        //val monitor = StreamerMonitorWorkerWrap()
+        //monitor.enqueuePeriodic(this)
     }
 
     override fun onDestroy() {
@@ -112,7 +127,7 @@ class MainActivity : AppCompatActivity() {
             val i = Intent(this, RadioService::class.java)
             i.putExtra("action", a.name)
             i.putExtra("value", v)
-            Log.d("MainActivity", "Sending intent ${a.name}")
+            Log.d(activityTag, "Sending intent ${a.name}")
             startService(i)
     }
 

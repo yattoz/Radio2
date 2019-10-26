@@ -4,6 +4,7 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.support.v4.media.session.PlaybackStateCompat
+import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import org.json.JSONObject
 
@@ -20,6 +21,7 @@ class PlayerStore {
     val stopTime: MutableLiveData<Long> = MutableLiveData()
     val currentTime: MutableLiveData<Long> = MutableLiveData()
     val streamerPicture: MutableLiveData<Bitmap> = MutableLiveData()
+    val streamerName: MutableLiveData<String> = MutableLiveData()
 
     init {
         playbackState.value = PlaybackStateCompat.STATE_STOPPED
@@ -27,39 +29,42 @@ class PlayerStore {
         isServiceStarted.value = false
         songTitle.value = ""
         songArtist.value = ""
+        streamerName.value = ""
         volume.value = 100 //TODO: make some settings screen to retain user preference for volume
         startTime.value =  System.currentTimeMillis()
         stopTime.value = System.currentTimeMillis() + 1000
         currentTime.value = System.currentTimeMillis()
     }
 
-
-
-
     fun initPicture(c: Context) {
         streamerPicture.value = BitmapFactory.decodeResource(c.resources, R.drawable.actionbar_logo)
     }
 
-    fun updateApi(res: JSONObject) {
-        startTime.value = res.getLong("start_time")*1000
-        stopTime.value = res.getLong("end_time")*1000
+    fun updateApi(resMain: JSONObject) {
+        startTime.value = resMain.getLong("start_time")*1000
+        stopTime.value = resMain.getLong("end_time")*1000
 
         // I noticed that the server has a big (5 seconds !!) offset for current time.
         // But relying on local time makes it bug with poorly clocked devices
-        currentTime.value = (res.getLong("current") - 5)*1000
-        //currentTime.value = System.currentTimeMillis()
+        currentTime.value = (resMain.getLong("current") - 5)*1000
+        streamerName.value = resMain.getJSONObject("dj").getString("djname")
 
-        val data = res.getString("np")
-        val hyphenPos = data.indexOf(" - ")
-        try {
-            if (hyphenPos < 0)
-                throw ArrayIndexOutOfBoundsException()
-            songTitle.value = data.substring(hyphenPos + 3)
-            songArtist.value = data.substring(0, hyphenPos)
-        } catch (e: Exception) {
-            songTitle.value = data
-            songArtist.value = ""
+        // If we're not in PLAYING state, update title / artist metadata. If we're playing, the ICY will take care of that.
+        if (PlayerStore.instance.playbackState.value != PlaybackStateCompat.STATE_PLAYING)
+        {
+            val data = resMain.getString("np")
+            val hyphenPos = data.indexOf(" - ")
+            try {
+                if (hyphenPos < 0)
+                    throw ArrayIndexOutOfBoundsException()
+                songTitle.value = data.substring(hyphenPos + 3)
+                songArtist.value = data.substring(0, hyphenPos)
+            } catch (e: Exception) {
+                songTitle.value = data
+                songArtist.value = ""
+            }
         }
+        Log.d("PlayerStore", "store updated")
     }
 
     companion object {
