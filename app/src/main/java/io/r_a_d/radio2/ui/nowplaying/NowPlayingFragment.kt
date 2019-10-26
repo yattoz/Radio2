@@ -45,11 +45,11 @@ class NowPlayingFragment : Fragment() {
 
 
 
-        PlayerStore.instance.songTitle.observe(this, Observer {
+        PlayerStore.instance.currentSong.title.observe(this, Observer {
             songTitleText.text = it
         })
 
-        PlayerStore.instance.songArtist.observe(this, Observer {
+        PlayerStore.instance.currentSong.artist.observe(this, Observer {
             songArtistText.text = it
         })
 
@@ -67,26 +67,26 @@ class NowPlayingFragment : Fragment() {
 
         // fuck it, do it on main thread
         PlayerStore.instance.currentTime.observe(this, Observer {
-            val dd = (PlayerStore.instance.currentTime.value!! - PlayerStore.instance.startTime.value!!).toInt()
+            val dd = (PlayerStore.instance.currentTime.value!! - PlayerStore.instance.currentSong.startTime.value!!).toInt()
             progressBar.progress = dd
         })
 
-        PlayerStore.instance.stopTime.observe(this, Observer {
-            val dd = (PlayerStore.instance.stopTime.value!! - PlayerStore.instance.startTime.value!!).toInt()
+        PlayerStore.instance.currentSong.stopTime.observe(this, Observer {
+            val dd = (PlayerStore.instance.currentSong.stopTime.value!! - PlayerStore.instance.currentSong.startTime.value!!).toInt()
             progressBar.max = dd
         })
 
-        PlayerStore.instance.stopTime.observe(this, Observer {
+        PlayerStore.instance.currentSong.stopTime.observe(this, Observer {
             val t : TextView= root.findViewById(R.id.endTime)
-            val minutes: String = ((PlayerStore.instance.stopTime.value!! - PlayerStore.instance.startTime.value!!)/60/1000).toString()
-            val seconds: String = ((PlayerStore.instance.stopTime.value!! - PlayerStore.instance.startTime.value!!)/1000%60).toString()
+            val minutes: String = ((PlayerStore.instance.currentSong.stopTime.value!! - PlayerStore.instance.currentSong.startTime.value!!)/60/1000).toString()
+            val seconds: String = ((PlayerStore.instance.currentSong.stopTime.value!! - PlayerStore.instance.currentSong.startTime.value!!)/1000%60).toString()
             t.text = "$minutes:${if (seconds.toInt() < 10) "0" else ""}$seconds"
         })
 
         PlayerStore.instance.currentTime.observe(this, Observer {
             val t : TextView= root.findViewById(R.id.currentTime)
-            val minutes: String = ((PlayerStore.instance.currentTime.value!! - PlayerStore.instance.startTime.value!!)/60/1000).toString()
-            val seconds: String = ((PlayerStore.instance.currentTime.value!! - PlayerStore.instance.startTime.value!!)/1000%60).toString()
+            val minutes: String = ((PlayerStore.instance.currentTime.value!! - PlayerStore.instance.currentSong.startTime.value!!)/60/1000).toString()
+            val seconds: String = ((PlayerStore.instance.currentTime.value!! - PlayerStore.instance.currentSong.startTime.value!!)/1000%60).toString()
             t.text = "$minutes:${if (seconds.toInt() < 10) "0" else ""}$seconds"
         })
 

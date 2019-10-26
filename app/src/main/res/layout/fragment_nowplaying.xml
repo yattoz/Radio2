@@ -5,147 +5,266 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:layout_margin="@dimen/activity_horizontal_margin"
+    android:layout_marginStart="@dimen/activity_horizontal_margin"
+    android:layout_marginEnd="@dimen/activity_horizontal_margin"
+    android:layout_marginTop="@dimen/activity_horizontal_margin"
+    android:layout_marginBottom="@dimen/activity_vertical_margin"
     >
 
-    <TextView
-        android:id="@+id/text_song_artist"
+    <ScrollView
+        android:id="@+id/scrollViewMetadata"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center"
-        android:text=""
-        android:textAlignment="center"
-        android:textSize="20sp"
+        android:layout_height="0dp"
+        android:layout_marginBottom="8dp"
+        android:fillViewport="true"
+        app:layout_constraintBottom_toTopOf="@+id/progressBar"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/streamerPicture" />
-
-    <TextView
-        android:id="@+id/text_song_title"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text=""
-        android:textAlignment="center"
-        android:gravity="center"
-        android:textSize="20sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/text_song_artist"/>
+        app:layout_constraintTop_toTopOf="@+id/nowPlayingGuideline">
 
 
-    <ImageButton
-        android:id="@+id/play_pause"
-        android:layout_width="104dp"
-        android:layout_height="93dp"
-        android:layout_gravity="center_vertical|center_horizontal"
-        android:adjustViewBounds="true"
-        android:background="?attr/selectableItemBackground"
-        android:contentDescription="play-pause"
-        android:contextClickable="false"
-        android:cropToPadding="false"
-        android:scaleType="centerCrop"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.441"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/text_song_title"
-        app:srcCompat="@drawable/ic_play"
-        tools:ignore="HardcodedText"
-        tools:targetApi="m" />
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintBottom_toTopOf="@+id/progressBar"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/text_song_title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="bottom"
+                android:text=""
+                android:textAlignment="center"
+                android:textColor="@color/whited"
+                android:textSize="20sp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"/>
+
+            <TextView
+                android:id="@+id/text_song_artist"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="bottom"
+                android:text=""
+                android:textAlignment="center"
+                android:textColor="@color/whited3"
+                android:textSize="20sp"
+                app:layout_constraintBottom_toTopOf="@+id/text_song_title"
+                app:layout_constraintStart_toStartOf="parent"
+                 />
+
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+    </ScrollView>
+
+
+    <!--    android:progressDrawable="@drawable/progress_bar_progress"     -->
 
     <SeekBar
         android:id="@+id/seek_bar_volume"
-        android:layout_width="match_parent"
-        android:layout_height="30dp"
-        android:layout_marginLeft="40dp"
-        android:layout_marginTop="16dp"
-        android:layout_marginRight="40dp"
+        android:layout_width="0dp"
+        android:layout_height="@dimen/seek_bar_thumb_height"
         android:max="100"
         android:progress="100"
         android:progressDrawable="@drawable/seek_bar_progress"
-        android:theme="@style/AppTheme"
         android:thumb="@drawable/seek_bar_thumb"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="1.0"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/play_pause" />
+        app:layout_constraintEnd_toStartOf="@+id/volume_text"
+        app:layout_constraintStart_toEndOf="@+id/volume_icon"
+        app:layout_constraintTop_toTopOf="@+id/streamerPicture" />
 
     <TextView
         android:id="@+id/volume_text"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:gravity="center"
+        android:layout_width="40dp"
+        android:layout_height="0dp"
+        android:gravity="end"
         android:text=""
-        android:textAlignment="center"
+        android:textAlignment="textEnd"
+        android:layout_marginRight="8dp"
         app:layout_constraintBottom_toBottomOf="@+id/seek_bar_volume"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/seek_bar_volume"
-        app:layout_constraintTop_toTopOf="@id/seek_bar_volume" />
+        app:layout_constraintEnd_toStartOf="@+id/streamerPicture"
+        app:layout_constraintTop_toTopOf="@id/seek_bar_volume"
+        app:layout_constraintVertical_bias="0.0"
+        android:layout_marginEnd="8dp" />
 
     <ImageView
         android:id="@+id/volume_icon"
-        android:layout_width="@dimen/seek_bar_thickness"
-        android:layout_height="@dimen/seek_bar_thickness"
+        android:layout_width="wrap_content"
+        android:layout_height="0dp"
         android:contentDescription="@string/volume"
         android:src="@drawable/ic_volume_high"
         android:textSize="12sp"
         app:layout_constraintBottom_toBottomOf="@+id/seek_bar_volume"
-        app:layout_constraintEnd_toStartOf="@+id/seek_bar_volume"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@id/seek_bar_volume" />
+        app:layout_constraintTop_toTopOf="@id/seek_bar_volume"
+        app:layout_constraintVertical_bias="0.0" />
 
     <ProgressBar
         android:id="@+id/progressBar"
         style="@style/Widget.AppCompat.ProgressBar.Horizontal"
 
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
+        android:layout_height="@dimen/progress_bar_thickness"
         android:layout_gravity="fill_horizontal"
         android:progress="70"
         android:progressDrawable="@drawable/progress_bar_progress"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/seek_bar_volume" />
-    <!--    android:progressDrawable="@drawable/progress_bar_progress"     -->
+        app:layout_constraintBottom_toTopOf="@+id/play_pause"
+        tools:layout_editor_absoluteX="0dp" />
 
     <TextView
         android:id="@+id/endTime"
-        android:layout_width="0dp"
+        android:layout_width="100dp"
         android:layout_height="wrap_content"
-        android:gravity="start"
-        android:text=""
-        android:textAlignment="textStart"
         android:layout_marginTop="4dp"
+        android:gravity="end"
+        android:text=""
+        android:textAlignment="textEnd"
         app:layout_constraintEnd_toEndOf="@+id/progressBar"
         app:layout_constraintTop_toBottomOf="@+id/progressBar" />
 
     <TextView
         android:id="@+id/currentTime"
-        android:layout_width="0dp"
+        android:layout_width="100dp"
         android:layout_height="wrap_content"
-        android:gravity="end"
-        android:text=""
-        android:textAlignment="textEnd"
         android:layout_marginTop="4dp"
+        android:gravity="start"
+        android:text=""
+        android:textAlignment="textStart"
         app:layout_constraintStart_toStartOf="@+id/progressBar"
         app:layout_constraintTop_toBottomOf="@+id/progressBar" />
 
 
     <ImageView
         android:id="@+id/streamerPicture"
-        android:layout_width="100dp"
-        android:layout_height="100dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
+        android:layout_gravity="top|center_horizontal"
+        android:scaleType="fitStart"
+        android:adjustViewBounds="true"
+        android:layout_width="110dp"
         android:contentDescription="dj-image"
-        app:srcCompat="@drawable/dj_image"
-        tools:ignore="HardcodedText" />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/streamerName"
+        app:srcCompat="@drawable/actionbar_logo"
+        tools:ignore="HardcodedText"
+        android:layout_height="wrap_content" />
+
+
+    <TextView
+        android:id="@+id/streamerName"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="Now streaming"
+        android:textStyle="bold"
+        android:gravity="center"
+        android:textAlignment="center"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="@+id/streamerPicture"
+        app:layout_constraintTop_toBottomOf="@id/streamerPicture"
+        />
+
+    <TextView
+        android:id="@+id/upNext"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="@color/whited"
+        android:textAlignment="center"
+        android:layout_gravity="top"
+        android:text="Up next:"
+        app:layout_constraintTop_toBottomOf="@+id/seek_bar_volume"
+        app:layout_constraintEnd_toStartOf="@id/streamerPicture"
+        app:layout_constraintStart_toStartOf="parent"
+        />
+    <ScrollView
+        android:id="@+id/scrollViewMetadataNext"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:fillViewport="true"
+        app:layout_constraintBottom_toTopOf="@+id/topInfoGuideline"
+        app:layout_constraintEnd_toStartOf="@id/streamerPicture"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/upNext">
+
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintBottom_toTopOf="@+id/progressBar"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/text_song_title_next"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="bottom"
+                android:text=""
+                android:textAlignment="center"
+                android:textColor="@color/whited"
+                android:textSize="12sp"
+                app:layout_constraintTop_toBottomOf="@+id/text_song_artist_next"
+                app:layout_constraintStart_toStartOf="parent"/>
+
+            <TextView
+                android:id="@+id/text_song_artist_next"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="bottom"
+                android:text=""
+                android:textAlignment="center"
+                android:textColor="@color/whited3"
+                android:textSize="12sp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                />
+
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+    </ScrollView>
 
     <!--         style="?android:attr/progressBarStyleHorizontal" -->
     <!--         android:theme="@style/App" -->
 
+    <ImageButton
+        android:id="@+id/play_pause"
+        android:layout_width="150dp"
+        android:layout_height="0dp"
+        android:layout_gravity="center_vertical|center_horizontal"
+        android:adjustViewBounds="true"
+        android:background="?attr/selectableItemBackground"
+        android:contentDescription="play-pause"
+        android:contextClickable="false"
+        android:cropToPadding="false"
+        android:scaleType="fitCenter"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/playButtonGuideline"
+        app:srcCompat="@drawable/ic_play"
+        tools:ignore="HardcodedText"
+        tools:targetApi="m" />
 
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/playButtonGuideline"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="0.8" />
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/nowPlayingGuideline"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="0.5" />
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/topInfoGuideline"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="0.30" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

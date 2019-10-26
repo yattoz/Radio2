@@ -90,9 +90,10 @@ class RadioService : MediaBrowserServiceCompat() {
     // ##################################################
 
     private val titleObserver: Observer<String> = Observer {
-        //if (PlayerStore.instance.playbackState.value != PlaybackStateCompat.STATE_PLAYING) {
+        if (PlayerStore.instance.playbackState.value != PlaybackStateCompat.STATE_PLAYING)
+        {
             nowPlayingNotification.update(this)
-        //}
+        }
     }
 
     override fun onLoadChildren(
@@ -145,7 +146,7 @@ class RadioService : MediaBrowserServiceCompat() {
         nowPlayingNotification.create(this, mediaSession)
         startForeground(radioServiceId, nowPlayingNotification.notification)
 
-        PlayerStore.instance.songTitle.observeForever(titleObserver)
+        PlayerStore.instance.currentSong.title.observeForever(titleObserver)
         PlayerStore.instance.isServiceStarted.value = true
         Log.d(radioTag, "created")
     }
@@ -188,7 +189,7 @@ class RadioService : MediaBrowserServiceCompat() {
         player.stop()
         player.release()
         unregisterReceiver(receiver)
-        PlayerStore.instance.songTitle.removeObserver(titleObserver)
+        PlayerStore.instance.currentSong.title.removeObserver(titleObserver)
         PlayerStore.instance.isServiceStarted.value = false
         Log.d(radioTag, "destroyed")
         // if the service is destroyed, the application had become useless.
@@ -254,12 +255,12 @@ class RadioService : MediaBrowserServiceCompat() {
                     try {
                         if (hyphenPos < 0)
                             throw ArrayIndexOutOfBoundsException()
-                        PlayerStore.instance.songTitle.value = data.substring(hyphenPos + 3)
-                        PlayerStore.instance.songArtist.value = data.substring(0, hyphenPos)
+                        PlayerStore.instance.currentSong.title.value = data.substring(hyphenPos + 3)
+                        PlayerStore.instance.currentSong.artist.value = data.substring(0, hyphenPos)
                         nowPlayingNotification.update(this)
                     } catch (e: Exception) {
-                        PlayerStore.instance.songTitle.value = data
-                        PlayerStore.instance.songArtist.value = ""
+                        PlayerStore.instance.currentSong.title.value = data
+                        PlayerStore.instance.currentSong.artist.value = ""
                     }
                 }
             }

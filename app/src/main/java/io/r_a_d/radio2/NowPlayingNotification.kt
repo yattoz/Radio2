@@ -94,8 +94,8 @@ class NowPlayingNotification {
 
         // Title : Title of notification (usu. songArtist is first)
         // Text : Text of the notification (usu. songTitle is second)
-        builder.setContentTitle(PlayerStore.instance.songArtist.value)
-        builder.setContentText(PlayerStore.instance.songTitle.value)
+        builder.setContentTitle(PlayerStore.instance.currentSong.artist.value)
+        builder.setContentText(PlayerStore.instance.currentSong.title.value)
         // As subText, we show when the player is stopped. This is a friendly reminder that the metadata won't get updated.
         // Maybe later we could replace it by a nice progressBar? Would it be interesting to have one here? I don't know.
         if (PlayerStore.instance.playbackState.value == PlaybackStateCompat.STATE_STOPPED) {

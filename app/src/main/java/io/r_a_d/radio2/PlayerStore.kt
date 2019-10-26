@@ -6,33 +6,29 @@ import android.graphics.BitmapFactory
 import android.support.v4.media.session.PlaybackStateCompat
 import android.util.Log
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
 import org.json.JSONObject
 
 
-class PlayerStore {
+class PlayerStore : ViewModel() {
 
     val isPlaying: MutableLiveData<Boolean> = MutableLiveData()
     val isServiceStarted: MutableLiveData<Boolean> = MutableLiveData()
-    val songTitle: MutableLiveData<String> = MutableLiveData()
-    val songArtist: MutableLiveData<String> = MutableLiveData()
     val volume: MutableLiveData<Int> = MutableLiveData()
     val playbackState: MutableLiveData<Int> = MutableLiveData()
-    val startTime: MutableLiveData<Long> = MutableLiveData()
-    val stopTime: MutableLiveData<Long> = MutableLiveData()
     val currentTime: MutableLiveData<Long> = MutableLiveData()
     val streamerPicture: MutableLiveData<Bitmap> = MutableLiveData()
     val streamerName: MutableLiveData<String> = MutableLiveData()
+    val currentSong : Song = Song()
+    val lastPlayed : ArrayList<Song> = ArrayList<Song>()
+    val queue : ArrayList<Song> = ArrayList<Song>()
 
     init {
         playbackState.value = PlaybackStateCompat.STATE_STOPPED
         isPlaying.value = false
         isServiceStarted.value = false
-        songTitle.value = ""
-        songArtist.value = ""
         streamerName.value = ""
         volume.value = 100 //TODO: make some settings screen to retain user preference for volume
-        startTime.value =  System.currentTimeMillis()
-        stopTime.value = System.currentTimeMillis() + 1000
         currentTime.value = System.currentTimeMillis()
     }
 
@@ -41,8 +37,8 @@ class PlayerStore {
     }
 
     fun updateApi(resMain: JSONObject) {
-        startTime.value = resMain.getLong("start_time")*1000
-        stopTime.value = resMain.getLong("end_time")*1000
+        currentSong.startTime.value = resMain.getLong("start_time")*1000
+        currentSong.stopTime.value = resMain.getLong("end_time")*1000
 
         // I noticed that the server has a big (5 seconds !!) offset for current time.
         // But relying on local time makes it bug with poorly clocked devices
@@ -53,19 +49,23 @@ class PlayerStore {
         if (PlayerStore.instance.playbackState.value != PlaybackStateCompat.STATE_PLAYING)
         {
             val data = resMain.getString("np")
+            //val data = "Anzai Yukari, Fujita Akane, Noguchi Yuri, Numakura Manami, Suzaki Aya, Uchida Aya - Spatto! Spy & Spice" // TODO DEBUG with a big title.
             val hyphenPos = data.indexOf(" - ")
             try {
                 if (hyphenPos < 0)
                     throw ArrayIndexOutOfBoundsException()
-                songTitle.value = data.substring(hyphenPos + 3)
-                songArtist.value = data.substring(0, hyphenPos)
+                currentSong.title.value = data.substring(hyphenPos + 3)
+                currentSong.artist.value = data.substring(0, hyphenPos)
             } catch (e: Exception) {
-                songTitle.value = data
-                songArtist.value = ""
+                currentSong.title.value = data
+                currentSong.artist.value = ""
             }
         }
+
+
         Log.d("PlayerStore", "store updated")
     }
+
 
     companion object {
         val instance by lazy {

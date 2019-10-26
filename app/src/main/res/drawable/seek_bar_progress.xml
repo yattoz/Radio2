@@ -4,6 +4,7 @@
 
     <item android:id="@android:id/background">
         <shape>
+
             <corners
                 android:radius="4dp"
                 />

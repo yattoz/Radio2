@@ -1,8 +1,11 @@
 package io.r_a_d.radio2.ui.nowplaying
 
 import android.widget.SeekBar
+import android.widget.TextView
+import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModel
 import io.r_a_d.radio2.PlayerStore
+import io.r_a_d.radio2.R
 
 class NowPlayingViewModel: ViewModel() {
 
@@ -27,4 +30,8 @@ class NowPlayingViewModel: ViewModel() {
                 // called after the user finishes moving the SeekBar
             }
         }
+
+    override fun onCleared() {
+        super.onCleared()
+    }
 }

@@ -15,26 +15,6 @@ import com.google.android.material.bottomnavigation.LabelVisibilityMode.LABEL_VI
 import androidx.lifecycle.Observer
 import java.util.*
 
-
-class Tick  : TimerTask() {
-    override fun run() {
-        PlayerStore.instance.currentTime.postValue(PlayerStore.instance.currentTime.value!! + 500)
-    }
-}
-
-class ApiFetchTick  : TimerTask() {
-    private val apiFetchTickTag = "======apiTick======"
-    override fun run() {
-        if (PlayerStore.instance.playbackState.value == PlaybackStateCompat.STATE_STOPPED)
-        {
-            val apiUrl = "https://r-a-d.io/api"
-            val mainApiData = ApiDataFetcher(apiUrl)
-            mainApiData.fetch()
-            Log.d(apiFetchTickTag, "mainApiData fetch")
-        }
-    }
-}
-
 class MainActivity : AppCompatActivity() {
 
     private val clockTicker: Timer = Timer()
@@ -46,6 +26,7 @@ class MainActivity : AppCompatActivity() {
 
         // Pre-UI launch
         val apiTicker = Timer()
+
 
 
         // UI Launch
@@ -90,14 +71,12 @@ class MainActivity : AppCompatActivity() {
         val apiFetchTick = ApiFetchTick()
         apiTicker.schedule(apiFetchTick,100,10 * 1000)
 
-        PlayerStore.instance.songTitle.observe(this, Observer {
-            if (PlayerStore.instance.playbackState.value != PlaybackStateCompat.STATE_PLAYING)
+        PlayerStore.instance.currentSong.title.observe(this, Observer {
+            if (PlayerStore.instance.playbackState.value == PlaybackStateCompat.STATE_PLAYING)
             {
-                actionOnService(Actions.NOTIFY)
-                return@Observer // if it's not playing, it means that the song has changed thanks to API, so don't call it again!
+                ApiDataFetcher(getString(R.string.MAIN_API)).fetch()
+                Log.d(activityTag, "Song changed, API fetched")
             }
-            ApiDataFetcher(getString(R.string.MAIN_API)).fetch()
-            Log.d(activityTag, "Song changed, API fetched")
         })
 
         PlayerStore.instance.initPicture(this)
