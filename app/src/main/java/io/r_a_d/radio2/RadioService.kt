@@ -28,6 +28,7 @@ import androidx.media.AudioAttributesCompat
 import androidx.media.AudioFocusRequestCompat
 import androidx.media.AudioManagerCompat
 import com.google.android.exoplayer2.metadata.icy.*
+import java.util.*
 import kotlin.math.exp
 import kotlin.math.ln
 import kotlin.system.exitProcess
@@ -38,6 +39,9 @@ class RadioService : MediaBrowserServiceCompat() {
     private val radioTag = "======RadioService====="
     private lateinit var nowPlayingNotification: NowPlayingNotification
     private val radioServiceId = 1
+    private var numberOfSongs = 0
+    private val apiTicker: Timer = Timer()
+
 
 
     // Define the broadcast receiver to handle any broadcasts
@@ -90,11 +94,33 @@ class RadioService : MediaBrowserServiceCompat() {
     // ##################################################
 
     private val titleObserver: Observer<String> = Observer {
-        if (PlayerStore.instance.playbackState.value != PlaybackStateCompat.STATE_PLAYING)
+        if (PlayerStore.instance.playbackState.value == PlaybackStateCompat.STATE_PLAYING)
         {
-            nowPlayingNotification.update(this)
+            Log.d(radioTag, "SONG CHANGED AND PLAYING")
+            // we activate latency compensation only if it's been at least 2 songs...
+            PlayerStore.instance.fetchApi(numberOfSongs >= 2)
         }
+        nowPlayingNotification.update(this)
     }
+
+    private val volumeObserver: Observer<Int> = Observer {
+        setVolume(it)
+    }
+
+    private val isPlayingObserver: Observer<Boolean> = Observer {
+        if (it)
+            beginPlaying()
+        else
+            stopPlaying()
+    }
+
+    private val startTimeObserver = Observer<Long> {
+        // We're listening to startTime to determine if we have to update Queue and Lp.
+        // this is because startTime is set by the API and never by the ICY, so both cases are covered (playing and stopped)
+        if (it != PlayerStore.instance.currentSongBackup.startTime.value) // we have a new song
+            PlayerStore.instance.updateQueueLp()
+    }
+
 
     override fun onLoadChildren(
         parentId: String,
@@ -140,13 +166,19 @@ class RadioService : MediaBrowserServiceCompat() {
         setupMediaPlayer()
         createMediaSession()
 
-
-
         nowPlayingNotification = NowPlayingNotification()
         nowPlayingNotification.create(this, mediaSession)
-        startForeground(radioServiceId, nowPlayingNotification.notification)
 
         PlayerStore.instance.currentSong.title.observeForever(titleObserver)
+        PlayerStore.instance.currentSong.startTime.observeForever(startTimeObserver)
+        PlayerStore.instance.volume.observeForever(volumeObserver)
+        PlayerStore.instance.isPlaying.observeForever(isPlayingObserver)
+
+        startForeground(radioServiceId, nowPlayingNotification.notification)
+
+        // start ticker for when the player is stopped
+        apiTicker.schedule(ApiFetchTick(),10 * 1000,10 * 1000)
+
         PlayerStore.instance.isServiceStarted.value = true
         Log.d(radioTag, "created")
     }
@@ -190,7 +222,20 @@ class RadioService : MediaBrowserServiceCompat() {
         player.release()
         unregisterReceiver(receiver)
         PlayerStore.instance.currentSong.title.removeObserver(titleObserver)
+        PlayerStore.instance.currentSong.startTime.removeObserver(startTimeObserver)
+        PlayerStore.instance.volume.removeObserver(volumeObserver)
+        PlayerStore.instance.isPlaying.removeObserver(isPlayingObserver)
+
+
+        mediaSession.isActive = false
+        mediaSession.setMediaButtonReceiver(null)
+
+        mediaSession.release()
+
         PlayerStore.instance.isServiceStarted.value = false
+        PlayerStore.instance.isInitialized = false
+
+        apiTicker.cancel() // stops the timer.
         Log.d(radioTag, "destroyed")
         // if the service is destroyed, the application had become useless.
         exitProcess(0)
@@ -250,18 +295,9 @@ class RadioService : MediaBrowserServiceCompat() {
                 if (entry is IcyInfo) {
                     Log.d(radioTag, "onMetadata: Title ----> ${entry.title}")
                     // Note : Kotlin supports UTF-8 by default.
+                    numberOfSongs++
                     val data = entry.title!!
-                    val hyphenPos = data.indexOf(" - ")
-                    try {
-                        if (hyphenPos < 0)
-                            throw ArrayIndexOutOfBoundsException()
-                        PlayerStore.instance.currentSong.title.value = data.substring(hyphenPos + 3)
-                        PlayerStore.instance.currentSong.artist.value = data.substring(0, hyphenPos)
-                        nowPlayingNotification.update(this)
-                    } catch (e: Exception) {
-                        PlayerStore.instance.currentSong.title.value = data
-                        PlayerStore.instance.currentSong.artist.value = ""
-                    }
+                    PlayerStore.instance.currentSong.setTitleArtist(data)
                 }
             }
         }
@@ -282,7 +318,6 @@ class RadioService : MediaBrowserServiceCompat() {
         // mediaSession.setFlags(MediaSessionCompat.FLAG_HANDLES_TRANSPORT_CONTROLS and MediaSessionCompat.FLAG_HANDLES_MEDIA_BUTTONS)
         mediaSession.isActive = true
         mediaSession.setCallback(mediaSessionCallback)
-
         playbackStateBuilder = PlaybackStateCompat.Builder()
         playbackStateBuilder.setActions(PlaybackStateCompat.ACTION_PLAY_PAUSE)
             .setState(PlaybackStateCompat.STATE_STOPPED, 0, 1.0f, SystemClock.elapsedRealtime())
@@ -306,6 +341,8 @@ class RadioService : MediaBrowserServiceCompat() {
 
         if (mediaSession.controller.playbackState.state == PlaybackStateCompat.STATE_PLAYING)
             return // nothing to do here
+
+        numberOfSongs = 0 // we count the number of songs to determine whether to activate latency compensation for the progressbar.
         PlayerStore.instance.playbackState.value = PlaybackStateCompat.STATE_PLAYING
 
         // Reinitialize media player. Otherwise the playback doesn't resume when beginPlaying. Dunno why.
@@ -332,7 +369,6 @@ class RadioService : MediaBrowserServiceCompat() {
     }
 
     // stop playing but keep the notification.
-    // API23+ can keep the notification. API22- must 'blink' it.
     fun stopPlaying()
     {
         if (mediaSession.controller.playbackState.state == PlaybackStateCompat.STATE_STOPPED)
@@ -349,6 +385,7 @@ class RadioService : MediaBrowserServiceCompat() {
             1.0f,
             SystemClock.elapsedRealtime()
         )
+        numberOfSongs = 0
         Log.d(radioTag, "stopped")
 
         mediaSession.setPlaybackState(playbackStateBuilder.build())
@@ -376,33 +413,39 @@ class RadioService : MediaBrowserServiceCompat() {
             stopPlaying()
         }
 
+
         override fun onMediaButtonEvent(mediaButtonEvent: Intent?): Boolean {
             // explicit handling of Media Buttons (for example bluetooth commands)
-            // Note : the service is always in foreground, so always started.
-            val keyEvent =
-                mediaButtonEvent?.getParcelableExtra<KeyEvent>(Intent.EXTRA_KEY_EVENT)
-            if (keyEvent == null || ((keyEvent.action) != KeyEvent.ACTION_DOWN)) {
-                return false
-            }
-            when (keyEvent.keyCode) {
-                KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE, KeyEvent.KEYCODE_HEADSETHOOK -> {
-                    //// Is this some kind of debouncing ? I'm not sure.
-                    //if (keyEvent.repeatCount > 0) {
-                    //    return false
-                    //} else {
-                    if (mediaSession.controller.playbackState.state == PlaybackStateCompat.STATE_PLAYING)
-                        pausePlaying()
-                    else
-                        beginPlaying()
-                    //}
-                    return true
+            // The hardware key on a corded headphones are handled in the MainActivity (for <API21)
+            if (PlayerStore.instance.isServiceStarted.value!!) {
+                val keyEvent =
+                    mediaButtonEvent?.getParcelableExtra<KeyEvent>(Intent.EXTRA_KEY_EVENT)
+                if (keyEvent == null || ((keyEvent.action) != KeyEvent.ACTION_DOWN)) {
+                    return false
                 }
-                KeyEvent.KEYCODE_MEDIA_STOP -> stopPlaying()
-                KeyEvent.KEYCODE_MEDIA_PAUSE -> pausePlaying()
-                KeyEvent.KEYCODE_MEDIA_PLAY -> beginPlaying()
-                else -> return false // these actions are the only ones we acknowledge.
+
+                when (keyEvent.keyCode) {
+                    KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE, KeyEvent.KEYCODE_HEADSETHOOK -> {
+                        //// Is this some kind of debouncing ? I'm not sure.
+                        //if (keyEvent.repeatCount > 0) {
+                        //    return false
+                        //} else {
+                        if (PlayerStore.instance.playbackState.value == PlaybackStateCompat.STATE_PLAYING)
+                            pausePlaying()
+                        else
+                            beginPlaying()
+                        //}
+                        return true
+                    }
+                    KeyEvent.KEYCODE_MEDIA_STOP -> stopPlaying()
+                    KeyEvent.KEYCODE_MEDIA_PAUSE -> pausePlaying()
+                    KeyEvent.KEYCODE_MEDIA_PLAY -> beginPlaying()
+                    else -> return false // these actions are the only ones we acknowledge.
+                }
+
             }
             return false
         }
     }
+
 }

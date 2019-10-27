@@ -16,10 +16,8 @@ class ApiFetchTick  : TimerTask() {
     override fun run() {
         if (PlayerStore.instance.playbackState.value == PlaybackStateCompat.STATE_STOPPED)
         {
-            val apiUrl = "https://r-a-d.io/api"
-            val mainApiData = ApiDataFetcher(apiUrl)
-            mainApiData.fetch()
-            Log.d(apiFetchTickTag, "mainApiData fetch")
+            PlayerStore.instance.fetchApi()
+            Log.d(apiFetchTickTag, "mainApiData fetch from object #${this.hashCode()}")
         }
     }
 }

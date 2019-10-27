@@ -7,5 +7,5 @@ enum class Actions
     PAUSE,
     VOLUME,
     KILL,
-    NOTIFY
+    NOTIFY,
 }

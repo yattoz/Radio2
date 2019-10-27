@@ -15,7 +15,7 @@
         android:id="@+id/scrollViewMetadata"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_marginBottom="8dp"
+        android:layout_marginBottom="16dp"
         android:fillViewport="true"
         app:layout_constraintBottom_toTopOf="@+id/progressBar"
         app:layout_constraintEnd_toEndOf="parent"
@@ -202,7 +202,7 @@
                 android:text=""
                 android:textAlignment="center"
                 android:textColor="@color/whited"
-                android:textSize="12sp"
+                android:textSize="16sp"
                 app:layout_constraintTop_toBottomOf="@+id/text_song_artist_next"
                 app:layout_constraintStart_toStartOf="parent"/>
 
@@ -214,7 +214,7 @@
                 android:text=""
                 android:textAlignment="center"
                 android:textColor="@color/whited3"
-                android:textSize="12sp"
+                android:textSize="16sp"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
                 />
@@ -253,13 +253,14 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        app:layout_constraintGuide_percent="0.8" />
+        app:layout_constraintGuide_percent="0.75" />
+
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/nowPlayingGuideline"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        app:layout_constraintGuide_percent="0.5" />
+        app:layout_constraintGuide_percent="0.40" />
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/topInfoGuideline"
         android:layout_width="wrap_content"

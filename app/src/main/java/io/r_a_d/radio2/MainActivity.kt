@@ -8,11 +8,12 @@ import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import android.content.Intent
-import android.media.session.PlaybackState
-import android.support.v4.media.session.PlaybackStateCompat
 import android.util.Log
 import com.google.android.material.bottomnavigation.LabelVisibilityMode.LABEL_VISIBILITY_LABELED
-import androidx.lifecycle.Observer
+import org.jetbrains.anko.doAsync
+import org.jetbrains.anko.uiThread
+import org.json.JSONObject
+import java.net.URL
 import java.util.*
 
 class MainActivity : AppCompatActivity() {
@@ -23,11 +24,6 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        // Pre-UI launch
-        val apiTicker = Timer()
-
-
 
         // UI Launch
         setTheme(R.style.AppTheme)
@@ -43,57 +39,52 @@ class MainActivity : AppCompatActivity() {
         setupActionBarWithNavController(navController, appBarConfiguration)
         navView.setupWithNavController(navController)
 
-        // Post-UI Launch
-
-        if(!PlayerStore.instance.isServiceStarted.value!!)
-        {
-            // if the service is not started, start it in STOP mode.
-            // It's not a dummy action : with STOP mode, the player does not buffer audio (and does not use data connection without the user's consent).
-            // this is useful since the service must be started to register bluetooth devices buttons.
-            // (in case someone opens the app then pushes the PLAY button from their bluetooth device)
-            val i = Intent(this, RadioService::class.java)
-            i.putExtra("action", Actions.STOP.name)
-            Log.d(activityTag, "Starting the service in foreground")
-            startService(i)
-        }
-
-        PlayerStore.instance.isPlaying.observe(this, Observer { newValue ->
-            if (newValue)
-                actionOnService(Actions.PLAY)
-            else
-                actionOnService(Actions.STOP)
-        })
-
-        PlayerStore.instance.volume.observe(this, Observer { newValue ->
-            actionOnService(Actions.VOLUME, newValue)
-        })
-
-        val apiFetchTick = ApiFetchTick()
-        apiTicker.schedule(apiFetchTick,100,10 * 1000)
-
-        PlayerStore.instance.currentSong.title.observe(this, Observer {
-            if (PlayerStore.instance.playbackState.value == PlaybackStateCompat.STATE_PLAYING)
-            {
-                ApiDataFetcher(getString(R.string.MAIN_API)).fetch()
-                Log.d(activityTag, "Song changed, API fetched")
-            }
-        })
-
-        PlayerStore.instance.initPicture(this)
-
+        // timers
+        // the clockTicker is used to update the UI. It's OK if it dies when the app loses focus.
+        // It should be possible to make this to alleviate the CPU charge. Not that a ticker is heavy on resources, but still.
         clockTicker.schedule(
             Tick(),
             500,
             500
         )
 
-        //val monitor = StreamerMonitorWorkerWrap()
-        //monitor.enqueuePeriodic(this)
+        PlayerStore.instance.fetchApi()
+
+        // Post-UI Launch
+        if (savedInstanceState?.getBoolean("isInitialized") == true || PlayerStore.instance.isInitialized)
+        {
+            Log.d(activityTag, "skipped initialization")
+            return
+        }
+
+        // initialize some API data
+        PlayerStore.instance.initPicture(this)
+        PlayerStore.instance.streamerName.value = ""
+        doAsync {
+            val s = URL(getString(R.string.MAIN_API)).readText()
+            uiThread {
+                val result = JSONObject(s)
+                if (!result.isNull("main"))
+                    PlayerStore.instance.initApi(result.getJSONObject("main"))
+            }
+        }
+
+        // if the service is not started, start it in STOP mode.
+        // It's not a dummy action : with STOP mode, the player does not buffer audio (and does not use data connection without the user's consent).
+        // this is useful since the service must be started to register bluetooth devices buttons.
+        // (in case someone opens the app then pushes the PLAY button from their bluetooth device)
+        if(!PlayerStore.instance.isServiceStarted.value!!)
+            actionOnService(Actions.STOP)
     }
 
     override fun onDestroy() {
         clockTicker.cancel()
         super.onDestroy()
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        outState.putBoolean("isInitialized", true)
+        super.onSaveInstanceState(outState)
     }
 
     // ####################################
@@ -110,6 +101,7 @@ class MainActivity : AppCompatActivity() {
             startService(i)
     }
 
+
     // ####################################
     // ###### SERVICE BINDER MANAGER ######
     // ####################################
@@ -117,4 +109,5 @@ class MainActivity : AppCompatActivity() {
     // NO BINDERS, only intents. That's the magic.
     // Avoid code duplication, keep a single entry point to modify the service, and manage the service independently
     // (no coupling between service and activity, as it should be ! Cause the notification makes changes too.)
+
 }

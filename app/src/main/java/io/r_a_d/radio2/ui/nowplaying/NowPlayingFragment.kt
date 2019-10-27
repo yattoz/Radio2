@@ -1,6 +1,7 @@
 package io.r_a_d.radio2.ui.nowplaying
 
 import android.annotation.SuppressLint
+import android.content.res.Configuration
 import androidx.lifecycle.ViewModelProviders
 import android.os.Bundle
 import android.support.v4.media.session.PlaybackStateCompat
@@ -11,7 +12,6 @@ import android.view.ViewGroup
 import android.widget.*
 import androidx.lifecycle.Observer
 import io.r_a_d.radio2.*
-
 
 
 class NowPlayingFragment : Fragment() {
@@ -35,6 +35,9 @@ class NowPlayingFragment : Fragment() {
         nowPlayingViewModel = ViewModelProviders.of(this).get(NowPlayingViewModel::class.java)
         val root = inflater.inflate(R.layout.fragment_nowplaying, container, false)
 
+        val orientation = resources.configuration.orientation
+
+
         // View bindings to the ViewModel
         val songTitleText: TextView = root.findViewById(R.id.text_song_title)
         val songArtistText: TextView = root.findViewById(R.id.text_song_artist)
@@ -42,19 +45,37 @@ class NowPlayingFragment : Fragment() {
         val volumeText: TextView = root.findViewById(R.id.volume_text)
         val progressBar: ProgressBar = root.findViewById(R.id.progressBar)
         val streamerPictureImageView: ImageView = root.findViewById(R.id.streamerPicture)
-
+        val streamerNameText : TextView = root.findViewById(R.id.streamerName)
+        val songTitleNextText: TextView = root.findViewById(R.id.text_song_title_next)
+        val songArtistNextText: TextView = root.findViewById(R.id.text_song_artist_next)
 
 
         PlayerStore.instance.currentSong.title.observe(this, Observer {
-            songTitleText.text = it
+            if (orientation == Configuration.ORIENTATION_PORTRAIT) {
+                songTitleText.text = it
+            } else {
+                songTitleText.text = PlayerStore.instance.currentSong.artist.value + " - " + it
+            }
         })
 
         PlayerStore.instance.currentSong.artist.observe(this, Observer {
-            songArtistText.text = it
+            if (orientation == Configuration.ORIENTATION_PORTRAIT) {
+                songArtistText.text = it
+            } else {
+                songArtistText.text = ""
+            }
         })
 
         PlayerStore.instance.playbackState.observe(this, Observer {
             syncPlayPauseButtonImage(root)
+        })
+
+        // trick : I can't observe the queue because it's an ArrayDeque that doesn't trigger any change...
+        // so I observe a dedicated Mutable that gets set when the queue is updated.
+        PlayerStore.instance.isQueueUpdated.observe(this, Observer {
+            val t = PlayerStore.instance.queue.peekFirst() ?: Song() // (it.peekFirst != null ? it.peekFirst : Song() )
+            songTitleNextText.text = t.title.value
+            songArtistNextText.text = t.artist.value
         })
 
         PlayerStore.instance.volume.observe(this, Observer {
@@ -63,6 +84,10 @@ class NowPlayingFragment : Fragment() {
 
         PlayerStore.instance.streamerPicture.observe(this, Observer {pic ->
             streamerPictureImageView.setImageBitmap(pic)
+        })
+
+        PlayerStore.instance.streamerName.observe(this, Observer {
+            streamerNameText.text = it
         })
 
         // fuck it, do it on main thread
