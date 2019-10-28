@@ -10,17 +10,12 @@ import androidx.navigation.ui.setupWithNavController
 import android.content.Intent
 import android.util.Log
 import com.google.android.material.bottomnavigation.LabelVisibilityMode.LABEL_VISIBILITY_LABELED
-import org.jetbrains.anko.doAsync
-import org.jetbrains.anko.uiThread
-import org.json.JSONObject
-import java.net.URL
 import java.util.*
 
 class MainActivity : AppCompatActivity() {
 
     private val clockTicker: Timer = Timer()
     private val activityTag = "=====MainActivity======"
-
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

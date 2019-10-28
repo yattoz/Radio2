@@ -3,11 +3,10 @@ package io.r_a_d.radio2
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.os.AsyncTask
 import android.support.v4.media.session.PlaybackStateCompat
 import android.util.Log
 import androidx.lifecycle.MutableLiveData
-import org.jetbrains.anko.doAsync
-import org.jetbrains.anko.uiThread
 import org.json.JSONObject
 import java.io.IOException
 import java.io.InputStream
@@ -80,74 +79,77 @@ class PlayerStore {
         Log.d(playerStoreTag, "store updated")
     }
 
+    private val scrape =
+    {
+        URL(urlToScrape).readText()
+    }
+
     // this is the very first API call
     fun initApi()
     {
-        doAsync {
-            val s = URL(urlToScrape).readText()
-            uiThread {
-                val result = JSONObject(s)
-                if (result.has("main"))
+        val post : (parameter: Any?) -> Unit = {
+            val result = JSONObject(it as String)
+            if (result.has("main"))
+            {
+                val resMain = result.getJSONObject("main")
+                updateApi(resMain)
+                currentSongBackup.copy(currentSong)
+                if (resMain.has("queue"))
                 {
-                    val resMain = result.getJSONObject("main")
-                    updateApi(resMain)
-                    currentSongBackup.copy(currentSong)
-                    if (resMain.has("queue"))
+                    val queueJSON =
+                        resMain.getJSONArray("queue")
+                    // if my queue is empty, I fill it entirely (startup)
+                    if (queue.isEmpty())
                     {
-                        val queueJSON =
-                            resMain.getJSONArray("queue")
-                        // if my queue is empty, I fill it entirely (startup)
-                        if (queue.isEmpty())
+                        for (i in 0 until queueJSON.length())
                         {
-                            for (i in 0 until queueJSON.length())
-                            {
-                                val t = extractSong(queueJSON[i] as JSONObject)
-                                if (t.startTime.value != currentSong.startTime.value) // if the API is too slow and didn't remove the first song from queue...
-                                    queue.addLast(t)
-                            }
+                            val t = extractSong(queueJSON[i] as JSONObject)
+                            if (t.startTime.value != currentSong.startTime.value) // if the API is too slow and didn't remove the first song from queue...
+                                queue.addLast(t)
                         }
                     }
-                    Log.d(playerStoreTag, queue.toString())
-
-                    if (resMain.has("lp"))
-                    {
-                        val queueJSON =
-                            resMain.getJSONArray("lp")
-                        // if my stack is empty, I fill it entirely (startup)
-                        if (lp.isEmpty())
-                        {
-                            for (i in 0 until queueJSON.length())
-                                lp.addLast(extractSong(queueJSON[i] as JSONObject))
-                        }
-                    }
-                    Log.d(playerStoreTag, lp.toString())
-                    isQueueUpdated.value = true
                 }
+                Log.d(playerStoreTag, queue.toString())
+
+                if (resMain.has("lp"))
+                {
+                    val queueJSON =
+                        resMain.getJSONArray("lp")
+                    // if my stack is empty, I fill it entirely (startup)
+                    if (lp.isEmpty())
+                    {
+                        for (i in 0 until queueJSON.length())
+                            lp.addLast(extractSong(queueJSON[i] as JSONObject))
+                    }
+                }
+                Log.d(playerStoreTag, lp.toString())
+                isQueueUpdated.value = true
             }
         }
-
+        Async(scrape, post)
     }
 
     private fun fetchLastRequest()
     {
-        doAsync {
+        val sleepScrape: () -> String = {
             Thread.sleep(12000) // we wait a bit (12s) for the API to get updated on R/a/dio side!
-            val s = URL(urlToScrape).readText()
-            uiThread {
-                val result = JSONObject(s)
-                if (result.has("main")) {
-                    val resMain = result.getJSONObject("main")
-                    if (resMain.has("queue"))
-                    {
-                        val queueJSON =
-                            resMain.getJSONArray("queue")
-                        val t = extractSong(queueJSON[4] as JSONObject)
-                        queue.addLast(t)
-                        Log.d(playerStoreTag, "added last queue song: $t")
-                    }
+            URL(urlToScrape).readText()
+        }
+        val post: (parameter: Any?) -> Unit = {
+            val result = JSONObject(it as String)
+            if (result.has("main")) {
+                val resMain = result.getJSONObject("main")
+                if (resMain.has("queue")) {
+                    val queueJSON =
+                        resMain.getJSONArray("queue")
+                    val t = extractSong(queueJSON[4] as JSONObject)
+                    queue.addLast(t)
+                    Log.d(playerStoreTag, "added last queue song: $t")
                 }
             }
         }
+
+        Async(sleepScrape, post)
     }
 
     fun updateQueueLp() {
@@ -178,22 +180,20 @@ class PlayerStore {
     }
 
     fun fetchApi(isCompensatingLatency: Boolean = false) {
-        doAsync {
-            val s = URL(urlToScrape).readText()
-            uiThread {
-                val result = JSONObject(s)
-                if (!result.isNull("main"))
-                {
-                    val res = result.getJSONObject("main")
-                    updateApi(res, isCompensatingLatency)
-                }
+        val post: (parameter: Any?) -> Unit = {
+            val result = JSONObject(it as String)
+            if (!result.isNull("main"))
+            {
+                val res = result.getJSONObject("main")
+                updateApi(res, isCompensatingLatency)
             }
         }
+        Async(scrape, post)
     }
 
     private fun fetchImage(fileUrl: String)
     {
-        doAsync {
+        val scrape: () -> Bitmap? = {
             var k: InputStream? = null
             var pic: Bitmap? = null
             try {
@@ -209,10 +209,12 @@ class PlayerStore {
             } finally {
                 k?.close()
             }
-            uiThread {
-                streamerPicture.postValue(pic)
-            }
+            pic
         }
+        val post : (parameter: Any?) -> Unit = {
+            streamerPicture.postValue(it as Bitmap?)
+        }
+        Async(scrape, post)
     }
 
     private val playerStoreTag = "====PlayerStore===="
@@ -220,5 +222,19 @@ class PlayerStore {
         val instance by lazy {
             PlayerStore()
         }
+    }
+}
+
+class Async(val handler: () -> Any?, val post: (Any?) -> Unit = {}) : AsyncTask<Void, Void, Any>() {
+    init {
+        execute()
+    }
+
+    override fun doInBackground(vararg params: Void?): Any? {
+        return handler()
+    }
+
+    override fun onPostExecute(result: Any?) {
+        post(result)
     }
 }
