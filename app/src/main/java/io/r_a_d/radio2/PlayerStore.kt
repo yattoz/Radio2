@@ -81,40 +81,51 @@ class PlayerStore {
     }
 
     // this is the very first API call
-    fun initApi(resMain: JSONObject)
+    fun initApi()
     {
-        updateApi(resMain)
-        currentSongBackup.copy(currentSong)
-        if (resMain.has("queue"))
-        {
-            val queueJSON =
-                resMain.getJSONArray("queue")
-            // if my queue is empty, I fill it entirely (startup)
-            if (queue.isEmpty())
-            {
-                for (i in 0 until queueJSON.length())
+        doAsync {
+            val s = URL(urlToScrape).readText()
+            uiThread {
+                val result = JSONObject(s)
+                if (result.has("main"))
                 {
-                    val s = extractSong(queueJSON[i] as JSONObject)
-                    if (s.startTime.value != currentSong.startTime.value) // if the API is too slow and didn't remove the first song from queue...
-                        queue.addLast(s)
+                    val resMain = result.getJSONObject("main")
+                    updateApi(resMain)
+                    currentSongBackup.copy(currentSong)
+                    if (resMain.has("queue"))
+                    {
+                        val queueJSON =
+                            resMain.getJSONArray("queue")
+                        // if my queue is empty, I fill it entirely (startup)
+                        if (queue.isEmpty())
+                        {
+                            for (i in 0 until queueJSON.length())
+                            {
+                                val t = extractSong(queueJSON[i] as JSONObject)
+                                if (t.startTime.value != currentSong.startTime.value) // if the API is too slow and didn't remove the first song from queue...
+                                    queue.addLast(t)
+                            }
+                        }
+                    }
+                    Log.d(playerStoreTag, queue.toString())
+
+                    if (resMain.has("lp"))
+                    {
+                        val queueJSON =
+                            resMain.getJSONArray("lp")
+                        // if my stack is empty, I fill it entirely (startup)
+                        if (lp.isEmpty())
+                        {
+                            for (i in 0 until queueJSON.length())
+                                lp.addLast(extractSong(queueJSON[i] as JSONObject))
+                        }
+                    }
+                    Log.d(playerStoreTag, lp.toString())
+                    isQueueUpdated.value = true
                 }
             }
         }
-        Log.d(playerStoreTag, queue.toString())
 
-        if (resMain.has("lp"))
-        {
-            val queueJSON =
-                resMain.getJSONArray("lp")
-            // if my stack is empty, I fill it entirely (startup)
-            if (lp.isEmpty())
-            {
-                for (i in 0 until queueJSON.length())
-                    lp.addLast(extractSong(queueJSON[i] as JSONObject))
-            }
-        }
-        Log.d(playerStoreTag, lp.toString())
-        isQueueUpdated.value = true
     }
 
     private fun fetchLastRequest()
@@ -188,8 +199,8 @@ class PlayerStore {
             try {
                 k = URL(fileUrl).content as InputStream
                 val options = BitmapFactory.Options()
-                options.inSampleSize = 4
-                // this makes 1/4 of origin image size from width and height.
+                options.inSampleSize = 2
+                // this makes 1/2 of origin image size from width and height.
                 // it alleviates the memory for API16-API19 especially
                 pic = BitmapFactory.decodeStream(k, null, options)
                 k.close()

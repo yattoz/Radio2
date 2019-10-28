@@ -17,7 +17,7 @@ class ApiFetchTick  : TimerTask() {
         if (PlayerStore.instance.playbackState.value == PlaybackStateCompat.STATE_STOPPED)
         {
             PlayerStore.instance.fetchApi()
-            Log.d(apiFetchTickTag, "mainApiData fetch from object #${this.hashCode()}")
+            //Log.d(apiFetchTickTag, "mainApiData fetch from object #${this.hashCode()}")
         }
     }
 }

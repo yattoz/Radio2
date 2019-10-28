@@ -60,14 +60,7 @@ class MainActivity : AppCompatActivity() {
         // initialize some API data
         PlayerStore.instance.initPicture(this)
         PlayerStore.instance.streamerName.value = ""
-        doAsync {
-            val s = URL(getString(R.string.MAIN_API)).readText()
-            uiThread {
-                val result = JSONObject(s)
-                if (!result.isNull("main"))
-                    PlayerStore.instance.initApi(result.getJSONObject("main"))
-            }
-        }
+        PlayerStore.instance.initApi()
 
         // if the service is not started, start it in STOP mode.
         // It's not a dummy action : with STOP mode, the player does not buffer audio (and does not use data connection without the user's consent).

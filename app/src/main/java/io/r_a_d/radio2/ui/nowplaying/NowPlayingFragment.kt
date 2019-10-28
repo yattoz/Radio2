@@ -35,9 +35,6 @@ class NowPlayingFragment : Fragment() {
         nowPlayingViewModel = ViewModelProviders.of(this).get(NowPlayingViewModel::class.java)
         val root = inflater.inflate(R.layout.fragment_nowplaying, container, false)
 
-        val orientation = resources.configuration.orientation
-
-
         // View bindings to the ViewModel
         val songTitleText: TextView = root.findViewById(R.id.text_song_title)
         val songArtistText: TextView = root.findViewById(R.id.text_song_artist)
@@ -51,19 +48,11 @@ class NowPlayingFragment : Fragment() {
 
 
         PlayerStore.instance.currentSong.title.observe(this, Observer {
-            if (orientation == Configuration.ORIENTATION_PORTRAIT) {
                 songTitleText.text = it
-            } else {
-                songTitleText.text = PlayerStore.instance.currentSong.artist.value + " - " + it
-            }
         })
 
         PlayerStore.instance.currentSong.artist.observe(this, Observer {
-            if (orientation == Configuration.ORIENTATION_PORTRAIT) {
                 songArtistText.text = it
-            } else {
-                songArtistText.text = ""
-            }
         })
 
         PlayerStore.instance.playbackState.observe(this, Observer {

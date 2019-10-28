@@ -27,6 +27,7 @@ import androidx.lifecycle.Observer
 import androidx.media.AudioAttributesCompat
 import androidx.media.AudioFocusRequestCompat
 import androidx.media.AudioManagerCompat
+import com.google.android.exoplayer2.Player
 import com.google.android.exoplayer2.metadata.icy.*
 import java.util.*
 import kotlin.math.exp
@@ -301,6 +302,8 @@ class RadioService : MediaBrowserServiceCompat() {
                 }
             }
         }
+        // this listener allows to reset numberOfSongs if the connection is lost.
+        player.addListener(exoPlayerEventListener)
 
         // Produces DataSource instances through which media data is loaded.
         val dataSourceFactory = DefaultDataSourceFactory(
@@ -322,7 +325,9 @@ class RadioService : MediaBrowserServiceCompat() {
         playbackStateBuilder.setActions(PlaybackStateCompat.ACTION_PLAY_PAUSE)
             .setState(PlaybackStateCompat.STATE_STOPPED, 0, 1.0f, SystemClock.elapsedRealtime())
 
-        // TODO : use the mediasession metadata to update the notification instead of triggering manual updates
+        /* TODO for the moment, the notification is manually updated every time the song or state changes.
+            it could be nice to use metadata to update it when it's playing, and manual updated when it's not.
+         */
         metadataBuilder = MediaMetadataCompat.Builder()
         mediaSession.setPlaybackState(playbackStateBuilder.build())
     }
@@ -341,8 +346,6 @@ class RadioService : MediaBrowserServiceCompat() {
 
         if (mediaSession.controller.playbackState.state == PlaybackStateCompat.STATE_PLAYING)
             return // nothing to do here
-
-        numberOfSongs = 0 // we count the number of songs to determine whether to activate latency compensation for the progressbar.
         PlayerStore.instance.playbackState.value = PlaybackStateCompat.STATE_PLAYING
 
         // Reinitialize media player. Otherwise the playback doesn't resume when beginPlaying. Dunno why.
@@ -385,7 +388,6 @@ class RadioService : MediaBrowserServiceCompat() {
             1.0f,
             SystemClock.elapsedRealtime()
         )
-        numberOfSongs = 0
         Log.d(radioTag, "stopped")
 
         mediaSession.setPlaybackState(playbackStateBuilder.build())
@@ -412,7 +414,6 @@ class RadioService : MediaBrowserServiceCompat() {
         override fun onStop() {
             stopPlaying()
         }
-
 
         override fun onMediaButtonEvent(mediaButtonEvent: Intent?): Boolean {
             // explicit handling of Media Buttons (for example bluetooth commands)
@@ -447,5 +448,23 @@ class RadioService : MediaBrowserServiceCompat() {
             return false
         }
     }
+
+    private val exoPlayerEventListener = object : Player.EventListener {
+        override fun onPlayerStateChanged(playWhenReady: Boolean, playbackState: Int) {
+            super.onPlayerStateChanged(playWhenReady, playbackState)
+            numberOfSongs = 0
+            var state = ""
+            when(playbackState)
+            {
+                Player.STATE_BUFFERING -> state = "Player.STATE_BUFFERING"
+                Player.STATE_IDLE -> state = "Player.STATE_IDLE"
+                Player.STATE_ENDED -> state = "Player.STATE_ENDED"
+                Player.STATE_READY -> state = "Player.STATE_READY"
+            }
+            Log.d(radioTag, "Player changed state: ${state}. numberOfSongs reset.")
+        }
+    }
+
+
 
 }
