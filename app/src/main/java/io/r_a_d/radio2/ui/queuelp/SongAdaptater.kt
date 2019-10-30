@@ -2,8 +2,6 @@ package io.r_a_d.radio2.ui.queuelp
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import android.widget.LinearLayout
-import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.recyclerview.widget.RecyclerView
 import io.r_a_d.radio2.R
@@ -11,8 +9,13 @@ import io.r_a_d.radio2.playerstore.Song
 import kotlinx.android.synthetic.main.song_view.view.*
 import kotlin.collections.ArrayList
 
-class SongAdaptater(private val myDataset: ArrayList<Song>) :
-    RecyclerView.Adapter<SongAdaptater.MyViewHolder>() {
+class SongAdaptater(private val myDataset: ArrayList<Song>
+                    /*,
+                    context: Context,
+                    resource: Int,
+                    objects: Array<out Song>*/
+) : RecyclerView.Adapter<SongAdaptater.MyViewHolder>() /*ArrayAdapter<Song>(context, resource, objects)*/ {
+
 
     // Provide a reference to the views for each data item
     // Complex data items may need more than one view per item, and
@@ -41,4 +44,15 @@ class SongAdaptater(private val myDataset: ArrayList<Song>) :
 
     // Return the size of your dataset (invoked by the layout manager)
     override fun getItemCount() = myDataset.size
+
+
+    /*
+    override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
+        // create a new view
+        val view = LayoutInflater.from(parent.context)
+            .inflate(R.layout.song_view, parent, false) as ConstraintLayout
+    }
+    */
+
 }
+

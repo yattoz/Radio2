@@ -8,11 +8,12 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import io.r_a_d.radio2.R
+import io.r_a_d.radio2.playerstore.PlayerStore
 import io.r_a_d.radio2.playerstore.Song
-import io.r_a_d.radio2.ui.nowplaying.NowPlayingFragment
 import java.util.*
 
 
@@ -28,25 +29,24 @@ import java.util.*
  * Use the [LastPlayedFragment.newInstance] factory method to
  * create an instance of this fragment.
  */
-class LastPlayedFragment : Fragment() {
+class LastPlayedFragment(param : ArrayList<Song>) : Fragment() {
     // TODO: Rename and change types of parameters
 
-    private val nowPlayingFragmentTag = NowPlayingFragment::class.java.name
+    private val lastPlayedFragmentTag = this::class.java.name
 
-    private val PARAM = ArrayList<Song>()
-
-
-    private var list = ArrayList<Song>()
+    private var list = param
     private lateinit var recyclerView: RecyclerView
     private lateinit var viewAdapter: RecyclerView.Adapter<*>
     private lateinit var viewManager: RecyclerView.LayoutManager
 
+    private val queueObserver = Observer<Boolean> {
+        Log.d(lastPlayedFragmentTag, "queue changed")
+        viewAdapter.notifyDataSetChanged()
+    }
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        arguments?.let {
-            list.addAll(PARAM)
-        }
     }
 
     override fun onCreateView(
@@ -69,8 +69,9 @@ class LastPlayedFragment : Fragment() {
 
             // specify an viewAdapter (see also next example)
             adapter = viewAdapter
-
         }
+
+        PlayerStore.instance.isQueueUpdated.observeForever(queueObserver)
 
         return root
     }
@@ -81,6 +82,7 @@ class LastPlayedFragment : Fragment() {
     }
 
     override fun onDestroyView() {
+        PlayerStore.instance.isQueueUpdated.removeObserver(queueObserver)
         super.onDestroyView()
     }
     /**
@@ -110,12 +112,6 @@ class LastPlayedFragment : Fragment() {
         // TODO: Rename and change types and number of parameters
         @JvmStatic
         fun newInstance(param: ArrayList<Song>) =
-            LastPlayedFragment().apply {
-                arguments = Bundle().apply {
-                    PARAM.clear()
-                    for (s in param)
-                        PARAM.add(PARAM.size, s)
-                }
-            }
+            LastPlayedFragment(param)
     }
 }
