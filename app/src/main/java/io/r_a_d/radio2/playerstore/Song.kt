@@ -1,4 +1,4 @@
-package io.r_a_d.radio2
+package io.r_a_d.radio2.playerstore
 
 import androidx.lifecycle.MutableLiveData
 

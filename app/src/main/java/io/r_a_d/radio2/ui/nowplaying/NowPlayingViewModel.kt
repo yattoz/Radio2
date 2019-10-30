@@ -1,11 +1,8 @@
 package io.r_a_d.radio2.ui.nowplaying
 
 import android.widget.SeekBar
-import android.widget.TextView
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModel
-import io.r_a_d.radio2.PlayerStore
-import io.r_a_d.radio2.R
+import io.r_a_d.radio2.playerstore.PlayerStore
 
 class NowPlayingViewModel: ViewModel() {
 

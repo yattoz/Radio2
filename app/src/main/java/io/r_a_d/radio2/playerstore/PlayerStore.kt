@@ -1,12 +1,13 @@
-package io.r_a_d.radio2
+package io.r_a_d.radio2.playerstore
 
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.os.AsyncTask
 import android.support.v4.media.session.PlaybackStateCompat
 import android.util.Log
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
+import io.r_a_d.radio2.R
 import org.json.JSONObject
 import java.io.IOException
 import java.io.InputStream
@@ -14,7 +15,7 @@ import java.net.URL
 import java.util.*
 
 
-class PlayerStore {
+class PlayerStore : ViewModel() {
 
     val isPlaying: MutableLiveData<Boolean> = MutableLiveData()
     val isServiceStarted: MutableLiveData<Boolean> = MutableLiveData()
@@ -44,7 +45,9 @@ class PlayerStore {
     }
 
     fun initPicture(c: Context) {
-        streamerPicture.value = BitmapFactory.decodeResource(c.resources, R.drawable.actionbar_logo)
+        streamerPicture.value = BitmapFactory.decodeResource(c.resources,
+            R.drawable.actionbar_logo
+        )
     }
 
     private fun updateApi(resMain: JSONObject, isCompensatingLatency : Boolean = false) {
@@ -69,7 +72,7 @@ class PlayerStore {
         currentTime.value = (resMain.getLong("current"))*1000 - (latencyCompensator)
 
         val newStreamer = resMain.getJSONObject("dj").getString("djname")
-        if (newStreamer != PlayerStore.instance.streamerName.value)
+        if (newStreamer != instance.streamerName.value)
         {
             val streamerPictureUrl =
                 "${urlToScrape}/dj-image/${resMain.getJSONObject("dj").getString("djimage")}"
@@ -225,16 +228,3 @@ class PlayerStore {
     }
 }
 
-class Async(val handler: () -> Any?, val post: (Any?) -> Unit = {}) : AsyncTask<Void, Void, Any>() {
-    init {
-        execute()
-    }
-
-    override fun doInBackground(vararg params: Void?): Any? {
-        return handler()
-    }
-
-    override fun onPostExecute(result: Any?) {
-        post(result)
-    }
-}

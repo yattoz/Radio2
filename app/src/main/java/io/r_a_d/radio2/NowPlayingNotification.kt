@@ -11,6 +11,7 @@ import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.media.session.PlaybackStateCompat
 import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
+import io.r_a_d.radio2.playerstore.PlayerStore
 
 class NowPlayingNotification {
 
