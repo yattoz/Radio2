@@ -82,7 +82,7 @@ class PlayerStore : ViewModel() {
         Log.d(playerStoreTag, "store updated")
     }
 
-    private val scrape =
+    private val scrape : () -> String =
     {
         URL(urlToScrape).readText()
     }
@@ -155,22 +155,21 @@ class PlayerStore : ViewModel() {
         Async(sleepScrape, post)
     }
 
-    fun updateQueueLp() {
-        if (!queue.isEmpty()){
-            queue.removeFirst()
-            fetchLastRequest()
-            Log.d(playerStoreTag, queue.toString())
-        }
-
-        if (!lp.isEmpty())
-        {
+    fun updateLp() {
             val n = Song()
             n.copy(currentSongBackup)
             lp.addFirst(n)
             currentSongBackup.copy(currentSong)
             Log.d(playerStoreTag, lp.toString())
+            isQueueUpdated.value = true
+    }
+
+    fun updateQueue() {
+        if (!queue.isEmpty()){
+            queue.removeFirst()
         }
-        isQueueUpdated.value = true
+        fetchLastRequest()
+        Log.d(playerStoreTag, queue.toString())
     }
 
     private fun extractSong(songJSON: JSONObject) : Song {

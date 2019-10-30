@@ -5,7 +5,6 @@ import androidx.lifecycle.MutableLiveData
 class Song {
     val title: MutableLiveData<String> = MutableLiveData()
     val artist: MutableLiveData<String> = MutableLiveData()
-
     val type: MutableLiveData<Int> = MutableLiveData()
     val startTime: MutableLiveData<Long> = MutableLiveData()
     val stopTime: MutableLiveData<Long> = MutableLiveData()
@@ -29,11 +28,15 @@ class Song {
         try {
             if (hyphenPos < 0)
                 throw ArrayIndexOutOfBoundsException()
-            artist.value = data.substring(0, hyphenPos)
-            title.value = data.substring(hyphenPos + 3)
+            if (artist.value != data.substring(0, hyphenPos))
+                artist.value = data.substring(0, hyphenPos)
+            if (title.value != data.substring(hyphenPos + 3))
+                title.value = data.substring(hyphenPos + 3)
         } catch (e: Exception) {
-            artist.value = ""
-            title.value = data
+            if (artist.value != "")
+                artist.value = ""
+            if (title.value != data)
+                title.value = data
         }
     }
 
