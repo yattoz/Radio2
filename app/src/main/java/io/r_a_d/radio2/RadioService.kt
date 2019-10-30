@@ -41,7 +41,7 @@ class RadioService : MediaBrowserServiceCompat() {
     private val radioTag = "======RadioService====="
     private lateinit var nowPlayingNotification: NowPlayingNotification
     private val radioServiceId = 1
-    private var numberOfSongs = 0
+    private var numberOfSongs = 1 // starts at 1 because the player state updates after the metadata
     private val apiTicker: Timer = Timer()
 
 
@@ -128,6 +128,10 @@ class RadioService : MediaBrowserServiceCompat() {
         }
     }
 
+    private val streamerObserver = Observer<String> {
+        PlayerStore.instance.initApi()
+    }
+
 
     override fun onLoadChildren(
         parentId: String,
@@ -176,10 +180,13 @@ class RadioService : MediaBrowserServiceCompat() {
         nowPlayingNotification = NowPlayingNotification()
         nowPlayingNotification.create(this, mediaSession)
 
+
+        PlayerStore.instance.streamerName.observeForever(streamerObserver)
         PlayerStore.instance.currentSong.title.observeForever(titleObserver)
         PlayerStore.instance.currentSong.startTime.observeForever(startTimeObserver)
         PlayerStore.instance.volume.observeForever(volumeObserver)
         PlayerStore.instance.isPlaying.observeForever(isPlayingObserver)
+
 
         startForeground(radioServiceId, nowPlayingNotification.notification)
 
@@ -458,7 +465,7 @@ class RadioService : MediaBrowserServiceCompat() {
     private val exoPlayerEventListener = object : Player.EventListener {
         override fun onPlayerStateChanged(playWhenReady: Boolean, playbackState: Int) {
             super.onPlayerStateChanged(playWhenReady, playbackState)
-            numberOfSongs = 0
+            numberOfSongs = 1
             var state = ""
             when(playbackState)
             {

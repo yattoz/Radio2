@@ -73,7 +73,7 @@ class NowPlayingFragment : Fragment() {
         // trick : I can't observe the queue because it's an ArrayDeque that doesn't trigger any change...
         // so I observe a dedicated Mutable that gets set when the queue is updated.
         PlayerStore.instance.isQueueUpdated.observe(this, Observer {
-            val t = PlayerStore.instance.queue.peekFirst() ?: Song() // (it.peekFirst != null ? it.peekFirst : Song() )
+            val t = if (PlayerStore.instance.queue.size > 0) PlayerStore.instance.queue[0] else Song() // (it.peekFirst != null ? it.peekFirst : Song() )
             songTitleNextText.text = t.title.value
             songArtistNextText.text = t.artist.value
         })

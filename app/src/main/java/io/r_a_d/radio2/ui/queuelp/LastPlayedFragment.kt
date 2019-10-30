@@ -33,7 +33,7 @@ class LastPlayedFragment : Fragment() {
 
     private val nowPlayingFragmentTag = NowPlayingFragment::class.java.name
 
-    private val PARAM = ArrayDeque<Song>()
+    private val PARAM = ArrayList<Song>()
 
 
     private var list = ArrayList<Song>()
@@ -104,17 +104,17 @@ class LastPlayedFragment : Fragment() {
          * Use this factory method to create a new instance of
          * this fragment using the provided parameters.
          *
-         * @param param ArrayDeque with Songs to display in the list
+         * @param param ArrayList with Songs to display in the list
          * @return A new instance of fragment LastPlayedFragment.
          */
         // TODO: Rename and change types and number of parameters
         @JvmStatic
-        fun newInstance(param: ArrayDeque<Song>) =
+        fun newInstance(param: ArrayList<Song>) =
             LastPlayedFragment().apply {
                 arguments = Bundle().apply {
                     PARAM.clear()
                     for (s in param)
-                        PARAM.addLast(s)
+                        PARAM.add(PARAM.size, s)
                 }
             }
     }

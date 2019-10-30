@@ -53,17 +53,16 @@ class MainActivity : AppCompatActivity() {
             return
         }
 
-        // initialize some API data
-        PlayerStore.instance.initPicture(this)
-        PlayerStore.instance.streamerName.value = ""
-        PlayerStore.instance.initApi()
-
         // if the service is not started, start it in STOP mode.
         // It's not a dummy action : with STOP mode, the player does not buffer audio (and does not use data connection without the user's consent).
         // this is useful since the service must be started to register bluetooth devices buttons.
         // (in case someone opens the app then pushes the PLAY button from their bluetooth device)
         if(!PlayerStore.instance.isServiceStarted.value!!)
             actionOnService(Actions.STOP)
+
+        // initialize some API data
+        PlayerStore.instance.initPicture(this)
+        PlayerStore.instance.streamerName.value = "" // initializing the streamer name will trigger an initApi from the observer in the Service.
     }
 
     override fun onDestroy() {

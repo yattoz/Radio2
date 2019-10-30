@@ -13,6 +13,7 @@ import java.io.IOException
 import java.io.InputStream
 import java.net.URL
 import java.util.*
+import kotlin.collections.ArrayList
 
 
 class PlayerStore : ViewModel() {
@@ -26,8 +27,8 @@ class PlayerStore : ViewModel() {
     val streamerName: MutableLiveData<String> = MutableLiveData()
     val currentSong : Song = Song()
     val currentSongBackup: Song = Song()
-    val lp : ArrayDeque<Song> = ArrayDeque()
-    val queue : ArrayDeque<Song> = ArrayDeque()
+    val lp : ArrayList<Song> = ArrayList()
+    val queue : ArrayList<Song> = ArrayList()
     var isQueueUpdated: MutableLiveData<Boolean> = MutableLiveData()
     private val urlToScrape = "https://r-a-d.io/api"
     var latencyCompensator : Long = 0
@@ -77,8 +78,8 @@ class PlayerStore : ViewModel() {
             val streamerPictureUrl =
                 "${urlToScrape}/dj-image/${resMain.getJSONObject("dj").getString("djimage")}"
             fetchImage(streamerPictureUrl)
+            streamerName.value = newStreamer
         }
-        streamerName.value = newStreamer
         Log.d(playerStoreTag, "store updated")
     }
 
@@ -87,7 +88,12 @@ class PlayerStore : ViewModel() {
         URL(urlToScrape).readText()
     }
 
-    // this is the very first API call
+    /* initApi is called :
+        - at startup
+        - when a streamer changes.
+        the idea is to fetch the queue when a streamer changes (potentially Hanyuu), and at startup.
+        The Last Played is only fetched if it's empty (so, only at startup), not when a streamer changes.
+     */
     fun initApi()
     {
         val post : (parameter: Any?) -> Unit = {
@@ -97,19 +103,16 @@ class PlayerStore : ViewModel() {
                 val resMain = result.getJSONObject("main")
                 updateApi(resMain)
                 currentSongBackup.copy(currentSong)
+                queue.clear()
                 if (resMain.has("queue"))
                 {
                     val queueJSON =
                         resMain.getJSONArray("queue")
-                    // if my queue is empty, I fill it entirely (startup)
-                    if (queue.isEmpty())
+                    for (i in 0 until queueJSON.length())
                     {
-                        for (i in 0 until queueJSON.length())
-                        {
-                            val t = extractSong(queueJSON[i] as JSONObject)
-                            if (t.startTime.value != currentSong.startTime.value) // if the API is too slow and didn't remove the first song from queue...
-                                queue.addLast(t)
-                        }
+                        val t = extractSong(queueJSON[i] as JSONObject)
+                        if (t.startTime.value != currentSong.startTime.value) // if the API is too slow and didn't remove the first song from queue...
+                            queue.add(queue.size, t)
                     }
                 }
                 Log.d(playerStoreTag, queue.toString())
@@ -122,7 +125,7 @@ class PlayerStore : ViewModel() {
                     if (lp.isEmpty())
                     {
                         for (i in 0 until queueJSON.length())
-                            lp.addLast(extractSong(queueJSON[i] as JSONObject))
+                            lp.add(lp.size, extractSong(queueJSON[i] as JSONObject))
                     }
                 }
                 Log.d(playerStoreTag, lp.toString())
@@ -146,7 +149,7 @@ class PlayerStore : ViewModel() {
                     val queueJSON =
                         resMain.getJSONArray("queue")
                     val t = extractSong(queueJSON[4] as JSONObject)
-                    queue.addLast(t)
+                    queue.add(queue.size, t)
                     Log.d(playerStoreTag, "added last queue song: $t")
                 }
             }
@@ -156,20 +159,26 @@ class PlayerStore : ViewModel() {
     }
 
     fun updateLp() {
+        // note : lp must never be empty. There should always be some songs "last played".
+        // if not, then the function has been called before initialization. No need to do anything.
+        if (lp.isNotEmpty()){
             val n = Song()
             n.copy(currentSongBackup)
-            lp.addFirst(n)
+            lp.add(0, n)
             currentSongBackup.copy(currentSong)
             Log.d(playerStoreTag, lp.toString())
-            isQueueUpdated.value = true
+        }
     }
 
     fun updateQueue() {
-        if (!queue.isEmpty()){
-            queue.removeFirst()
+        if (queue.isNotEmpty()){
+            queue.remove(queue.first())
+            fetchLastRequest()
+            Log.d(playerStoreTag, queue.toString())
+            isQueueUpdated.value = true
+        } else {
+            Log.d(playerStoreTag, "queue is empty!")
         }
-        fetchLastRequest()
-        Log.d(playerStoreTag, queue.toString())
     }
 
     private fun extractSong(songJSON: JSONObject) : Song {
