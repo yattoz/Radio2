@@ -12,8 +12,6 @@ import org.json.JSONObject
 import java.io.IOException
 import java.io.InputStream
 import java.net.URL
-import java.util.*
-import kotlin.collections.ArrayList
 
 
 class PlayerStore : ViewModel() {
@@ -53,7 +51,7 @@ class PlayerStore : ViewModel() {
 
     private fun updateApi(resMain: JSONObject, isCompensatingLatency : Boolean = false) {
         // If we're not in PLAYING state, update title / artist metadata. If we're playing, the ICY will take care of that.
-        if (playbackState.value != PlaybackStateCompat.STATE_PLAYING)
+        if (playbackState.value != PlaybackStateCompat.STATE_PLAYING || currentSong.title.value == "")
             currentSong.setTitleArtist(resMain.getString("np"))
 
         // only update the value if the song has changed. This avoids to trigger observers when they shouldn't be triggered

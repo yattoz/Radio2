@@ -41,10 +41,8 @@ class RadioService : MediaBrowserServiceCompat() {
     private val radioTag = "======RadioService====="
     private lateinit var nowPlayingNotification: NowPlayingNotification
     private val radioServiceId = 1
-    private var numberOfSongs = 1 // starts at 1 because the player state updates after the metadata
+    private var numberOfSongs = 0
     private val apiTicker: Timer = Timer()
-
-
 
     // Define the broadcast receiver to handle any broadcasts
     private val receiver = object : BroadcastReceiver() {
@@ -102,7 +100,6 @@ class RadioService : MediaBrowserServiceCompat() {
             // we activate latency compensation only if it's been at least 2 songs...
             PlayerStore.instance.fetchApi(numberOfSongs >= 2)
         }
-        //PlayerStore.instance.updateQueueLp()
         nowPlayingNotification.update(this)
     }
 
@@ -465,7 +462,7 @@ class RadioService : MediaBrowserServiceCompat() {
     private val exoPlayerEventListener = object : Player.EventListener {
         override fun onPlayerStateChanged(playWhenReady: Boolean, playbackState: Int) {
             super.onPlayerStateChanged(playWhenReady, playbackState)
-            numberOfSongs = 1
+            numberOfSongs = 0
             var state = ""
             when(playbackState)
             {
