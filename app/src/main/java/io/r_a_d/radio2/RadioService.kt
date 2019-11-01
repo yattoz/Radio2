@@ -117,7 +117,7 @@ class RadioService : MediaBrowserServiceCompat() {
     private val startTimeObserver = Observer<Long> {
         // We're listening to startTime to determine if we have to update Queue and Lp.
         // this is because startTime is set by the API and never by the ICY, so both cases are covered (playing and stopped)
-        // TODO : this goes very wrong when a streamer comes in.
+        // should be OK even when a new streamer comes in.
         if (it != PlayerStore.instance.currentSongBackup.startTime.value) // we have a new song
         {
             PlayerStore.instance.updateLp()

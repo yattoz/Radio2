@@ -1,22 +1,18 @@
 package io.r_a_d.radio2.ui.nowplaying
 
 import android.annotation.SuppressLint
-import android.content.Context
 import androidx.lifecycle.ViewModelProviders
 import android.os.Bundle
 import android.support.v4.media.session.PlaybackStateCompat
-import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
-import androidx.fragment.app.FragmentTransaction
 import androidx.lifecycle.Observer
 import io.r_a_d.radio2.*
 import io.r_a_d.radio2.playerstore.PlayerStore
 import io.r_a_d.radio2.playerstore.Song
-import io.r_a_d.radio2.ui.queuelp.LastPlayedFragment
 
 
 
@@ -31,7 +27,7 @@ class NowPlayingFragment : Fragment() {
 
      */
 
-    private val nowPlayingFragmentTag = NowPlayingFragment::class.java.name
+    //private val nowPlayingFragmentTag = NowPlayingFragment::class.java.name
 
 
     private lateinit var nowPlayingViewModel: NowPlayingViewModel
@@ -131,10 +127,6 @@ class NowPlayingFragment : Fragment() {
         }
 
         return root
-    }
-
-    override fun onAttach(context: Context) {
-        super.onAttach(context)
     }
 
     private fun syncPlayPauseButtonImage(v: View)

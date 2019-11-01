@@ -1,7 +1,5 @@
 package io.r_a_d.radio2.ui.queuelp
 
-import android.content.Context
-import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -66,14 +64,6 @@ class QueueFragment : Fragment(){
     }
 
     companion object {
-        /**
-         * Use this factory method to create a new instance of
-         * this fragment using the provided parameters.
-         *
-         * @param param ArrayList with Songs to display in the list
-         * @return A new instance of fragment LastPlayedFragment.
-         */
-        // TODO: Rename and change types and number of parameters
         @JvmStatic
         fun newInstance() = QueueFragment()
     }

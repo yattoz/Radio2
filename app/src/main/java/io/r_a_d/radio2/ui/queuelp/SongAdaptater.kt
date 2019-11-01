@@ -1,5 +1,6 @@
 package io.r_a_d.radio2.ui.queuelp
 
+import android.annotation.SuppressLint
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.constraintlayout.widget.ConstraintLayout
@@ -36,9 +37,8 @@ class SongAdaptater(private val dataSet: ArrayList<Song>
     }
 
     // Replace the contents of a view (invoked by the layout manager)
+    @SuppressLint("SetTextI18n")
     override fun onBindViewHolder(holder: MyViewHolder, position: Int) {
-        // - get element from your dataset at this position
-        // - replace the contents of the view with that element
         holder.itemView.item.text = "${dataSet[position].artist.value} - ${dataSet[position].title.value}"
     }
 

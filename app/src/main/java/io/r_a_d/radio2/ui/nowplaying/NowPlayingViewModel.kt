@@ -27,8 +27,4 @@ class NowPlayingViewModel: ViewModel() {
                 // called after the user finishes moving the SeekBar
             }
         }
-
-    override fun onCleared() {
-        super.onCleared()
-    }
 }

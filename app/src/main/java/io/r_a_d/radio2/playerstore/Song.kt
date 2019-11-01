@@ -22,7 +22,6 @@ class Song(artistTitle: String = "") {
 
     fun setTitleArtist(data: String)
     {
-        //val data = "Anzai Yukari, Fujita Akane, Noguchi Yuri, Numakura Manami, Suzaki Aya, Uchida Aya - Spatto! Spy & Spice" // TODO DEBUG with a big title.
         val hyphenPos = data.indexOf(" - ")
         try {
             if (hyphenPos < 0)

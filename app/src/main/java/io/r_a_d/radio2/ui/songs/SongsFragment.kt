@@ -1,7 +1,6 @@
 package io.r_a_d.radio2.ui.songs
 
 import android.os.Bundle
-import android.util.AttributeSet
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -12,8 +11,6 @@ import androidx.lifecycle.ViewModelProviders
 import androidx.viewpager.widget.ViewPager
 import com.google.android.material.tabs.TabLayout
 import io.r_a_d.radio2.R
-import io.r_a_d.radio2.playerstore.PlayerStore
-import io.r_a_d.radio2.playerstore.Song
 import io.r_a_d.radio2.ui.queuelp.LastPlayedFragment
 import io.r_a_d.radio2.ui.queuelp.QueueFragment
 
