@@ -130,25 +130,6 @@ class NowPlayingFragment : Fragment() {
             PlayerStore.instance.isPlaying.value = PlayerStore.instance.playbackState.value == PlaybackStateCompat.STATE_STOPPED
         }
 
-        val lpButton : Button = root.findViewById(R.id.last_played)
-        val queueButton : Button = root.findViewById(R.id.queue)
-
-        queueButton.setOnClickListener {
-            fragmentManager?.beginTransaction()
-                ?.replace(R.id.nav_host_fragment, LastPlayedFragment.newInstance(PlayerStore.instance.queue))
-                ?.addToBackStack(nowPlayingFragmentTag)
-                ?.setTransitionStyle(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
-                ?.commit()
-        }
-
-        lpButton.setOnClickListener {
-            fragmentManager?.beginTransaction()
-                ?.replace(R.id.nav_host_fragment, LastPlayedFragment.newInstance(PlayerStore.instance.lp))
-                ?.addToBackStack(nowPlayingFragmentTag)
-                ?.setTransitionStyle(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
-                ?.commit()
-        }
-
         return root
     }
 

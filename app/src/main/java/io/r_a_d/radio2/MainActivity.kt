@@ -10,7 +10,6 @@ import androidx.navigation.ui.setupWithNavController
 import android.content.Intent
 import android.os.Environment
 import android.util.Log
-import androidx.core.os.EnvironmentCompat
 import com.google.android.material.bottomnavigation.LabelVisibilityMode.LABEL_VISIBILITY_LABELED
 import io.r_a_d.radio2.playerstore.PlayerStore
 import java.io.File
@@ -89,7 +88,7 @@ class MainActivity : AppCompatActivity() {
         // Passing each menu ID as a set of Ids because each
         // menu should be considered as top level destinations.
         val appBarConfiguration = AppBarConfiguration(setOf(
-            R.id.navigation_nowplaying, R.id.navigation_home, R.id.navigation_dashboard, R.id.navigation_notifications))
+            R.id.navigation_nowplaying, R.id.navigation_songs, R.id.navigation_dashboard, R.id.navigation_notifications))
         setupActionBarWithNavController(navController, appBarConfiguration)
         navView.setupWithNavController(navController)
 

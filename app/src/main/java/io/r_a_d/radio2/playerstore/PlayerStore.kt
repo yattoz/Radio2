@@ -29,6 +29,7 @@ class PlayerStore : ViewModel() {
     val lp : ArrayList<Song> = ArrayList()
     val queue : ArrayList<Song> = ArrayList()
     var isQueueUpdated: MutableLiveData<Boolean> = MutableLiveData()
+    var isLpUpdated: MutableLiveData<Boolean> = MutableLiveData()
     private val urlToScrape = "https://r-a-d.io/api"
     var latencyCompensator : Long = 0
     var isInitialized: Boolean = false
@@ -41,6 +42,7 @@ class PlayerStore : ViewModel() {
         volume.value = 100 //TODO: make some settings screen to retain user preference for volume
         currentTime.value = System.currentTimeMillis()
         isQueueUpdated.value = false
+        isLpUpdated.value = false
 
     }
 
@@ -114,6 +116,7 @@ class PlayerStore : ViewModel() {
                             queue.add(queue.size, t)
                     }
                 }
+                isLpUpdated.value = true
                 Log.d(tag, playerStoreTag +  queue.toString())
 
                 if (resMain.has("lp"))
@@ -150,6 +153,7 @@ class PlayerStore : ViewModel() {
                     val t = extractSong(queueJSON[4] as JSONObject)
                     queue.add(queue.size, t)
                     Log.d(tag, playerStoreTag +  "added last queue song: $t")
+                    isQueueUpdated.value = true
                 }
             }
         }
@@ -165,6 +169,7 @@ class PlayerStore : ViewModel() {
             n.copy(currentSongBackup)
             lp.add(0, n)
             currentSongBackup.copy(currentSong)
+            isLpUpdated.value = true
             Log.d(tag, playerStoreTag +  lp.toString())
         }
     }

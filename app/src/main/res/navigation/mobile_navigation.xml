@@ -6,10 +6,10 @@
     app:startDestination="@id/navigation_nowplaying">
 
     <fragment
-        android:id="@+id/navigation_home"
-        android:name="io.r_a_d.radio2.ui.home.HomeFragment"
+        android:id="@+id/navigation_songs"
+        android:name="io.r_a_d.radio2.ui.songs.SongsFragment"
         android:label="@string/title_home"
-        tools:layout="@layout/fragment_home" />
+        tools:layout="@layout/fragment_songs" />
 
     <fragment
         android:id="@+id/navigation_dashboard"

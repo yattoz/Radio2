@@ -8,6 +8,7 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -29,7 +30,7 @@ import java.util.*
  * Use the [LastPlayedFragment.newInstance] factory method to
  * create an instance of this fragment.
  */
-class LastPlayedFragment(param : ArrayList<Song>) : Fragment() {
+class LastPlayedFragment(param : ArrayList<Song>, private val isUpdating: MutableLiveData<Boolean>) : Fragment() {
     // TODO: Rename and change types of parameters
 
     private val lastPlayedFragmentTag = this::class.java.name
@@ -43,7 +44,6 @@ class LastPlayedFragment(param : ArrayList<Song>) : Fragment() {
         Log.d(tag, lastPlayedFragmentTag + "queue changed")
         viewAdapter.notifyDataSetChanged()
     }
-
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -71,7 +71,7 @@ class LastPlayedFragment(param : ArrayList<Song>) : Fragment() {
             adapter = viewAdapter
         }
 
-        PlayerStore.instance.isQueueUpdated.observeForever(queueObserver)
+        isUpdating.observeForever(queueObserver)
 
         return root
     }
@@ -82,7 +82,7 @@ class LastPlayedFragment(param : ArrayList<Song>) : Fragment() {
     }
 
     override fun onDestroyView() {
-        PlayerStore.instance.isQueueUpdated.removeObserver(queueObserver)
+        isUpdating.removeObserver(queueObserver)
         super.onDestroyView()
     }
     /**
@@ -111,7 +111,7 @@ class LastPlayedFragment(param : ArrayList<Song>) : Fragment() {
          */
         // TODO: Rename and change types and number of parameters
         @JvmStatic
-        fun newInstance(param: ArrayList<Song>) =
-            LastPlayedFragment(param)
+        fun newInstance(param: ArrayList<Song>, isUpdating: MutableLiveData<Boolean>) =
+            LastPlayedFragment(param, isUpdating)
     }
 }

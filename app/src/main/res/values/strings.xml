@@ -32,4 +32,5 @@
     <string name="volume">Volume: </string>
     <string name="MAIN_API">https://r-a-d.io/api</string>
     <string name="streamerNotificationChannel">New Streamer Notification</string>
+    <string name="title_queue_lp">Songs</string>
 </resources>

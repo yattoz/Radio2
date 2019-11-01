@@ -7,9 +7,9 @@
         android:title="@string/title_nowplaying"/>
 
     <item
-        android:id="@+id/navigation_home"
-        android:icon="@drawable/ic_home_black_24dp"
-        android:title="@string/title_home"/>
+        android:id="@+id/navigation_songs"
+        android:icon="@drawable/ic_playlist_music"
+        android:title="@string/title_queue_lp"/>
 
     <item
         android:id="@+id/navigation_dashboard"
