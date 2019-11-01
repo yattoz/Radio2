@@ -12,7 +12,6 @@ class Tick  : TimerTask() {
 }
 
 class ApiFetchTick  : TimerTask() {
-    private val apiFetchTickTag = "======apiTick======"
     override fun run() {
         if (PlayerStore.instance.playbackState.value == PlaybackStateCompat.STATE_STOPPED)
         {

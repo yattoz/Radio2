@@ -8,18 +8,76 @@ import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import android.content.Intent
+import android.os.Environment
 import android.util.Log
+import androidx.core.os.EnvironmentCompat
 import com.google.android.material.bottomnavigation.LabelVisibilityMode.LABEL_VISIBILITY_LABELED
 import io.r_a_d.radio2.playerstore.PlayerStore
+import java.io.File
+import java.io.IOException
 import java.util.*
 
 class MainActivity : AppCompatActivity() {
 
     private val clockTicker: Timer = Timer()
-    private val activityTag = "=====MainActivity======"
+    //logging
+    /* Checks if external storage is available for read and write */
+    private val isExternalStorageWritable: Boolean
+        get() {
+            val state = Environment.getExternalStorageState()
+            return Environment.MEDIA_MOUNTED == state
+        }
+
+    /* Checks if external storage is available to at least read */
+    private val isExternalStorageReadable: Boolean
+        get() {
+            val state = Environment.getExternalStorageState()
+            return Environment.MEDIA_MOUNTED == state || Environment.MEDIA_MOUNTED_READ_ONLY == state
+        }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // Logging
+        when {
+            isExternalStorageWritable -> {
+
+                val appDirectory = Environment.getExternalStorageDirectory()
+                // File(getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS) + "/MyPersonalAppFolder")
+                val logDirectory = File("$appDirectory/log")
+                val logFile = File(logDirectory, "logcat" + System.currentTimeMillis() + ".txt")
+                Log.d(tag, "appDirectory : $appDirectory, logDirectory : $logDirectory, logFile : $logFile")
+
+                // create app folder
+                if (!appDirectory.exists()) {
+                    appDirectory.mkdir()
+                    Log.d(tag, "$appDirectory created")
+                }
+
+                // create log folder
+                if (!logDirectory.exists()) {
+                    logDirectory.mkdir()
+                    Log.d(tag, "$logDirectory created")
+                }
+
+                // clear the previous logcat and then write the new one to the file
+                try {
+                    Runtime.getRuntime().exec("logcat -c")
+                    Runtime.getRuntime().exec("logcat -v time -f $logFile *:S $tag:V ")
+                    Log.d(tag, "logcat started")
+                } catch (e: IOException) {
+                    e.printStackTrace()
+                }
+
+            }
+            isExternalStorageReadable -> {
+                // only readable
+            }
+            else -> {
+                // not accessible
+            }
+        }
+
 
         // UI Launch
         setTheme(R.style.AppTheme)
@@ -49,7 +107,7 @@ class MainActivity : AppCompatActivity() {
         // Post-UI Launch
         if (savedInstanceState?.getBoolean("isInitialized") == true || PlayerStore.instance.isInitialized)
         {
-            Log.d(activityTag, "skipped initialization")
+            Log.d(tag, "skipped initialization")
             return
         }
 
@@ -85,7 +143,7 @@ class MainActivity : AppCompatActivity() {
             val i = Intent(this, RadioService::class.java)
             i.putExtra("action", a.name)
             i.putExtra("value", v)
-            Log.d(activityTag, "Sending intent ${a.name}")
+            Log.d(tag, "Sending intent ${a.name}")
             startService(i)
     }
 

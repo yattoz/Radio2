@@ -8,6 +8,7 @@ import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import io.r_a_d.radio2.R
+import io.r_a_d.radio2.tag
 import org.json.JSONObject
 import java.io.IOException
 import java.io.InputStream
@@ -65,7 +66,7 @@ class PlayerStore : ViewModel() {
         if(isCompensatingLatency)
         {
             latencyCompensator = resMain.getLong("current")*1000 - currentSong.startTime.value!!
-            Log.d(playerStoreTag, "latency compensator set to ${(latencyCompensator).toFloat()/1000} s")
+            Log.d(tag, playerStoreTag +  "latency compensator set to ${(latencyCompensator).toFloat()/1000} s")
         }
         currentSong.stopTime.value = resMain.getLong("end_time")*1000
         currentTime.value = (resMain.getLong("current"))*1000 - (latencyCompensator)
@@ -78,7 +79,7 @@ class PlayerStore : ViewModel() {
             fetchImage(streamerPictureUrl)
             streamerName.value = newStreamer
         }
-        Log.d(playerStoreTag, "store updated")
+        Log.d(tag, playerStoreTag +  "store updated")
     }
 
     private val scrape : () -> String =
@@ -113,7 +114,7 @@ class PlayerStore : ViewModel() {
                             queue.add(queue.size, t)
                     }
                 }
-                Log.d(playerStoreTag, queue.toString())
+                Log.d(tag, playerStoreTag +  queue.toString())
 
                 if (resMain.has("lp"))
                 {
@@ -126,7 +127,7 @@ class PlayerStore : ViewModel() {
                             lp.add(lp.size, extractSong(queueJSON[i] as JSONObject))
                     }
                 }
-                Log.d(playerStoreTag, lp.toString())
+                Log.d(tag, playerStoreTag +  lp.toString())
                 isQueueUpdated.value = true
             }
         }
@@ -148,7 +149,7 @@ class PlayerStore : ViewModel() {
                         resMain.getJSONArray("queue")
                     val t = extractSong(queueJSON[4] as JSONObject)
                     queue.add(queue.size, t)
-                    Log.d(playerStoreTag, "added last queue song: $t")
+                    Log.d(tag, playerStoreTag +  "added last queue song: $t")
                 }
             }
         }
@@ -164,7 +165,7 @@ class PlayerStore : ViewModel() {
             n.copy(currentSongBackup)
             lp.add(0, n)
             currentSongBackup.copy(currentSong)
-            Log.d(playerStoreTag, lp.toString())
+            Log.d(tag, playerStoreTag +  lp.toString())
         }
     }
 
@@ -172,10 +173,10 @@ class PlayerStore : ViewModel() {
         if (queue.isNotEmpty()){
             queue.remove(queue.first())
             fetchLastRequest()
-            Log.d(playerStoreTag, queue.toString())
+            Log.d(tag, playerStoreTag +  queue.toString())
             isQueueUpdated.value = true
         } else {
-            Log.d(playerStoreTag, "queue is empty!")
+            Log.d(tag, playerStoreTag +  "queue is empty!")
         }
     }
 

@@ -40,7 +40,7 @@ class LastPlayedFragment(param : ArrayList<Song>) : Fragment() {
     private lateinit var viewManager: RecyclerView.LayoutManager
 
     private val queueObserver = Observer<Boolean> {
-        Log.d(lastPlayedFragmentTag, "queue changed")
+        Log.d(tag, lastPlayedFragmentTag + "queue changed")
         viewAdapter.notifyDataSetChanged()
     }
 
