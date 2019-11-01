@@ -12,6 +12,12 @@
         tools:layout="@layout/fragment_songs" />
 
     <fragment
+        android:id="@+id/navigation_child_queue_lp"
+        android:name="io.r_a_d.radio2.ui.queuelp.LastPlayedFragment"
+        android:label="@string/title_queue_lp"
+        tools:layout="@layout/fragment_songs" />
+
+    <fragment
         android:id="@+id/navigation_dashboard"
         android:name="io.r_a_d.radio2.ui.dashboard.DashboardFragment"
         android:label="@string/title_dashboard"

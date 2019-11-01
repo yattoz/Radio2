@@ -18,7 +18,7 @@ class SongsPagerAdapter(f: FragmentManager, t: Int) : FragmentPagerAdapter(f, t)
      */
 
     override fun getItem(position: Int): Fragment {
-        return fragmentList.get(position)
+        return fragmentList[position]
     }
 
     override fun getCount(): Int {
@@ -31,6 +31,6 @@ class SongsPagerAdapter(f: FragmentManager, t: Int) : FragmentPagerAdapter(f, t)
     }
 
     override fun getPageTitle(position: Int): CharSequence? {
-        return fragmentTitleList.get(position)
+        return fragmentTitleList[position]
     }
 }

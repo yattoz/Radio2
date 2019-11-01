@@ -105,7 +105,7 @@ class PlayerStore : ViewModel() {
                 updateApi(resMain)
                 currentSongBackup.copy(currentSong)
                 queue.clear()
-                if (resMain.has("queue"))
+                if (resMain.has("queue") && resMain.getBoolean("isafkstream"))
                 {
                     val queueJSON =
                         resMain.getJSONArray("queue")
@@ -214,7 +214,7 @@ class PlayerStore : ViewModel() {
             try {
                 k = URL(fileUrl).content as InputStream
                 val options = BitmapFactory.Options()
-                options.inSampleSize = 2
+                options.inSampleSize = 1
                 // this makes 1/2 of origin image size from width and height.
                 // it alleviates the memory for API16-API19 especially
                 pic = BitmapFactory.decodeStream(k, null, options)

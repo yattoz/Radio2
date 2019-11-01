@@ -67,11 +67,12 @@
         android:layout_height="@dimen/seek_bar_thumb_height"
         android:max="100"
         android:progress="100"
-        android:progressDrawable="@drawable/seek_bar_progress"
-        android:thumb="@drawable/seek_bar_thumb"
+
         app:layout_constraintEnd_toStartOf="@+id/volume_text"
         app:layout_constraintStart_toEndOf="@+id/volume_icon"
         app:layout_constraintTop_toTopOf="@+id/streamerPicture" />
+    <!--         android:progressDrawable="@drawable/seek_bar_progress"
+        android:thumb="@drawable/seek_bar_thumb" -->
 
     <TextView
         android:id="@+id/volume_text"

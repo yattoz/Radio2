@@ -9,7 +9,7 @@ import io.r_a_d.radio2.playerstore.Song
 import kotlinx.android.synthetic.main.song_view.view.*
 import kotlin.collections.ArrayList
 
-class SongAdaptater(private val myDataset: ArrayList<Song>
+class SongAdaptater(private val dataSet: ArrayList<Song>
                     /*,
                     context: Context,
                     resource: Int,
@@ -39,11 +39,11 @@ class SongAdaptater(private val myDataset: ArrayList<Song>
     override fun onBindViewHolder(holder: MyViewHolder, position: Int) {
         // - get element from your dataset at this position
         // - replace the contents of the view with that element
-        holder.itemView.item.text = "${myDataset[position].artist.value} - ${myDataset[position].title.value}"
+        holder.itemView.item.text = "${dataSet[position].artist.value} - ${dataSet[position].title.value}"
     }
 
     // Return the size of your dataset (invoked by the layout manager)
-    override fun getItemCount() = myDataset.size
+    override fun getItemCount() = dataSet.size
 
 
     /*

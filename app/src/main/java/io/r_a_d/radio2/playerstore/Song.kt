@@ -2,7 +2,7 @@ package io.r_a_d.radio2.playerstore
 
 import androidx.lifecycle.MutableLiveData
 
-class Song {
+class Song(artistTitle: String = "") {
     val title: MutableLiveData<String> = MutableLiveData()
     val artist: MutableLiveData<String> = MutableLiveData()
     val type: MutableLiveData<Int> = MutableLiveData()
@@ -10,8 +10,7 @@ class Song {
     val stopTime: MutableLiveData<Long> = MutableLiveData()
 
     init {
-        title.value = ""
-        artist.value = ""
+        setTitleArtist(artistTitle)
         type.value = 0
         startTime.value =  System.currentTimeMillis()
         stopTime.value = System.currentTimeMillis() + 1000

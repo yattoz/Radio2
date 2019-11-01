@@ -14,6 +14,7 @@ import com.google.android.material.bottomnavigation.LabelVisibilityMode.LABEL_VI
 import io.r_a_d.radio2.playerstore.PlayerStore
 import java.io.File
 import java.io.IOException
+import java.lang.Exception
 import java.util.*
 
 class MainActivity : AppCompatActivity() {
@@ -45,7 +46,10 @@ class MainActivity : AppCompatActivity() {
                 // File(getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS) + "/MyPersonalAppFolder")
                 val logDirectory = File("$appDirectory/log")
                 val logFile = File(logDirectory, "logcat" + System.currentTimeMillis() + ".txt")
-                Log.d(tag, "appDirectory : $appDirectory, logDirectory : $logDirectory, logFile : $logFile")
+                Log.d(
+                    tag,
+                    "appDirectory : $appDirectory, logDirectory : $logDirectory, logFile : $logFile"
+                )
 
                 // create app folder
                 if (!appDirectory.exists()) {
@@ -62,7 +66,7 @@ class MainActivity : AppCompatActivity() {
                 // clear the previous logcat and then write the new one to the file
                 try {
                     Runtime.getRuntime().exec("logcat -c")
-                    Runtime.getRuntime().exec("logcat -v time -f $logFile *:S $tag:V ")
+                    Runtime.getRuntime().exec("logcat -v time -f $logFile *:E $tag:V ")
                     Log.d(tag, "logcat started")
                 } catch (e: IOException) {
                     e.printStackTrace()
@@ -81,6 +85,7 @@ class MainActivity : AppCompatActivity() {
         // UI Launch
         setTheme(R.style.AppTheme)
         setContentView(R.layout.activity_main)
+
         val navView: BottomNavigationView = findViewById(R.id.nav_view)
         navView.labelVisibilityMode = LABEL_VISIBILITY_LABELED
 
