@@ -3,21 +3,22 @@ package io.r_a_d.radio2
 import android.os.Bundle
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import androidx.appcompat.app.AppCompatActivity
-import androidx.navigation.findNavController
-import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupActionBarWithNavController
-import androidx.navigation.ui.setupWithNavController
 import android.content.Intent
-import android.os.Environment
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
 import androidx.navigation.NavController
 import com.google.android.material.bottomnavigation.LabelVisibilityMode.LABEL_VISIBILITY_LABELED
 import io.r_a_d.radio2.playerstore.PlayerStore
+
+import java.util.Timer
+
+/* Log to file import
+import android.os.Environment
 import java.io.File
 import java.io.IOException
-import java.util.Timer
+*/
 
 class MainActivity : AppCompatActivity() {
 
@@ -93,7 +94,6 @@ class MainActivity : AppCompatActivity() {
 
          */
 
-
         // timers
         // the clockTicker is used to update the UI. It's OK if it dies when the app loses focus.
         // It should be possible to make this to alleviate the CPU charge. Not that a ticker is heavy on resources, but still.
@@ -158,23 +158,25 @@ class MainActivity : AppCompatActivity() {
     // (no coupling between service and activity, as it should be ! Cause the notification makes changes too.)
 
 
+    /*
     // ####################################
     // ####### LOGGING TO FILE ############
     // ####################################
 
-    /* Checks if external storage is available for read and write */
+    // Checks if external storage is available for read and write
     private val isExternalStorageWritable: Boolean
         get() {
             val state = Environment.getExternalStorageState()
             return Environment.MEDIA_MOUNTED == state
         }
 
-    /* Checks if external storage is available to at least read */
+    // Checks if external storage is available to at least read
     private val isExternalStorageReadable: Boolean
         get() {
             val state = Environment.getExternalStorageState()
             return Environment.MEDIA_MOUNTED == state || Environment.MEDIA_MOUNTED_READ_ONLY == state
         }
+
 
     private fun logToFile()
     {
@@ -222,5 +224,7 @@ class MainActivity : AppCompatActivity() {
             }
         }
     }
+
+     */
 
 }
