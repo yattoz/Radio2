@@ -12,12 +12,12 @@
         android:title="@string/title_queue_lp"/>
 
     <item
-        android:id="@+id/navigation_dashboard"
+        android:id="@+id/navigation_news"
         android:icon="@drawable/ic_newspaper"
-        android:title="@string/title_dashboard"/>
+        android:title="@string/title_news"/>
 
     <item
-        android:id="@+id/navigation_notifications"
+        android:id="@+id/navigation_chat"
         android:icon="@drawable/ic_chat_processing"
         android:title="@string/title_chat"/>
 

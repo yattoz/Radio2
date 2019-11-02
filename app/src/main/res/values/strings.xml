@@ -1,21 +1,12 @@
 <resources>
     <string name="app_name">R/a/dio2</string>
-    <string name="title_home">Home</string>
-    <string name="title_dashboard">News</string>
-    <string name="title_notifications">Notifications</string>
     <string name="title_nowplaying">R/a/dio</string>
+    <string name="title_queue_lp">Songs</string>
+    <string name="title_chat">Chat</string>
+    <string name="title_news">News</string>
 
     <string name="now_playing_notification_title_template">Now playing: %1$s</string>
 
-    <!-- TODO: remove this placeholder text -->
-    <string name="now_playing_notification_placeholder_text_template">You said %1$s and lorem ipsum
-        dolor sit amet, consectetur adipiscing elit. Etiam non enim magna. Morbi dictum, velit vel
-        semper venenatis, magna odio volutpat velit, at ullamcorper nulla lacus sed turpis.
-        Pellentesque vitae metus elit, nec tincidunt tellus. Integer sed nisl sem, ullamcorper
-        ornare lacus. Duis ac mauris sed massa congue volutpat. Donec sed erat sit amet turpis
-        viverra rhoncus sit amet nec magna. Donec lacinia ligula at libero volutpat nec
-        tortor.
-    </string>
 
     <string name="action_share">Share</string>
     <string name="action_reply">Reply</string>
@@ -32,6 +23,5 @@
     <string name="volume">Volume: </string>
     <string name="MAIN_API">https://r-a-d.io/api</string>
     <string name="streamerNotificationChannel">New Streamer Notification</string>
-    <string name="title_queue_lp">Songs</string>
-    <string name="title_chat">Chat</string>
+
 </resources>

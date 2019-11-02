@@ -54,57 +54,57 @@ class NowPlayingFragment : Fragment() {
         val songArtistNextText: TextView = root.findViewById(R.id.text_song_artist_next)
 
 
-        PlayerStore.instance.currentSong.title.observe(this, Observer {
+        PlayerStore.instance.currentSong.title.observe(viewLifecycleOwner, Observer {
                 songTitleText.text = it
         })
 
-        PlayerStore.instance.currentSong.artist.observe(this, Observer {
+        PlayerStore.instance.currentSong.artist.observe(viewLifecycleOwner, Observer {
                 songArtistText.text = it
         })
 
-        PlayerStore.instance.playbackState.observe(this, Observer {
+        PlayerStore.instance.playbackState.observe(viewLifecycleOwner, Observer {
             syncPlayPauseButtonImage(root)
         })
 
         // trick : I can't observe the queue because it's an ArrayDeque that doesn't trigger any change...
         // so I observe a dedicated Mutable that gets set when the queue is updated.
-        PlayerStore.instance.isQueueUpdated.observe(this, Observer {
+        PlayerStore.instance.isQueueUpdated.observe(viewLifecycleOwner, Observer {
             val t = if (PlayerStore.instance.queue.size > 0) PlayerStore.instance.queue[0] else Song("No queue - ") // (it.peekFirst != null ? it.peekFirst : Song() )
             songTitleNextText.text = t.title.value
             songArtistNextText.text = t.artist.value
         })
 
-        PlayerStore.instance.volume.observe(this, Observer {
+        PlayerStore.instance.volume.observe(viewLifecycleOwner, Observer {
             volumeText.text = "$it%"
         })
 
-        PlayerStore.instance.streamerPicture.observe(this, Observer { pic ->
+        PlayerStore.instance.streamerPicture.observe(viewLifecycleOwner, Observer { pic ->
             streamerPictureImageView.setImageBitmap(pic)
         })
 
-        PlayerStore.instance.streamerName.observe(this, Observer {
+        PlayerStore.instance.streamerName.observe(viewLifecycleOwner, Observer {
             streamerNameText.text = it
         })
 
         // fuck it, do it on main thread
-        PlayerStore.instance.currentTime.observe(this, Observer {
+        PlayerStore.instance.currentTime.observe(viewLifecycleOwner, Observer {
             val dd = (PlayerStore.instance.currentTime.value!! - PlayerStore.instance.currentSong.startTime.value!!).toInt()
             progressBar.progress = dd
         })
 
-        PlayerStore.instance.currentSong.stopTime.observe(this, Observer {
+        PlayerStore.instance.currentSong.stopTime.observe(viewLifecycleOwner, Observer {
             val dd = (PlayerStore.instance.currentSong.stopTime.value!! - PlayerStore.instance.currentSong.startTime.value!!).toInt()
             progressBar.max = dd
         })
 
-        PlayerStore.instance.currentSong.stopTime.observe(this, Observer {
+        PlayerStore.instance.currentSong.stopTime.observe(viewLifecycleOwner, Observer {
             val t : TextView= root.findViewById(R.id.endTime)
             val minutes: String = ((PlayerStore.instance.currentSong.stopTime.value!! - PlayerStore.instance.currentSong.startTime.value!!)/60/1000).toString()
             val seconds: String = ((PlayerStore.instance.currentSong.stopTime.value!! - PlayerStore.instance.currentSong.startTime.value!!)/1000%60).toString()
             t.text = "$minutes:${if (seconds.toInt() < 10) "0" else ""}$seconds"
         })
 
-        PlayerStore.instance.currentTime.observe(this, Observer {
+        PlayerStore.instance.currentTime.observe(viewLifecycleOwner, Observer {
             val t : TextView= root.findViewById(R.id.currentTime)
             val minutes: String = ((PlayerStore.instance.currentTime.value!! - PlayerStore.instance.currentSong.startTime.value!!)/60/1000).toString()
             val seconds: String = ((PlayerStore.instance.currentTime.value!! - PlayerStore.instance.currentSong.startTime.value!!)/1000%60).toString()
