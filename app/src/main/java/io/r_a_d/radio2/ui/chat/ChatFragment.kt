@@ -14,7 +14,7 @@ import io.r_a_d.radio2.R
 class ChatFragment : Fragment() {
 
     private lateinit var chatViewModel: ChatViewModel
-    private lateinit var root: View
+
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -26,8 +26,8 @@ class ChatFragment : Fragment() {
 
         if (!chatViewModel.isChatLoaded)
         {
-            root = inflater.inflate(R.layout.fragment_chat, container, false)
-            chatViewModel.webView = root.findViewById<WebView>(R.id.chat_webview)
+            chatViewModel.root = inflater.inflate(R.layout.fragment_chat, container, false)
+            chatViewModel.webView = chatViewModel.root.findViewById<WebView>(R.id.chat_webview)
             chatViewModel.webViewChat = WebViewChat(chatViewModel.webView as WebView)
             chatViewModel.webViewChat!!.start()
             chatViewModel.isChatLoaded = true
@@ -36,7 +36,7 @@ class ChatFragment : Fragment() {
             Log.d(tag, "webview already created!?")
         }
 
-        return root
+        return chatViewModel.root
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
