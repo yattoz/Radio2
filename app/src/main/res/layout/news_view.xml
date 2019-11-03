@@ -21,7 +21,6 @@
         android:id="@+id/news_author"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:textSize="20sp"
         android:gravity="end"
         android:textAlignment="textEnd"
         app:autoSizeTextType="uniform"

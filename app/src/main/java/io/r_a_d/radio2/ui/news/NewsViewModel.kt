@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.recyclerview.widget.RecyclerView
 import io.r_a_d.radio2.Async
 import io.r_a_d.radio2.tag
 import org.json.JSONArray
@@ -16,10 +17,6 @@ import kotlin.collections.ArrayList
 
 class NewsViewModel : ViewModel() {
 
-    private val _text = MutableLiveData<String>().apply {
-        value = "This is dashboard Fragment"
-    }
-    val text: LiveData<String> = _text
     val newsArray : ArrayList<News> = ArrayList()
 
     private val urlToScrape = "https://r-a-d.io/api/news"
@@ -45,10 +42,11 @@ class NewsViewModel : ViewModel() {
         }
     }
 
-    fun fetch()
+    fun fetch(root: androidx.swiperefreshlayout.widget.SwipeRefreshLayout? = null, viewAdapter: RecyclerView.Adapter<*>? = null)
     {
         val post : (parameter: Any?) -> Unit = {
-
+            root?.isRefreshing = false
+            viewAdapter?.notifyDataSetChanged()
         }
         Async(scrape, post)
     }

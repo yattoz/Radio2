@@ -30,7 +30,8 @@ class NewsFragment : Fragment() {
         newsViewModel =
                 ViewModelProviders.of(this).get(NewsViewModel::class.java)
 
-        val root = inflater.inflate(R.layout.fragment_news, container, false)
+        val root = inflater.inflate(R.layout.fragment_news, container, false) as androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+
         viewManager = LinearLayoutManager(context)
         viewAdapter = NewsAdapter(newsViewModel.newsArray)
         recyclerView = root.findViewById<RecyclerView>(R.id.news_recycler).apply {
@@ -43,6 +44,12 @@ class NewsFragment : Fragment() {
 
             // specify an viewAdapter (see also next example)
             adapter = viewAdapter
+        }
+
+        root.setOnRefreshListener {
+            newsViewModel.newsArray.clear()
+            newsViewModel.fetch(root, viewAdapter)
+
         }
 
         return root
