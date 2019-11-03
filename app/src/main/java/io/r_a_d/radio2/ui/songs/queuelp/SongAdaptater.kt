@@ -1,4 +1,4 @@
-package io.r_a_d.radio2.ui.queuelp
+package io.r_a_d.radio2.ui.songs.queuelp
 
 import android.annotation.SuppressLint
 import android.view.LayoutInflater

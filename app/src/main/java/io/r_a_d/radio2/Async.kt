@@ -1,4 +1,4 @@
-package io.r_a_d.radio2.playerstore
+package io.r_a_d.radio2
 
 import android.os.AsyncTask
 
