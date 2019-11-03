@@ -27,10 +27,9 @@ class SongsFragment : Fragment() {
         songsViewModel =
                 ViewModelProviders.of(this).get(SongsViewModel::class.java)
 
-        // We only initialize the whole thing if it has not been done earlier.
-        // I feel like it makes the UI a bit snappier. The fragment is not destroyed but re-used.
-        if (!songsViewModel.isInitialized)
-        {
+        // We keep reinitializing the fragment  because we use a pager and it crashes if we rotate the screen (it cannot re-create the content with addFragment visibly)
+        //if (!songsViewModel.isInitialized)
+        //{
             // Add Fragments to adapter one by one
             songsViewModel.root = inflater.inflate(R.layout.fragment_songs, container, false)
             songsViewModel.viewPager = songsViewModel.root.findViewById(R.id.tabPager)
@@ -44,7 +43,7 @@ class SongsFragment : Fragment() {
             tabLayout.setupWithViewPager(songsViewModel.viewPager)
             songsViewModel.isInitialized = true
             Log.d(tag, "SongFragment view created")
-        }
+        //}
 
         return songsViewModel.root
     }

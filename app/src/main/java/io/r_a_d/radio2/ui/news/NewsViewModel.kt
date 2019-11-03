@@ -1,8 +1,6 @@
 package io.r_a_d.radio2.ui.news
 
 import android.util.Log
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.recyclerview.widget.RecyclerView
 import io.r_a_d.radio2.Async
@@ -24,7 +22,8 @@ class NewsViewModel : ViewModel() {
     private val scrape : () -> Unit =
     {
         val t = URL(urlToScrape).readText()
-        val result = JSONArray(t as String)
+        val result = JSONArray(t)
+        newsArray.clear()
         for (n in 0 until result.length())
         {
             val news = News()

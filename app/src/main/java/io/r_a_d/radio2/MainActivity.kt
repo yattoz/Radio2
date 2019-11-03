@@ -6,7 +6,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.ui.setupActionBarWithNavController
 import android.content.Intent
 import android.util.Log
-import androidx.core.view.updateLayoutParams
+import androidx.core.content.res.ResourcesCompat
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
 import androidx.navigation.NavController
@@ -22,6 +22,9 @@ import java.io.IOException
 */
 
 class MainActivity : AppCompatActivity() {
+
+    // define global colors
+
 
     private val clockTicker: Timer = Timer()
     private var currentNavController: LiveData<NavController>? = null
@@ -72,6 +75,10 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // initialize programmatically accessible colors
+        colorBlue = ResourcesCompat.getColor(resources, R.color.bluereq, null)
+        colorWhited = ResourcesCompat.getColor(resources, R.color.whited, null)
 
         // UI Launch
         setTheme(R.style.AppTheme)

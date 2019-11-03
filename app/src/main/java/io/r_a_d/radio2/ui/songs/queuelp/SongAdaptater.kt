@@ -1,11 +1,15 @@
 package io.r_a_d.radio2.ui.songs.queuelp
 
 import android.annotation.SuppressLint
+import android.graphics.Color
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.content.res.ResourcesCompat
 import androidx.recyclerview.widget.RecyclerView
 import io.r_a_d.radio2.R
+import io.r_a_d.radio2.colorBlue
+import io.r_a_d.radio2.colorWhited
 import io.r_a_d.radio2.playerstore.Song
 import kotlinx.android.synthetic.main.song_view.view.*
 import kotlin.collections.ArrayList
@@ -40,6 +44,10 @@ class SongAdaptater(private val dataSet: ArrayList<Song>
     @SuppressLint("SetTextI18n")
     override fun onBindViewHolder(holder: MyViewHolder, position: Int) {
         holder.itemView.item.text = "${dataSet[position].artist.value} - ${dataSet[position].title.value}"
+        if (dataSet[position].type.value == 1)
+            holder.itemView.item.setTextColor(colorBlue)
+        else
+            holder.itemView.item.setTextColor(colorWhited)
     }
 
     // Return the size of your dataset (invoked by the layout manager)

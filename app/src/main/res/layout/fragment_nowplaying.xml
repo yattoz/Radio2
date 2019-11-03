@@ -13,7 +13,7 @@
         android:id="@+id/scrollViewMetadata"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_marginBottom="16dp"
+        android:layout_marginBottom="12dp"
         android:fillViewport="true"
         app:layout_constraintBottom_toTopOf="@+id/progressBar"
         app:layout_constraintEnd_toEndOf="parent"
@@ -114,23 +114,25 @@
 
     <TextView
         android:id="@+id/endTime"
-        android:layout_width="100dp"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="4dp"
         android:gravity="end"
         android:text=""
         android:textAlignment="textEnd"
         app:layout_constraintEnd_toEndOf="@+id/progressBar"
+        app:layout_constraintStart_toEndOf="@+id/play_pause"
         app:layout_constraintTop_toBottomOf="@+id/progressBar" />
 
     <TextView
         android:id="@+id/currentTime"
-        android:layout_width="100dp"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="4dp"
         android:gravity="start"
         android:text=""
         android:textAlignment="textStart"
+        app:layout_constraintEnd_toStartOf="@+id/play_pause"
         app:layout_constraintStart_toStartOf="@+id/progressBar"
         app:layout_constraintTop_toBottomOf="@+id/progressBar" />
 
@@ -142,41 +144,30 @@
         android:layout_gravity="top|center_horizontal"
         android:adjustViewBounds="true"
         android:contentDescription="dj-image"
-        android:scaleType="fitStart"
-        app:layout_constraintBottom_toTopOf="@id/streamerName"
-        app:layout_constraintDimensionRatio="h,1:1"
+        android:scaleType="fitCenter"
+        app:layout_constraintBottom_toTopOf="@+id/imageLeftGuideline"
         app:layout_constraintEnd_toEndOf="parent"
+
+        app:layout_constraintStart_toStartOf="@id/imageGuideline"
         app:layout_constraintTop_toTopOf="parent"
         app:srcCompat="@drawable/actionbar_logo"
-        tools:ignore="HardcodedText"
-
-        />
-
+        tools:ignore="HardcodedText" />
 
     <TextView
         android:id="@+id/streamerName"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:gravity="center"
-        android:text="Now streaming"
+        android:gravity="top|center_horizontal"
+        android:text="@string/now_streaming"
+        android:lines="1"
         android:textAlignment="center"
         android:textStyle="bold"
-        app:layout_constraintBottom_toTopOf="@id/topInfoGuideline"
+        android:layout_marginTop="8dp"
+        app:layout_constraintBottom_toTopOf="@+id/topInfoGuideline"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintStart_toStartOf="@+id/streamerPicture"
-        app:layout_constraintTop_toBottomOf="@id/streamerPicture" />
-
-    <TextView
-        android:id="@+id/upNext"
-        android:layout_width="wrap_content"
-        android:layout_height="0dp"
-        android:layout_gravity="top"
-        android:text="Up next:"
-        android:textAlignment="center"
-        android:textColor="@color/whited"
-        app:layout_constraintEnd_toStartOf="@id/streamerPicture"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/seek_bar_volume" />
+        app:layout_constraintTop_toBottomOf="@+id/streamerPicture" />
 
     <ScrollView
         android:id="@+id/scrollViewMetadataNext"
@@ -186,19 +177,48 @@
         app:layout_constraintBottom_toTopOf="@+id/topInfoGuideline"
         app:layout_constraintEnd_toStartOf="@id/streamerPicture"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/upNext">
+        app:layout_constraintTop_toBottomOf="@id/seek_bar_volume">
 
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            app:layout_constraintBottom_toTopOf="@+id/progressBar">
+            app:layout_constraintBottom_toTopOf="@+id/progressBar"
+            android:layout_marginEnd="8dp"
+            android:layout_marginRight="8dp"
+            >
+
+            <TextView
+                android:id="@+id/upNext"
+                android:layout_width="wrap_content"
+                android:layout_height="0dp"
+                android:layout_gravity="top"
+                android:text="@string/up_next"
+                android:textAlignment="center"
+                android:textColor="@color/whited"
+                android:layout_marginTop="8dp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+
+            <TextView
+                android:id="@+id/text_song_artist_next"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="bottom"
+                android:text=""
+                android:textAlignment="center"
+                android:textColor="@color/whited3"
+                android:textSize="16sp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/upNext" />
 
             <TextView
                 android:id="@+id/text_song_title_next"
                 android:layout_width="match_parent"
-                android:layout_height="0dp"
+                android:layout_height="wrap_content"
                 android:gravity="bottom"
                 android:text=""
                 android:textAlignment="center"
@@ -207,22 +227,7 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/text_song_artist_next" />
 
-            <TextView
-                android:id="@+id/text_song_artist_next"
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:gravity="bottom"
-                android:text=""
-                android:textAlignment="center"
-                android:textColor="@color/whited3"
-                android:textSize="16sp"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
-
-
         </androidx.constraintlayout.widget.ConstraintLayout>
-
-
     </ScrollView>
 
     <!--         style="?android:attr/progressBarStyleHorizontal" -->
@@ -260,7 +265,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        app:layout_constraintGuide_percent="0.45" />
+        app:layout_constraintGuide_percent="0.40" />
 
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/topInfoGuideline"
@@ -269,4 +274,17 @@
         android:orientation="horizontal"
         app:layout_constraintGuide_percent="0.30" />
 
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/imageGuideline"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent="0.70" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/imageLeftGuideline"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="0.20" />
 </androidx.constraintlayout.widget.ConstraintLayout>

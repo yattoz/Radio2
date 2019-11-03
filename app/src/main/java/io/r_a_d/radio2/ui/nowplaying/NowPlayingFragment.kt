@@ -4,11 +4,13 @@ import android.annotation.SuppressLint
 import androidx.lifecycle.ViewModelProviders
 import android.os.Bundle
 import android.support.v4.media.session.PlaybackStateCompat
+import android.util.TypedValue
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
+import androidx.core.widget.TextViewCompat
 import androidx.lifecycle.Observer
 import io.r_a_d.radio2.*
 import io.r_a_d.radio2.playerstore.PlayerStore
@@ -53,6 +55,14 @@ class NowPlayingFragment : Fragment() {
         val songTitleNextText: TextView = root.findViewById(R.id.text_song_title_next)
         val songArtistNextText: TextView = root.findViewById(R.id.text_song_artist_next)
 
+        TextViewCompat.setAutoSizeTextTypeUniformWithConfiguration(
+            streamerNameText,4, 24, 2, TypedValue.COMPLEX_UNIT_SP)
+        /*
+        TextViewCompat.setAutoSizeTextTypeUniformWithConfiguration(
+            songTitleText,4, 24, 2, TypedValue.COMPLEX_UNIT_SP)
+        TextViewCompat.setAutoSizeTextTypeUniformWithConfiguration(
+            songArtistText,4, 24, 2, TypedValue.COMPLEX_UNIT_SP)
+         */
 
         PlayerStore.instance.currentSong.title.observe(viewLifecycleOwner, Observer {
                 songTitleText.text = it

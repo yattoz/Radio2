@@ -11,6 +11,6 @@ class News {
 
     override fun toString() : String
     {
-        return "$author | $title | $date"
+        return "$author | $title | $date | $header"
     }
 }

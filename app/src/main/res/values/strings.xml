@@ -23,5 +23,7 @@
     <string name="volume">Volume: </string>
     <string name="MAIN_API">https://r-a-d.io/api</string>
     <string name="streamerNotificationChannel">New Streamer Notification</string>
+    <string name="up_next">Up next:</string>
+    <string name="now_streaming">Now streaming</string>
 
 </resources>

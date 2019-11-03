@@ -1,10 +1,12 @@
 package io.r_a_d.radio2.ui.news
 
+import android.annotation.SuppressLint
 import android.widget.TextView
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.text.HtmlCompat
+import androidx.core.widget.TextViewCompat
 import androidx.recyclerview.widget.RecyclerView
 import io.r_a_d.radio2.R
 import kotlin.collections.ArrayList
@@ -36,13 +38,17 @@ class NewsAdapter(private val dataSet: ArrayList<News>
     }
 
     // Replace the contents of a view (invoked by the layout manager)
+    @SuppressLint("SetTextI18n")
     override fun onBindViewHolder(holder: MyViewHolder, position: Int) {
         val title = holder.itemView.findViewById<TextView>(R.id.news_title)
         val text = holder.itemView.findViewById<TextView>(R.id.news_text)
         val author = holder.itemView.findViewById<TextView>(R.id.news_author)
+        val header = holder.itemView.findViewById<TextView>(R.id.news_header)
         title.text = dataSet[position].title
         text.text = HtmlCompat.fromHtml(dataSet[position].text, HtmlCompat.FROM_HTML_MODE_LEGACY)
-        author.text = dataSet[position].author
+        header.text = HtmlCompat.fromHtml(dataSet[position].header, HtmlCompat.FROM_HTML_MODE_LEGACY).replace(Regex("\n"), " ")
+        author.text = "| ${dataSet[position].author}"
+        TextViewCompat.setAutoSizeTextTypeWithDefaults(author, TextViewCompat.AUTO_SIZE_TEXT_TYPE_UNIFORM)
     }
 
     // Return the size of your dataset (invoked by the layout manager)

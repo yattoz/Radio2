@@ -117,7 +117,7 @@ class PlayerStore : ViewModel() {
                             queue.add(queue.size, t)
                     }
                 }
-                isLpUpdated.value = true
+                isQueueUpdated.value = true
                 Log.d(tag, playerStoreTag +  queue.toString())
 
                 if (resMain.has("lp"))
@@ -132,7 +132,7 @@ class PlayerStore : ViewModel() {
                     }
                 }
                 Log.d(tag, playerStoreTag +  lp.toString())
-                isQueueUpdated.value = true
+                isLpUpdated.value = true
             }
         }
         Async(scrape, post)
