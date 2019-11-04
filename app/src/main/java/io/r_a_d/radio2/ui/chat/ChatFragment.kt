@@ -29,10 +29,16 @@ class ChatFragment : Fragment() {
 
         if (!chatViewModel.isChatLoaded)
         {
-            chatViewModel.root = inflater.inflate(R.layout.fragment_chat, container, false)
-            chatViewModel.webView = chatViewModel.root.findViewById<WebView>(R.id.chat_webview)
-            chatViewModel.webViewChat = WebViewChat(chatViewModel.webView as WebView)
-            chatViewModel.webViewChat!!.start()
+
+            try {
+                chatViewModel.root = inflater.inflate(R.layout.fragment_chat, container, false)
+                chatViewModel.webView = chatViewModel.root.findViewById<WebView>(R.id.chat_webview)
+                chatViewModel.webViewChat = WebViewChat(chatViewModel.webView as WebView)
+                chatViewModel.webViewChat!!.start()
+            } catch (e: Exception) {
+                chatViewModel.root = inflater.inflate(R.layout.fragment_error_chat, container, false)
+            }
+
             chatViewModel.isChatLoaded = true
             Log.d(tag, "webview created")
         } else {

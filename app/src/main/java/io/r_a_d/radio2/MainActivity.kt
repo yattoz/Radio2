@@ -94,27 +94,13 @@ class MainActivity : BaseActivity() {
         // UI Launch
         setTheme(R.style.AppTheme)
         setContentView(R.layout.activity_main)
-
         attachKeyboardListeners()
 
         if (savedInstanceState == null) {
             setupBottomNavigationBar()
         } // Else, need to wait for onRestoreInstanceState
 
-        /*
-        val navView: BottomNavigationView = findViewById(R.id.nav_view)
-        navView.labelVisibilityMode = LABEL_VISIBILITY_LABELED
 
-        val navController = findNavController(R.id.nav_host_fragment)
-        navController.saveState()
-        // Passing each menu ID as a set of Ids because each
-        // menu should be considered as top level destinations.
-        val appBarConfiguration = AppBarConfiguration(setOf(
-            R.id.navigation_nowplaying, R.id.navigation_songs, R.id.navigation_dashboard, R.id.navigation_notifications))
-        setupActionBarWithNavController(navController, appBarConfiguration)
-        navView.setupWithNavController(navController)
-
-         */
 
         // timers
         // the clockTicker is used to update the UI. It's OK if it dies when the app loses focus.

@@ -61,16 +61,16 @@
 
     <!--    android:progressDrawable="@drawable/progress_bar_progress"     -->
 
-    <SeekBar
+    <androidx.appcompat.widget.AppCompatSeekBar
         android:id="@+id/seek_bar_volume"
         android:layout_width="0dp"
-        android:layout_height="@dimen/seek_bar_thumb_height"
+        android:layout_height="32dp"
         android:max="100"
         android:progress="100"
-
         app:layout_constraintEnd_toStartOf="@+id/volume_text"
         app:layout_constraintStart_toEndOf="@+id/volume_icon"
-        app:layout_constraintTop_toTopOf="@+id/streamerPicture" />
+        app:layout_constraintTop_toTopOf="@+id/streamerPicture"
+        app:layout_constraintBottom_toBottomOf="@id/volume_icon"/>
     <!--         android:progressDrawable="@drawable/seek_bar_progress"
         android:thumb="@drawable/seek_bar_thumb" -->
 
@@ -80,7 +80,7 @@
         android:layout_height="0dp"
         android:layout_marginEnd="8dp"
         android:layout_marginRight="8dp"
-        android:gravity="end"
+        android:gravity="end|center_vertical"
         android:text=""
         android:textAlignment="textEnd"
         app:layout_constraintBottom_toBottomOf="@+id/seek_bar_volume"
