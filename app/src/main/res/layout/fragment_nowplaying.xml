@@ -31,7 +31,7 @@
             <TextView
                 android:id="@+id/text_song_title"
                 android:layout_width="match_parent"
-                android:layout_height="0dp"
+                android:layout_height="wrap_content"
                 android:gravity="bottom"
                 android:text=""
                 android:textAlignment="center"
@@ -43,7 +43,7 @@
             <TextView
                 android:id="@+id/text_song_artist"
                 android:layout_width="match_parent"
-                android:layout_height="0dp"
+                android:layout_height="wrap_content"
                 android:gravity="bottom"
                 android:text=""
                 android:textAlignment="center"

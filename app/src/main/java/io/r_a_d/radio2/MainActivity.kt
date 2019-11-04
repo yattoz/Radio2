@@ -14,6 +14,11 @@ import com.google.android.material.bottomnavigation.LabelVisibilityMode.LABEL_VI
 import io.r_a_d.radio2.playerstore.PlayerStore
 
 import java.util.Timer
+import androidx.core.app.ComponentActivity.ExtraData
+import androidx.core.content.ContextCompat.getSystemService
+import android.icu.lang.UCharacter.GraphemeClusterBreak.T
+import android.view.View
+
 
 /* Log to file import
 import android.os.Environment
@@ -21,20 +26,19 @@ import java.io.File
 import java.io.IOException
 */
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : BaseActivity() {
 
-    // define global colors
 
 
     private val clockTicker: Timer = Timer()
     private var currentNavController: LiveData<NavController>? = null
+
 
     /**
      * Called on first creation and when restoring state.
      */
     private fun setupBottomNavigationBar() {
         val bottomNavigationView = findViewById<BottomNavigationView>(R.id.bottom_nav)
-        bottomNavigationView.labelVisibilityMode = LABEL_VISIBILITY_LABELED
 
         //val navGraphIds = listOf(R.navigation.home, R.navigation.list, R.navigation.form)
         val navGraphIds = listOf(R.navigation.navigation_nowplaying, R.navigation.navigation_songs,
@@ -59,11 +63,17 @@ class MainActivity : AppCompatActivity() {
         return currentNavController?.value?.navigateUp() ?: false
     }
 
-
-
     // #####################################
     // ######### LIFECYCLE CALLBACKS #######
     // #####################################
+
+    override fun onResume() {
+        super.onResume()
+    }
+
+    override fun onPause() {
+        super.onPause()
+    }
 
     override fun onRestoreInstanceState(savedInstanceState: Bundle?) {
         super.onRestoreInstanceState(savedInstanceState ?: Bundle())
@@ -76,6 +86,7 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+
         // initialize programmatically accessible colors
         colorBlue = ResourcesCompat.getColor(resources, R.color.bluereq, null)
         colorWhited = ResourcesCompat.getColor(resources, R.color.whited, null)
@@ -83,6 +94,9 @@ class MainActivity : AppCompatActivity() {
         // UI Launch
         setTheme(R.style.AppTheme)
         setContentView(R.layout.activity_main)
+
+        attachKeyboardListeners()
+
         if (savedInstanceState == null) {
             setupBottomNavigationBar()
         } // Else, need to wait for onRestoreInstanceState
