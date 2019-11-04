@@ -467,7 +467,15 @@ class RadioService : MediaBrowserServiceCompat() {
             when(playbackState)
             {
                 Player.STATE_BUFFERING -> state = "Player.STATE_BUFFERING"
-                Player.STATE_IDLE -> state = "Player.STATE_IDLE"
+                Player.STATE_IDLE -> {
+                    state = "Player.STATE_IDLE"
+                    // inform the PlayerStore that the playback has stopped. This enables the ticker, triggers API fetch, and updates UI in no-network state.
+                    if (PlayerStore.instance.playbackState.value != PlaybackStateCompat.STATE_STOPPED)
+                    {
+                        PlayerStore.instance.playbackState.postValue(PlaybackStateCompat.STATE_STOPPED)
+                        PlayerStore.instance.isPlaying.postValue(false)
+                    }
+                }
                 Player.STATE_ENDED -> state = "Player.STATE_ENDED"
                 Player.STATE_READY -> state = "Player.STATE_READY"
             }

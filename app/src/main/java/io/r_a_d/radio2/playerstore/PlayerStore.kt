@@ -44,7 +44,7 @@ class PlayerStore : ViewModel() {
         currentTime.value = System.currentTimeMillis()
         isQueueUpdated.value = false
         isLpUpdated.value = false
-
+        currentSong.title.value = "No connection"
     }
 
     fun initPicture(c: Context) {
@@ -68,7 +68,7 @@ class PlayerStore : ViewModel() {
         // at this moment, we set it to 0. Then, next time the updateApi is called when we're playing, we measure the latency and we set out latencyComparator.
         if(isCompensatingLatency)
         {
-            latencyCompensator = resMain.getLong("current")*1000 - currentSong.startTime.value!!
+            latencyCompensator = resMain.getLong("current")*1000 - (currentSong.startTime.value ?: resMain.getLong("current")*1000)
             Log.d(tag, playerStoreTag +  "latency compensator set to ${(latencyCompensator).toFloat()/1000} s")
         }
         currentSong.stopTime.value = resMain.getLong("end_time")*1000
@@ -134,6 +134,7 @@ class PlayerStore : ViewModel() {
                 Log.d(tag, playerStoreTag +  lp.toString())
                 isLpUpdated.value = true
             }
+            isInitialized = true
         }
         Async(scrape, post)
     }
