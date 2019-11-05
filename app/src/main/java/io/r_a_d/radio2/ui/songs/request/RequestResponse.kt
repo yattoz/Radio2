@@ -4,12 +4,12 @@ import io.r_a_d.radio2.playerstore.Song
 import org.json.JSONObject
 
 class RequestResponse(jsonResponse: JSONObject) {
-    val total: Int = jsonResponse.getInt("total")
-    val perPage: Int = jsonResponse.getInt("per_page") // should stay 20 but in any case...
+    //val total: Int = jsonResponse.getInt("total")
+    //val perPage: Int = jsonResponse.getInt("per_page") // should stay 20 but in any case...
     val currentPage: Int = jsonResponse.getInt("current_page")
     val lastPage: Int = jsonResponse.getInt("last_page")
-    val fromNbr: Int = jsonResponse.getInt("from")
-    val toNbr: Int = jsonResponse.getInt("to")
+    //val fromNbr: Int = jsonResponse.getInt("from")
+    //val toNbr: Int = jsonResponse.getInt("to")
     var songs : ArrayList<Song> = ArrayList()
 
     init {

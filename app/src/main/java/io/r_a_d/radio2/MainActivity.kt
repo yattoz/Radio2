@@ -2,7 +2,6 @@ package io.r_a_d.radio2
 
 import android.os.Bundle
 import com.google.android.material.bottomnavigation.BottomNavigationView
-import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.ui.setupActionBarWithNavController
 import android.content.Intent
 import android.util.Log
@@ -10,15 +9,9 @@ import androidx.core.content.res.ResourcesCompat
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
 import androidx.navigation.NavController
-import com.google.android.material.bottomnavigation.LabelVisibilityMode.LABEL_VISIBILITY_LABELED
 import io.r_a_d.radio2.playerstore.PlayerStore
 
 import java.util.Timer
-import androidx.core.app.ComponentActivity.ExtraData
-import androidx.core.content.ContextCompat.getSystemService
-import android.icu.lang.UCharacter.GraphemeClusterBreak.T
-import android.view.View
-
 
 /* Log to file import
 import android.os.Environment
@@ -67,14 +60,6 @@ class MainActivity : BaseActivity() {
     // ######### LIFECYCLE CALLBACKS #######
     // #####################################
 
-    override fun onResume() {
-        super.onResume()
-    }
-
-    override fun onPause() {
-        super.onPause()
-    }
-
     override fun onRestoreInstanceState(savedInstanceState: Bundle?) {
         super.onRestoreInstanceState(savedInstanceState ?: Bundle())
         // Now that BottomNavigationBar has restored its instance state
@@ -90,6 +75,9 @@ class MainActivity : BaseActivity() {
         // initialize programmatically accessible colors
         colorBlue = ResourcesCompat.getColor(resources, R.color.bluereq, null)
         colorWhited = ResourcesCompat.getColor(resources, R.color.whited, null)
+        colorGreenList = (ResourcesCompat.getColorStateList(resources, R.color.button_green, null))
+        colorRedList = (ResourcesCompat.getColorStateList(resources, R.color.button_red, null))
+        colorGreenListCompat = (ResourcesCompat.getColorStateList(resources, R.color.button_green_compat, null))
 
         // UI Launch
         setTheme(R.style.AppTheme)

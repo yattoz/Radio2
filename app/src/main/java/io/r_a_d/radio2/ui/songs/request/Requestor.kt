@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import io.r_a_d.radio2.ActionOnError
 import io.r_a_d.radio2.Async
+import io.r_a_d.radio2.playerstore.Song
 import io.r_a_d.radio2.tag
 import org.json.JSONException
 import org.json.JSONObject
@@ -18,6 +19,7 @@ import java.util.*
 import java.util.regex.Pattern
 
 import javax.net.ssl.HttpsURLConnection
+import kotlin.collections.ArrayList
 
 /**
  * Requests a song via the website's API
@@ -34,12 +36,15 @@ class Requestor {
     private val requestUrl = "https://r-a-d.io/request/%1\$d"
     private val searchUrl = "https://r-a-d.io/api/search/%1s?page=%2\$d"
 
-    var token: String? = null
+    private var token: String? = null
     val snackBarText : MutableLiveData<String?> = MutableLiveData()
-    var responseArray : ArrayList<RequestResponse> = ArrayList()
+    private var responseArray : ArrayList<RequestResponse> = ArrayList()
+    var requestSongArray : ArrayList<Song> = ArrayList()
+    val isRequestResultUpdated : MutableLiveData<Boolean> = MutableLiveData()
 
     init {
         snackBarText.value = ""
+        isRequestResultUpdated.value = false
     }
 
     /**
@@ -153,6 +158,7 @@ class Requestor {
     fun search(query: String)
     {
         responseArray.clear()
+        requestSongArray.clear()
         searchPage(query, 1) // the searchPage function is recursive to get all pages.
     }
 
@@ -167,8 +173,13 @@ class Requestor {
         val post : (Any?) -> Unit = {
             val response = RequestResponse(it as JSONObject)
 
-            Log.d(tag, (response as RequestResponse).toString())
+            Log.d(tag, response.toString())
             responseArray.add(response)
+            for (i in 0 until response.songs.size)
+            {
+                requestSongArray.add(response.songs[i])
+            }
+            isRequestResultUpdated.value = true
             if (response.currentPage < response.lastPage)
                 searchPage(query, pageNumber + 1) // recursive call to get the next page
             else
