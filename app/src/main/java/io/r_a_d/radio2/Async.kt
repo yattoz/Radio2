@@ -4,13 +4,24 @@ import android.os.AsyncTask
 import android.util.Log
 import io.r_a_d.radio2.playerstore.PlayerStore
 
-class Async(val handler: () -> Any?, val post: (Any?) -> Unit = {}) : AsyncTask<Void, Void, Any>() {
+class Async(val handler: (Any?) -> Any?, val post: (Any?) -> Unit = {},
+            private val actionOnError: ActionOnError = ActionOnError.RESET, private val parameters: Any? = null) :
+    AsyncTask<Any, Void, Any>() {
+
     init {
         try {
             execute()
         } catch (e: Exception)
         {
             Log.d(tag,e.toString())
+        }
+    }
+
+    private fun onException(e: java.lang.Exception) {
+        when(actionOnError)
+        {
+            ActionOnError.RESET -> resetPlayerStateOnNetworkError()
+            ActionOnError.NOTIFY -> return
         }
     }
 
@@ -28,8 +39,8 @@ class Async(val handler: () -> Any?, val post: (Any?) -> Unit = {}) : AsyncTask<
             PlayerStore.instance.isQueueUpdated.postValue(true)
             PlayerStore.instance.isLpUpdated.postValue(true)
             // safe-update for the title avoids callback loop too.
-            if (PlayerStore.instance.currentSong.title.value != "No connection")
-                PlayerStore.instance.currentSong.title.postValue("No connection")
+            if (PlayerStore.instance.currentSong.title.value != noConnectionValue)
+                PlayerStore.instance.currentSong.title.postValue(noConnectionValue)
             storeReset = true
         }
 
@@ -37,12 +48,12 @@ class Async(val handler: () -> Any?, val post: (Any?) -> Unit = {}) : AsyncTask<
         Log.d(tag, "fallback for no network. Store reset : $storeReset")
     }
 
-    override fun doInBackground(vararg params: Void?): Any? {
+    override fun doInBackground(vararg params: Any?): Any? {
         try {
-            return handler()
+            return handler(parameters)
         } catch (e: Exception) {
             Log.d(tag,e.toString())
-            resetPlayerStateOnNetworkError()
+            onException(e)
         }
         return null
     }
@@ -52,7 +63,7 @@ class Async(val handler: () -> Any?, val post: (Any?) -> Unit = {}) : AsyncTask<
             post(result)
         } catch (e: Exception) {
             Log.d(tag,e.toString())
-            resetPlayerStateOnNetworkError()
+            onException(e)
         }
     }
 }

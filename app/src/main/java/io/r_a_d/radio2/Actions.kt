@@ -9,3 +9,8 @@ enum class Actions
     KILL,
     NOTIFY,
 }
+
+enum class ActionOnError {
+    RESET,
+    NOTIFY
+}

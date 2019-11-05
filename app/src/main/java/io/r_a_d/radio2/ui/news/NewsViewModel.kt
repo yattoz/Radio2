@@ -19,7 +19,7 @@ class NewsViewModel : ViewModel() {
 
     private val urlToScrape = "https://r-a-d.io/api/news"
 
-    private val scrape : () -> Unit =
+    private val scrape : (Any?) -> Unit =
     {
         val t = URL(urlToScrape).readText()
         val result = JSONArray(t)

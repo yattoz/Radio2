@@ -9,6 +9,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import io.r_a_d.radio2.Async
 import io.r_a_d.radio2.R
+import io.r_a_d.radio2.noConnectionValue
 import io.r_a_d.radio2.tag
 import org.json.JSONObject
 import java.io.IOException
@@ -44,7 +45,7 @@ class PlayerStore : ViewModel() {
         currentTime.value = System.currentTimeMillis()
         isQueueUpdated.value = false
         isLpUpdated.value = false
-        currentSong.title.value = "No connection"
+        currentSong.title.value = noConnectionValue
     }
 
     fun initPicture(c: Context) {
@@ -55,7 +56,7 @@ class PlayerStore : ViewModel() {
 
     private fun updateApi(resMain: JSONObject, isCompensatingLatency : Boolean = false) {
         // If we're not in PLAYING state, update title / artist metadata. If we're playing, the ICY will take care of that.
-        if (playbackState.value != PlaybackStateCompat.STATE_PLAYING || currentSong.title.value == "")
+        if (playbackState.value != PlaybackStateCompat.STATE_PLAYING || currentSong.title.value == "" || currentSong.title.value == noConnectionValue)
             currentSong.setTitleArtist(resMain.getString("np"))
 
         // only update the value if the song has changed. This avoids to trigger observers when they shouldn't be triggered
@@ -85,7 +86,7 @@ class PlayerStore : ViewModel() {
         Log.d(tag, playerStoreTag +  "store updated")
     }
 
-    private val scrape : () -> String =
+    private val scrape : (Any?) -> String =
     {
         URL(urlToScrape).readText()
     }
@@ -141,7 +142,7 @@ class PlayerStore : ViewModel() {
 
     private fun fetchLastRequest()
     {
-        val sleepScrape: () -> String = {
+        val sleepScrape: (Any?) -> String = {
             Thread.sleep(12000) // we wait a bit (12s) for the API to get updated on R/a/dio side!
             URL(urlToScrape).readText()
         }
@@ -210,7 +211,7 @@ class PlayerStore : ViewModel() {
 
     private fun fetchImage(fileUrl: String)
     {
-        val scrape: () -> Bitmap? = {
+        val scrape: (Any?) -> Bitmap? = {
             var k: InputStream? = null
             var pic: Bitmap? = null
             try {
