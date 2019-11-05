@@ -2,12 +2,16 @@ package io.r_a_d.radio2.playerstore
 
 import androidx.lifecycle.MutableLiveData
 
-class Song(artistTitle: String = "") {
+class Song(artistTitle: String = "", _id : Int = 0, _isRequestable : Boolean = false) {
+
+    // TODO : remove MutableLiveData, use a MutableLiveData Boolean on PlayerStore instead
     val title: MutableLiveData<String> = MutableLiveData()
     val artist: MutableLiveData<String> = MutableLiveData()
     val type: MutableLiveData<Int> = MutableLiveData()
     val startTime: MutableLiveData<Long> = MutableLiveData()
     val stopTime: MutableLiveData<Long> = MutableLiveData()
+    val id: Int = _id
+    val isRequestable : Boolean = _isRequestable
 
     init {
         setTitleArtist(artistTitle)

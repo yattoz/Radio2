@@ -13,6 +13,7 @@ import com.google.android.material.tabs.TabLayout
 import io.r_a_d.radio2.R
 import io.r_a_d.radio2.ui.songs.queuelp.LastPlayedFragment
 import io.r_a_d.radio2.ui.songs.queuelp.QueueFragment
+import io.r_a_d.radio2.ui.songs.request.RequestFragment
 
 class SongsFragment : Fragment() {
 
@@ -36,6 +37,7 @@ class SongsFragment : Fragment() {
             adapter = SongsPagerAdapter(childFragmentManager, FragmentPagerAdapter.BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT)
             adapter.addFragment(LastPlayedFragment.newInstance(), "last played")
             adapter.addFragment(QueueFragment.newInstance(), "queue")
+            adapter.addFragment(RequestFragment.newInstance(), "request")
 
             songsViewModel.viewPager.adapter = adapter
 
