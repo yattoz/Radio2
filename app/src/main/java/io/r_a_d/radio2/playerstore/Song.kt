@@ -10,8 +10,8 @@ class Song(artistTitle: String = "", _id : Int = 0, _isRequestable : Boolean = f
     val type: MutableLiveData<Int> = MutableLiveData()
     val startTime: MutableLiveData<Long> = MutableLiveData()
     val stopTime: MutableLiveData<Long> = MutableLiveData()
-    val id: Int = _id
-    val isRequestable : Boolean = _isRequestable
+    var id: Int = _id
+    var isRequestable : Boolean = _isRequestable
 
     init {
         setTitleArtist(artistTitle)

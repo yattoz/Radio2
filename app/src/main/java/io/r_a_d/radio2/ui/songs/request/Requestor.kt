@@ -32,8 +32,11 @@ import javax.net.ssl.HttpsURLConnection
 class Requestor {
     private val cookieManager: CookieManager = CookieManager()
     private val requestUrl = "https://r-a-d.io/request/%1\$d"
+    private val searchUrl = "https://r-a-d.io/api/search/%1s?page=%2\$d"
+
     var token: String? = null
     val snackBarText : MutableLiveData<String?> = MutableLiveData()
+    var responseArray : ArrayList<RequestResponse> = ArrayList()
 
     init {
         snackBarText.value = ""
@@ -147,19 +150,36 @@ class Requestor {
             snackBarText.postValue(value)
         }
 
-    var pageNumber = 1
-    private val searchUrl = "https://r-a-d.io/api/search/%1s?page=%2\$d"
-
     fun search(query: String)
     {
+        responseArray.clear()
+        searchPage(query, 1) // the searchPage function is recursive to get all pages.
+    }
+
+    private fun searchPage(query: String, pageNumber : Int)
+    {
         val searchURL = String.format(Locale.getDefault(), searchUrl, query, pageNumber)
-        val scrape : (Any?) -> String = {
-            URL(searchURL).readText()
+        val scrape : (Any?) -> JSONObject = {
+            val res = URL(searchURL).readText()
+            val json = JSONObject(res)
+            json
         }
         val post : (Any?) -> Unit = {
-            Log.d(tag, it as String)
+            val response = RequestResponse(it as JSONObject)
+
+            Log.d(tag, (response as RequestResponse).toString())
+            responseArray.add(response)
+            if (response.currentPage < response.lastPage)
+                searchPage(query, pageNumber + 1) // recursive call to get the next page
+            else
+                finishSearch()
         }
-        Async(scrape, post)
+        Async(scrape, post, ActionOnError.NOTIFY)
+    }
+
+    private fun finishSearch()
+    {
+        //request(responseArray.first().songs.first().id)
     }
 
     fun request(songID: Int?) {
