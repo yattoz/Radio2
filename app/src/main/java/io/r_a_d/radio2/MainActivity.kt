@@ -71,7 +71,6 @@ class MainActivity : BaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-
         // initialize programmatically accessible colors
         colorBlue = ResourcesCompat.getColor(resources, R.color.bluereq, null)
         colorWhited = ResourcesCompat.getColor(resources, R.color.whited, null)
@@ -89,7 +88,6 @@ class MainActivity : BaseActivity() {
         } // Else, need to wait for onRestoreInstanceState
 
 
-
         // timers
         // the clockTicker is used to update the UI. It's OK if it dies when the app loses focus.
         // It should be possible to make this to alleviate the CPU charge. Not that a ticker is heavy on resources, but still.
@@ -102,7 +100,7 @@ class MainActivity : BaseActivity() {
         PlayerStore.instance.fetchApi()
 
         // Post-UI Launch
-        if (savedInstanceState?.getBoolean("isInitialized") == true || PlayerStore.instance.isInitialized)
+        if (savedInstanceState?.getBoolean("isInitialized") == true && PlayerStore.instance.isInitialized)
         {
             Log.d(tag, "skipped initialization")
             return
