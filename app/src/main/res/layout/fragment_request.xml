@@ -40,10 +40,13 @@
             android:scrollbars="vertical"
             android:layout_margin="8dp"
             app:layout_constraintTop_toBottomOf="@id/search"
-            app:layout_constraintBottom_toBottomOf="@id/searchConstraint"
+            app:layout_constraintBottom_toBottomOf="parent"
             >
 
         </androidx.recyclerview.widget.RecyclerView>
+
+
+
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

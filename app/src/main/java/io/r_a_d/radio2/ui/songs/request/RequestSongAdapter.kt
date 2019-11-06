@@ -12,6 +12,10 @@ import androidx.recyclerview.widget.RecyclerView
 import io.r_a_d.radio2.*
 import io.r_a_d.radio2.playerstore.Song
 import kotlinx.android.synthetic.main.request_song_view.view.*
+import android.view.View
+import kotlinx.android.synthetic.main.button_load_more.view.*
+
+
 
 
 class RequestSongAdapter(private val dataSet: ArrayList<Song>
@@ -21,6 +25,8 @@ class RequestSongAdapter(private val dataSet: ArrayList<Song>
     objects: Array<out Song>*/
 ) : RecyclerView.Adapter<RequestSongAdapter.MyViewHolder>() /*ArrayAdapter<Song>(context, resource, objects)*/ {
 
+    private val viewTypeCell = 1 // normal cell with song and request button
+    private val viewTypeFooter = 2 // the bottom cell should be the "load more" button whenever needed
 
     // Provide a reference to the views for each data item
     // Complex data items may need more than one view per item, and
@@ -33,8 +39,13 @@ class RequestSongAdapter(private val dataSet: ArrayList<Song>
     override fun onCreateViewHolder(parent: ViewGroup,
                                     viewType: Int): MyViewHolder {
         // create a new view
-        val view = LayoutInflater.from(parent.context)
-            .inflate(R.layout.request_song_view, parent, false) as ConstraintLayout
+
+        val view =
+            if (viewType == viewTypeCell)
+                LayoutInflater.from(parent.context).inflate(R.layout.request_song_view, parent, false) as ConstraintLayout
+            else
+                LayoutInflater.from(parent.context).inflate(R.layout.button_load_more, parent, false) as ConstraintLayout
+
         // set the view's size, margins, paddings and layout parameters
         //...
         return MyViewHolder(view)
@@ -43,6 +54,23 @@ class RequestSongAdapter(private val dataSet: ArrayList<Song>
     // Replace the contents of a view (invoked by the layout manager)
     @SuppressLint("SetTextI18n")
     override fun onBindViewHolder(holder: MyViewHolder, position: Int) {
+
+        if (itemCount <= 1)
+            return
+
+        if (holder.itemViewType == viewTypeFooter)
+        {
+            if (Requestor.instance.isLoadMoreVisible)
+                holder.itemView.loadMoreButton.visibility = View.VISIBLE
+            else
+                holder.itemView.loadMoreButton.visibility = View.GONE
+            holder.itemView.loadMoreButton.text = "Load more results"
+            holder.itemView.loadMoreButton.setOnClickListener{
+                Requestor.instance.loadMore()
+            }
+            return
+        }
+
         val artist = holder.itemView.findViewById<TextView>(R.id.request_song_artist)
         val title = holder.itemView.findViewById<TextView>(R.id.request_song_title)
         val button = holder.itemView.request_button
@@ -70,7 +98,12 @@ class RequestSongAdapter(private val dataSet: ArrayList<Song>
     }
 
     // Return the size of your dataset (invoked by the layout manager)
-    override fun getItemCount() = dataSet.size
+    override fun getItemCount() = dataSet.size + 1 // add 1 for the "Load more results" button
+
+    override fun getItemViewType(position: Int): Int {
+        return if (position == dataSet.size) viewTypeFooter else viewTypeCell
+    }
+
     /*
     override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
         // create a new view

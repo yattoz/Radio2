@@ -35,17 +35,83 @@ class Requestor {
     private val cookieManager: CookieManager = CookieManager()
     private val requestUrl = "https://r-a-d.io/request/%1\$d"
     private val searchUrl = "https://r-a-d.io/api/search/%1s?page=%2\$d"
+    private val songThresholdStep = 50
+    private var songThreshold = songThresholdStep
+    private var localQuery = ""
 
     private var token: String? = null
     val snackBarText : MutableLiveData<String?> = MutableLiveData()
     private var responseArray : ArrayList<RequestResponse> = ArrayList()
     var requestSongArray : ArrayList<Song> = ArrayList()
-    val isRequestResultUpdated : MutableLiveData<Boolean> = MutableLiveData()
+    var isRequestResultUpdated : MutableLiveData<Boolean> = MutableLiveData()
+    var isLoadMoreVisible: Boolean = false
 
     init {
         snackBarText.value = ""
         isRequestResultUpdated.value = false
+        isLoadMoreVisible = false
     }
+
+    fun search(query: String)
+    {
+        responseArray.clear()
+        requestSongArray.clear()
+        localQuery = query
+        searchPage(query, 1) // the searchPage function is recursive to get all pages.
+    }
+
+    private fun searchPage(query: String, pageNumber : Int)
+    {
+        val searchURL = String.format(Locale.getDefault(), searchUrl, query, pageNumber)
+        val scrape : (Any?) -> JSONObject = {
+            val res = URL(searchURL).readText()
+            val json = JSONObject(res)
+            json
+        }
+        val post : (Any?) -> Unit = {
+            val response = RequestResponse(it as JSONObject)
+
+            Log.d(tag, response.toString())
+            responseArray.add(response)
+            for (i in 0 until response.songs.size)
+            {
+                requestSongArray.add(response.songs[i])
+            }
+            isRequestResultUpdated.value = true
+            if (requestSongArray.size >= songThreshold)
+            {
+                isLoadMoreVisible = true
+
+            } else {
+                if (response.currentPage < response.lastPage)
+                    searchPage(query, pageNumber + 1) // recursive call to get the next page
+                else
+                    finishSearch()
+            }
+
+        }
+        Async(scrape, post, ActionOnError.NOTIFY)
+    }
+
+    private fun finishSearch()
+    {
+        isLoadMoreVisible = false
+    }
+
+    fun reset()
+    {
+        requestSongArray.clear()
+        responseArray.clear()
+        isRequestResultUpdated.value = false
+        songThreshold = songThresholdStep
+    }
+
+    fun loadMore()
+    {
+        songThreshold += songThresholdStep
+        searchPage(localQuery, responseArray.last().currentPage + 1)
+    }
+
 
     /**
      * Scrape the website for the CSRF token required for requesting
@@ -104,94 +170,57 @@ class Requestor {
      * Request the song with the CSRF token that was scraped
      */
     private val requestSong: (Any?) -> Any? = {
-            val reqString = it as String
-            var response = ""
+        val reqString = it as String
+        var response = ""
 
-            try {
-                val reqURL = URL(reqString)
-                val conn = reqURL.openConnection() as HttpsURLConnection
-                val tokenObject = JSONObject()
+        try {
+            val reqURL = URL(reqString)
+            val conn = reqURL.openConnection() as HttpsURLConnection
+            val tokenObject = JSONObject()
 
-                tokenObject.put("_token", token)
-                val requestBytes = tokenObject.toString().toByteArray()
+            tokenObject.put("_token", token)
+            val requestBytes = tokenObject.toString().toByteArray()
 
-                conn.requestMethod = "POST"
-                conn.doOutput = true
-                conn.doInput = true
-                conn.setChunkedStreamingMode(0)
-                conn.setRequestProperty("Content-Type", "application/json")
+            conn.requestMethod = "POST"
+            conn.doOutput = true
+            conn.doInput = true
+            conn.setChunkedStreamingMode(0)
+            conn.setRequestProperty("Content-Type", "application/json")
 
-                val os = conn.outputStream
-                os.write(requestBytes)
+            val os = conn.outputStream
+            os.write(requestBytes)
 
-                val responseCode = conn.responseCode
+            val responseCode = conn.responseCode
 
-                if (responseCode == HttpsURLConnection.HTTP_OK) {
-                    var line: String?
-                    val br = BufferedReader(InputStreamReader(
-                        conn.inputStream))
+            if (responseCode == HttpsURLConnection.HTTP_OK) {
+                var line: String?
+                val br = BufferedReader(InputStreamReader(
+                    conn.inputStream))
+                line = br.readLine()
+                while (line != null) {
+                    response += line
                     line = br.readLine()
-                    while (line != null) {
-                        response += line
-                        line = br.readLine()
-                    }
-                } else {
-                    response = ""
                 }
-            } catch (ex: IOException) {
-                ex.printStackTrace()
-            } catch (ex: JSONException) {
-                ex.printStackTrace()
+            } else {
+                response = ""
             }
-
-            response
+        } catch (ex: IOException) {
+            ex.printStackTrace()
+        } catch (ex: JSONException) {
+            ex.printStackTrace()
         }
+
+        response
+    }
 
     private val postSong  : (Any?) -> (Unit) = {
-            val response = JSONObject(it as String)
-            val key = response.names()!!.get(0) as String
-            val value = response.getString(key)
+        val response = JSONObject(it as String)
+        val key = response.names()!!.get(0) as String
+        val value = response.getString(key)
 
-            snackBarText.postValue(value)
-        }
-
-    fun search(query: String)
-    {
-        responseArray.clear()
-        requestSongArray.clear()
-        searchPage(query, 1) // the searchPage function is recursive to get all pages.
+        snackBarText.postValue(value)
     }
 
-    private fun searchPage(query: String, pageNumber : Int)
-    {
-        val searchURL = String.format(Locale.getDefault(), searchUrl, query, pageNumber)
-        val scrape : (Any?) -> JSONObject = {
-            val res = URL(searchURL).readText()
-            val json = JSONObject(res)
-            json
-        }
-        val post : (Any?) -> Unit = {
-            val response = RequestResponse(it as JSONObject)
-
-            Log.d(tag, response.toString())
-            responseArray.add(response)
-            for (i in 0 until response.songs.size)
-            {
-                requestSongArray.add(response.songs[i])
-            }
-            isRequestResultUpdated.value = true
-            if (response.currentPage < response.lastPage)
-                searchPage(query, pageNumber + 1) // recursive call to get the next page
-            else
-                finishSearch()
-        }
-        Async(scrape, post, ActionOnError.NOTIFY)
-    }
-
-    private fun finishSearch()
-    {
-        //request(responseArray.first().songs.first().id)
-    }
 
     fun request(songID: Int?) {
         val requestSongUrl = String.format(requestUrl, songID!!)

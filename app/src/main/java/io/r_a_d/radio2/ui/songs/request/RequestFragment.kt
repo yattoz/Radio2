@@ -31,10 +31,19 @@ class RequestFragment : Fragment() {
         override fun onQueryTextChange(newText: String?): Boolean {
             if (newText == "")
             {
-                Requestor.instance.requestSongArray.clear()
-                Requestor.instance.isRequestResultUpdated.value = false
+                Requestor.instance.reset()
+                viewAdapter.notifyDataSetChanged() // this is to remove the "Load more" button
             }
             return true
+        }
+    }
+
+    private val snackBarTextObserver: Observer<String?> = Observer {
+        if (Requestor.instance.snackBarText.value != "")
+        {
+            val s = Snackbar.make(searchView, Requestor.instance.snackBarText.value as CharSequence, Snackbar.LENGTH_LONG)
+            s.show()
+            Requestor.instance.snackBarText.value = "" // resetting afterwards to avoid re-triggering it when we enter again the fragment
         }
     }
 
@@ -49,6 +58,7 @@ class RequestFragment : Fragment() {
     ): View? {
         // Inflate the layout for this fragment
         val root = inflater.inflate(R.layout.fragment_request, container, false)
+
         searchView = root.findViewById(R.id.searchBox)
 
         searchView.setOnQueryTextListener(listener)
@@ -71,21 +81,15 @@ class RequestFragment : Fragment() {
         }
         Requestor.instance.isRequestResultUpdated.observeForever(requestSongObserver)
         Requestor.instance.snackBarText.observeForever(snackBarTextObserver)
+        //Requestor.instance.isLoadMoreVisible.observeForever(loadMoreObserver)
         return root
     }
 
     override fun onDestroyView() {
         Requestor.instance.snackBarText.removeObserver(snackBarTextObserver)
         Requestor.instance.isRequestResultUpdated.removeObserver(requestSongObserver)
+        //Requestor.instance.isLoadMoreVisible.removeObserver(loadMoreObserver)
         super.onDestroyView()
-    }
-
-    private val snackBarTextObserver: Observer<String?> = Observer {
-        if (Requestor.instance.snackBarText.value != "")
-        {
-            val s = Snackbar.make(searchView, Requestor.instance.snackBarText.value as CharSequence, Snackbar.LENGTH_LONG)
-            s.show()
-        }
     }
 
     companion object {
