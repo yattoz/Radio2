@@ -28,5 +28,10 @@
     <string name="error_webView">Error loading WebView. Try downloading Google Chrome on Google Play, or enabling it if you disabled it.</string>
     <string name="load_more_results">Load more results</string>
     <string name="request">request</string>
+    <string name="action_settings">Settings</string>
+    <string name="action_refresh">Force data refresh</string>
+    <string name="action_bug_submit">Submit a bug (GitHub)</string>
+    <string name="github_url_new_issue">https://github.com/yattoz/Radio2/issues/new</string>
+
 
 </resources>

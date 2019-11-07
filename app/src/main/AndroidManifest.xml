@@ -43,6 +43,11 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity android:name=".ParametersActivity"
+            android:launchMode="singleTask"
+            android:screenOrientation="fullSensor"
+            android:configChanges="orientation|screenSize"
+            android:parentActivityName=".MainActivity"/>
 
         <receiver android:name="androidx.media.session.MediaButtonReceiver">
             <intent-filter>

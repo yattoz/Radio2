@@ -5,6 +5,8 @@ import com.google.android.material.bottomnavigation.BottomNavigationView
 import androidx.navigation.ui.setupActionBarWithNavController
 import android.content.Intent
 import android.util.Log
+import android.view.Menu
+import androidx.appcompat.widget.Toolbar
 import androidx.core.content.res.ResourcesCompat
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
@@ -12,6 +14,10 @@ import androidx.navigation.NavController
 import io.r_a_d.radio2.playerstore.PlayerStore
 
 import java.util.Timer
+import android.view.MenuItem
+import android.net.Uri
+import com.google.android.material.snackbar.Snackbar
+
 
 /* Log to file import
 import android.os.Environment
@@ -21,11 +27,8 @@ import java.io.IOException
 
 class MainActivity : BaseActivity() {
 
-
-
     private val clockTicker: Timer = Timer()
     private var currentNavController: LiveData<NavController>? = null
-
 
     /**
      * Called on first creation and when restoring state.
@@ -60,6 +63,40 @@ class MainActivity : BaseActivity() {
     // ######### LIFECYCLE CALLBACKS #######
     // #####################################
 
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        // Inflate the menu, this adds items to the action bar if it is present.
+        menuInflater.inflate(R.menu.toolbar_menu, menu)
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        // Handle item selection
+        return when (item.itemId) {
+            R.id.action_refresh -> {
+                PlayerStore.instance.queue.clear()
+                PlayerStore.instance.lp.clear()
+                PlayerStore.instance.initApi()
+                val s = Snackbar.make(findViewById(R.id.nav_host_container), "Refreshing data..." as CharSequence, Snackbar.LENGTH_LONG)
+                s.show()
+                true
+            }
+            R.id.action_settings -> {
+                val i = Intent(this, ParametersActivity::class.java)
+                // TODO add stuff
+                startActivity(i)
+                true
+            }
+            R.id.action_bug_submit -> {
+                val url = getString(R.string.github_url_new_issue)
+                val i = Intent(Intent.ACTION_VIEW)
+                i.data = Uri.parse(url)
+                startActivity(i)
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
+        }
+    }
+
     override fun onRestoreInstanceState(savedInstanceState: Bundle?) {
         super.onRestoreInstanceState(savedInstanceState ?: Bundle())
         // Now that BottomNavigationBar has restored its instance state
@@ -82,6 +119,11 @@ class MainActivity : BaseActivity() {
         setTheme(R.style.AppTheme)
         setContentView(R.layout.activity_main)
         attachKeyboardListeners()
+
+        val toolbar : Toolbar = findViewById(R.id.toolbar)
+
+        // before setting up the bottom bar, we must declare the top bar that will be used by the bottom bar to display titles.
+        setSupportActionBar(toolbar)
 
         if (savedInstanceState == null) {
             setupBottomNavigationBar()

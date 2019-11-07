@@ -14,16 +14,17 @@ import com.google.android.material.bottomnavigation.BottomNavigationView
 abstract class BaseActivity : AppCompatActivity() {
     private val keyboardLayoutListener : ViewTreeObserver.OnGlobalLayoutListener = ViewTreeObserver.OnGlobalLayoutListener {
         val viewHeight = (rootLayout?.rootView?.height ?: 0)
-        val height =  ((rootLayout?.height ?: 0))
-        val contentViewTop : Int = window.findViewById<View>(Window.ID_ANDROID_CONTENT).top
-        val contentViewBottom : Int = window.findViewById<View>(Window.ID_ANDROID_CONTENT).bottom
+        val viewWidth = (rootLayout?.rootView?.width ?: 0)
 
-        Log.d(tag, "$contentViewTop, $viewHeight, $height, $contentViewBottom")
+        val height =  ((rootLayout?.height ?: 0))
+        val width =  ((rootLayout?.width ?: 0))
+
+        Log.d(tag, "$viewWidth, $viewHeight, $width, $height, ${viewHeight.toDouble()/viewWidth.toDouble()}, ${height.toDouble()/width.toDouble()}")
 
 
         val broadcastManager = LocalBroadcastManager.getInstance(this@BaseActivity)
 
-        if(height <= viewHeight * 2 / 3){
+        if(height <= viewHeight * 2 / 3 /*height.toDouble()/width.toDouble() < 1.20 */){
             val keyboardHeight = viewHeight - height
             onShowKeyboard(keyboardHeight)
 
@@ -51,7 +52,7 @@ abstract class BaseActivity : AppCompatActivity() {
 
  */
 // keyboard stuff
-    private fun onShowKeyboard(keyboardHeight: Int) {
+private fun onShowKeyboard(keyboardHeight: Int) {
     // do things when keyboard is shown
     val bottomNavigationView = findViewById<BottomNavigationView>(R.id.bottom_nav)
     bottomNavigationView.visibility = View.GONE
