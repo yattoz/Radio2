@@ -13,6 +13,7 @@ import com.google.android.material.tabs.TabLayout
 import io.r_a_d.radio2.R
 import io.r_a_d.radio2.ui.songs.queuelp.LastPlayedFragment
 import io.r_a_d.radio2.ui.songs.queuelp.QueueFragment
+import io.r_a_d.radio2.ui.songs.request.FavoritesFragment
 import io.r_a_d.radio2.ui.songs.request.RequestFragment
 
 class SongsFragment : Fragment() {
@@ -38,6 +39,7 @@ class SongsFragment : Fragment() {
             adapter.addFragment(LastPlayedFragment.newInstance(), "last played")
             adapter.addFragment(QueueFragment.newInstance(), "queue")
             adapter.addFragment(RequestFragment.newInstance(), "request")
+            adapter.addFragment(FavoritesFragment.newInstance(), "Favorites")
 
             songsViewModel.viewPager.adapter = adapter
 

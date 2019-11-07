@@ -1,16 +1,15 @@
 package io.r_a_d.radio2.playerstore
 
 import android.content.Context
+import android.content.SharedPreferences
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.support.v4.media.session.PlaybackStateCompat
 import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import io.r_a_d.radio2.Async
-import io.r_a_d.radio2.R
-import io.r_a_d.radio2.noConnectionValue
-import io.r_a_d.radio2.tag
+import androidx.preference.PreferenceManager
+import io.r_a_d.radio2.*
 import org.json.JSONObject
 import java.io.IOException
 import java.io.InputStream
@@ -30,8 +29,9 @@ class PlayerStore : ViewModel() {
     val currentSongBackup: Song = Song()
     val lp : ArrayList<Song> = ArrayList()
     val queue : ArrayList<Song> = ArrayList()
-    var isQueueUpdated: MutableLiveData<Boolean> = MutableLiveData()
-    var isLpUpdated: MutableLiveData<Boolean> = MutableLiveData()
+    val isQueueUpdated: MutableLiveData<Boolean> = MutableLiveData()
+    val isLpUpdated: MutableLiveData<Boolean> = MutableLiveData()
+    val isMuted : MutableLiveData<Boolean> = MutableLiveData()
     private val urlToScrape = "https://r-a-d.io/api"
     private var latencyCompensator : Long = 0
     var isInitialized: Boolean = false
@@ -41,10 +41,11 @@ class PlayerStore : ViewModel() {
         isPlaying.value = false
         isServiceStarted.value = false
         streamerName.value = ""
-        volume.value = 100 //TODO: make some settings screen to retain user preference for volume
+        volume.value = preferenceStore.getInt("volume", 100)
         currentTime.value = System.currentTimeMillis()
         isQueueUpdated.value = false
         isLpUpdated.value = false
+        isMuted.value = false
         currentSong.title.value = noConnectionValue
     }
 

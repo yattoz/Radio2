@@ -32,6 +32,7 @@
     <string name="action_refresh">Force data refresh</string>
     <string name="action_bug_submit">Submit a bug (GitHub)</string>
     <string name="github_url_new_issue">https://github.com/yattoz/Radio2/issues/new</string>
+    <string name="no_user_name">Set you IRC user name in the settings to display your favorites.</string>
 
 
 </resources>

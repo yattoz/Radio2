@@ -5,12 +5,15 @@ import androidx.lifecycle.MutableLiveData
 import io.r_a_d.radio2.ActionOnError
 import io.r_a_d.radio2.Async
 import io.r_a_d.radio2.playerstore.Song
+import io.r_a_d.radio2.preferenceStore
 import io.r_a_d.radio2.tag
+import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
 import java.io.BufferedReader
 import java.io.IOException
 import java.io.InputStreamReader
+import java.lang.Exception
 import java.net.CookieHandler
 import java.net.CookieManager
 import java.net.MalformedURLException
@@ -35,6 +38,7 @@ class Requestor {
     private val cookieManager: CookieManager = CookieManager()
     private val requestUrl = "https://r-a-d.io/request/%1\$d"
     private val searchUrl = "https://r-a-d.io/api/search/%1s?page=%2\$d"
+    private val favoritesUrl = "https://r-a-d.io/faves/%1s?dl=true"
     private val songThresholdStep = 50
     private var songThreshold = songThresholdStep
     private var localQuery = ""
@@ -42,14 +46,55 @@ class Requestor {
     private var token: String? = null
     val snackBarText : MutableLiveData<String?> = MutableLiveData()
     private var responseArray : ArrayList<RequestResponse> = ArrayList()
-    var requestSongArray : ArrayList<Song> = ArrayList()
-    var isRequestResultUpdated : MutableLiveData<Boolean> = MutableLiveData()
+    val requestSongArray : ArrayList<Song> = ArrayList()
+    val favoritesSongArray : ArrayList<Song> = ArrayList()
+    val isRequestResultUpdated : MutableLiveData<Boolean> = MutableLiveData()
+    val isFavoritesUpdated : MutableLiveData<Boolean> = MutableLiveData()
     var isLoadMoreVisible: Boolean = false
+
 
     init {
         snackBarText.value = ""
         isRequestResultUpdated.value = false
+        isFavoritesUpdated.value = false
         isLoadMoreVisible = false
+    }
+
+    fun initFavorites(userName : String? = preferenceStore.getString("userName", null)){
+        Log.d(tag, "initializing favorites")
+        favoritesSongArray.clear()
+        if (userName == null)
+        {
+            // TODO display something special like "no user set. Go to Preferences to set it."
+            Log.d(tag, "no user name set for favorites")
+            return
+        }
+        val favoritesUserUrl = String.format(Locale.getDefault(), favoritesUrl, userName)
+        val scrapeFavorites : (Any?) -> JSONArray = {
+            JSONArray(URL(favoritesUserUrl).readText())
+        }
+        val postFavorites :  (Any?) -> Unit = {
+            val res = it as JSONArray
+            for (i in 0 until (res).length())
+            {
+                val item = res.getJSONObject(i)
+                val artistTitle = item.getString("meta")
+                val id : Int? = if (item.isNull("tracks_id"))
+                    null
+                else
+                    item.getInt("tracks_id")
+
+                val lastRequested : Int? = if (item.isNull("lastrequested")) null else item.getInt("lastrequested")
+                val lastPlayed : Int? = if (item.isNull("lastplayed")) null else item.getInt("lastplayed")
+                val requestCount : Int? = if (item.isNull("requestcount")) null else item.getInt("requestcount")
+                val isRequestable = coolDown(lastPlayed, lastRequested, requestCount) < 0
+                Log.d(tag, "val : $id")
+                favoritesSongArray.add(Song(artistTitle, id ?: 0, isRequestable))
+            }
+            Log.d(tag, "favorites : $favoritesSongArray")
+            isFavoritesUpdated.value = true
+        }
+        Async(scrapeFavorites, postFavorites, ActionOnError.NOTIFY)
     }
 
     fun search(query: String)

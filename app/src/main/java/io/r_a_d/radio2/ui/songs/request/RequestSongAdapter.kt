@@ -14,8 +14,11 @@ import io.r_a_d.radio2.playerstore.Song
 import kotlinx.android.synthetic.main.request_song_view.view.*
 import android.view.View
 import kotlinx.android.synthetic.main.button_load_more.view.*
-
-
+import android.R.attr.name
+import android.text.method.TextKeyListener.clear
+import android.util.Log
+import java.util.*
+import kotlin.collections.ArrayList
 
 
 class RequestSongAdapter(private val dataSet: ArrayList<Song>
@@ -111,6 +114,31 @@ class RequestSongAdapter(private val dataSet: ArrayList<Song>
             .inflate(R.layout.song_view, parent, false) as ConstraintLayout
     }
     */
+
+    // a filtering function. As naive as it could be, but it should work.
+    private val dataSetOrig = ArrayList<Song>()
+    init {
+        dataSetOrig.addAll(dataSet)
+    }
+
+    fun filter(entry: String) {
+        var text = entry
+        dataSet.clear()
+        Log.d(tag, "entering filter")
+        if (text.isEmpty()) {
+            dataSet.addAll(dataSetOrig)
+        } else {
+            text = text.toLowerCase(locale = Locale.ROOT)
+            for (item in dataSetOrig) {
+                Log.d(tag, "$text, ${item.artist.value!!.toLowerCase(locale = Locale.ROOT)}, ${item.title.value!!.toLowerCase(locale = Locale.ROOT)}")
+                if (item.artist.value!!.toLowerCase(locale = Locale.ROOT).contains(text) ||
+                    item.title.value!!.toLowerCase(locale = Locale.ROOT).contains(text)) {
+                    dataSet.add(item)
+                }
+            }
+        }
+        notifyDataSetChanged()
+    }
 
 }
 

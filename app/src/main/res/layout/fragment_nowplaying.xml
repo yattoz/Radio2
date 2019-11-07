@@ -65,6 +65,8 @@
         android:id="@+id/seek_bar_volume"
         android:layout_width="0dp"
         android:layout_height="32dp"
+        android:layout_marginEnd="4dp"
+        android:layout_marginRight="4dp"
         android:max="100"
         android:progress="100"
         app:layout_constraintEnd_toStartOf="@+id/volume_text"
@@ -74,9 +76,10 @@
     <!--         android:progressDrawable="@drawable/seek_bar_progress"
         android:thumb="@drawable/seek_bar_thumb" -->
 
+    <!-- the width is in SP, it scales with font size.-->
     <TextView
         android:id="@+id/volume_text"
-        android:layout_width="40dp"
+        android:layout_width="36sp"
         android:layout_height="0dp"
         android:layout_marginEnd="8dp"
         android:layout_marginRight="8dp"
@@ -91,10 +94,11 @@
     <ImageView
         android:id="@+id/volume_icon"
         android:layout_width="wrap_content"
-        android:layout_height="0dp"
+        android:layout_height="24dp"
         android:contentDescription="@string/volume"
         android:src="@drawable/ic_volume_high"
         android:textSize="12sp"
+        android:scaleType="fitEnd"
         app:layout_constraintBottom_toBottomOf="@+id/seek_bar_volume"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@id/seek_bar_volume"

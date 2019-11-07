@@ -16,7 +16,9 @@ import io.r_a_d.radio2.playerstore.PlayerStore
 import java.util.Timer
 import android.view.MenuItem
 import android.net.Uri
+import androidx.preference.PreferenceManager
 import com.google.android.material.snackbar.Snackbar
+import io.r_a_d.radio2.ui.songs.request.Requestor
 
 
 /* Log to file import
@@ -76,6 +78,7 @@ class MainActivity : BaseActivity() {
                 PlayerStore.instance.queue.clear()
                 PlayerStore.instance.lp.clear()
                 PlayerStore.instance.initApi()
+                Requestor.instance.initFavorites()
                 val s = Snackbar.make(findViewById(R.id.nav_host_container), "Refreshing data..." as CharSequence, Snackbar.LENGTH_LONG)
                 s.show()
                 true
@@ -107,6 +110,7 @@ class MainActivity : BaseActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        preferenceStore = PreferenceManager.getDefaultSharedPreferences(this)
 
         // initialize programmatically accessible colors
         colorBlue = ResourcesCompat.getColor(resources, R.color.bluereq, null)
@@ -114,21 +118,6 @@ class MainActivity : BaseActivity() {
         colorGreenList = (ResourcesCompat.getColorStateList(resources, R.color.button_green, null))
         colorRedList = (ResourcesCompat.getColorStateList(resources, R.color.button_red, null))
         colorGreenListCompat = (ResourcesCompat.getColorStateList(resources, R.color.button_green_compat, null))
-
-        // UI Launch
-        setTheme(R.style.AppTheme)
-        setContentView(R.layout.activity_main)
-        attachKeyboardListeners()
-
-        val toolbar : Toolbar = findViewById(R.id.toolbar)
-
-        // before setting up the bottom bar, we must declare the top bar that will be used by the bottom bar to display titles.
-        setSupportActionBar(toolbar)
-
-        if (savedInstanceState == null) {
-            setupBottomNavigationBar()
-        } // Else, need to wait for onRestoreInstanceState
-
 
         // timers
         // the clockTicker is used to update the UI. It's OK if it dies when the app loses focus.
@@ -145,19 +134,35 @@ class MainActivity : BaseActivity() {
         if (savedInstanceState?.getBoolean("isInitialized") == true && PlayerStore.instance.isInitialized)
         {
             Log.d(tag, "skipped initialization")
-            return
+        } else {
+            // if the service is not started, start it in STOP mode.
+            // It's not a dummy action : with STOP mode, the player does not buffer audio (and does not use data connection without the user's consent).
+            // this is useful since the service must be started to register bluetooth devices buttons.
+            // (in case someone opens the app then pushes the PLAY button from their bluetooth device)
+            if(!PlayerStore.instance.isServiceStarted.value!!)
+                actionOnService(Actions.STOP)
+
+            // initialize some API data
+            PlayerStore.instance.initPicture(this)
+            PlayerStore.instance.streamerName.value = "" // initializing the streamer name will trigger an initApi from the observer in the Service.
+
+            // initialize the favorites
+            Requestor.instance.initFavorites()
         }
 
-        // if the service is not started, start it in STOP mode.
-        // It's not a dummy action : with STOP mode, the player does not buffer audio (and does not use data connection without the user's consent).
-        // this is useful since the service must be started to register bluetooth devices buttons.
-        // (in case someone opens the app then pushes the PLAY button from their bluetooth device)
-        if(!PlayerStore.instance.isServiceStarted.value!!)
-            actionOnService(Actions.STOP)
+        // initialize the UI
+        setTheme(R.style.AppTheme)
+        setContentView(R.layout.activity_main)
+        attachKeyboardListeners()
 
-        // initialize some API data
-        PlayerStore.instance.initPicture(this)
-        PlayerStore.instance.streamerName.value = "" // initializing the streamer name will trigger an initApi from the observer in the Service.
+        val toolbar : Toolbar = findViewById(R.id.toolbar)
+
+        // before setting up the bottom bar, we must declare the top bar that will be used by the bottom bar to display titles.
+        setSupportActionBar(toolbar)
+
+        if (savedInstanceState == null) {
+            setupBottomNavigationBar()
+        } // Else, need to wait for onRestoreInstanceState
     }
 
     override fun onDestroy() {

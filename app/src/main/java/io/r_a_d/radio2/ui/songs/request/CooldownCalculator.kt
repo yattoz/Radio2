@@ -58,8 +58,12 @@ fun delay(rawPriority: Int) : Int {
 }
 
 // I tweaked this to report in a single point whether the song is requestable or not
-fun coolDown(lastPlayed: Int, lastRequest: Int, requestsNbr: Int) : Long {
+fun coolDown(lastPlayed: Int?, lastRequest: Int?, requestsNbr: Int?) : Long {
+    if (requestsNbr == null || lastPlayed == null || lastRequest == null)
+        return Long.MAX_VALUE // maximum positive value : the song won't be requestable
+
     val delay = delay(requestsNbr)
     val now = (System.currentTimeMillis() / 1000)
     return max(lastPlayed, lastRequest) + delay - now
+    // if coolDown < 0, the song is requestable.
 }

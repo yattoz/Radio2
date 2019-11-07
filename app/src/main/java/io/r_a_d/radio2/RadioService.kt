@@ -107,6 +107,15 @@ class RadioService : MediaBrowserServiceCompat() {
         setVolume(it)
     }
 
+    private val isMutedObserver: Observer<Boolean> = Observer {
+        setVolume(
+            if (it)
+                null
+            else
+                -1
+        )
+    }
+
     private val isPlayingObserver: Observer<Boolean> = Observer {
         if (it)
             beginPlaying()
@@ -183,6 +192,7 @@ class RadioService : MediaBrowserServiceCompat() {
         PlayerStore.instance.currentSong.startTime.observeForever(startTimeObserver)
         PlayerStore.instance.volume.observeForever(volumeObserver)
         PlayerStore.instance.isPlaying.observeForever(isPlayingObserver)
+        PlayerStore.instance.isMuted.observeForever(isMutedObserver)
 
 
         startForeground(radioServiceId, nowPlayingNotification.notification)
@@ -236,6 +246,7 @@ class RadioService : MediaBrowserServiceCompat() {
         PlayerStore.instance.currentSong.startTime.removeObserver(startTimeObserver)
         PlayerStore.instance.volume.removeObserver(volumeObserver)
         PlayerStore.instance.isPlaying.removeObserver(isPlayingObserver)
+        PlayerStore.instance.isMuted.removeObserver(isMutedObserver)
 
 
         mediaSession.isActive = false
@@ -403,12 +414,19 @@ class RadioService : MediaBrowserServiceCompat() {
         mediaSession.setPlaybackState(playbackStateBuilder.build())
     }
 
-    fun setVolume(v: Int) {
+    fun setVolume(vol: Int?) {
+        var v = vol
+        when(v)
+        {
+            null -> { player.volume = 0f ; return } // null means "mute"
+            -1 -> v = PlayerStore.instance.volume.value // -1 means "restore previous volume"
+        }
+
         // re-shaped volume setter with a logarithmic (ln) function.
         // I think it sounds more natural this way. Adjust coefficient to change the function shape.
         // visualize it on any graphic calculator if you're unsure.
         val c : Float = 2.toFloat()
-        val x = v.toFloat()/100
+        val x : Float = v!!.toFloat()/100
         player.volume = -(1/c)* ln(1-(1- exp(-c))*x)
     }
 

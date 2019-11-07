@@ -54,6 +54,8 @@ class NowPlayingFragment : Fragment() {
         val streamerNameText : TextView = root.findViewById(R.id.streamerName)
         val songTitleNextText: TextView = root.findViewById(R.id.text_song_title_next)
         val songArtistNextText: TextView = root.findViewById(R.id.text_song_artist_next)
+        val volumeIconImage : ImageView = root.findViewById(R.id.volume_icon)
+
 
         TextViewCompat.setAutoSizeTextTypeUniformWithConfiguration(
             streamerNameText,4, 24, 2, TypedValue.COMPLEX_UNIT_SP)
@@ -86,7 +88,21 @@ class NowPlayingFragment : Fragment() {
 
         PlayerStore.instance.volume.observe(viewLifecycleOwner, Observer {
             volumeText.text = "$it%"
+            when {
+                it > 66 -> volumeIconImage.setImageResource(R.drawable.ic_volume_high)
+                it in 33..66 -> volumeIconImage.setImageResource(R.drawable.ic_volume_medium)
+                it in 0..33 -> volumeIconImage.setImageResource(R.drawable.ic_volume_low)
+                else -> volumeIconImage.setImageResource(R.drawable.ic_volume_off)
+            }
         })
+
+        PlayerStore.instance.isMuted.observe(viewLifecycleOwner, Observer {
+            if (it)
+                volumeIconImage.setImageResource(R.drawable.ic_volume_off)
+            else
+                PlayerStore.instance.volume.value = PlayerStore.instance.volume.value // force trigger volume observer
+        })
+
 
         PlayerStore.instance.streamerPicture.observe(viewLifecycleOwner, Observer { pic ->
             streamerPictureImageView.setImageBitmap(pic)
@@ -134,6 +150,10 @@ class NowPlayingFragment : Fragment() {
         val button: ImageButton = root.findViewById(R.id.play_pause)
         button.setOnClickListener{
             PlayerStore.instance.isPlaying.value = PlayerStore.instance.playbackState.value == PlaybackStateCompat.STATE_STOPPED
+        }
+
+        volumeIconImage.setOnClickListener{
+            PlayerStore.instance.isMuted.value = !PlayerStore.instance.isMuted.value!!
         }
 
         return root

@@ -23,8 +23,18 @@
                 android:iconifiedByDefault="false"
                 android:queryHint="Search for a song..."
                 />
-
         </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <TextView
+            android:id="@+id/noUserNameText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/no_user_name"
+            android:gravity="center"
+            android:textSize="24sp"
+            android:visibility="gone"
+            app:layout_constraintTop_toBottomOf="@id/search"
+            />
 
         <androidx.recyclerview.widget.RecyclerView
             android:layout_width="match_parent"

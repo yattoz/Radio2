@@ -10,7 +10,7 @@ class Song(artistTitle: String = "", _id : Int = 0, _isRequestable : Boolean = f
     val type: MutableLiveData<Int> = MutableLiveData()
     val startTime: MutableLiveData<Long> = MutableLiveData()
     val stopTime: MutableLiveData<Long> = MutableLiveData()
-    var id: Int = _id
+    var id: Int? = _id
     var isRequestable : Boolean = _isRequestable
 
     init {
@@ -21,7 +21,7 @@ class Song(artistTitle: String = "", _id : Int = 0, _isRequestable : Boolean = f
     }
 
     override fun toString() : String {
-        return "${artist.value} - ${title.value} | type=${type.value} | times ${startTime.value} - ${stopTime.value}\n"
+        return "id=$id | ${artist.value} - ${title.value} | type=${type.value} | times ${startTime.value} - ${stopTime.value}\n"
     }
 
     fun setTitleArtist(data: String)

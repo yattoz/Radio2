@@ -52,10 +52,10 @@
                 android:id="@+id/parameters_host_container"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
+                android:layout_margin="8dp"
                 />
 
         </androidx.coordinatorlayout.widget.CoordinatorLayout>
-
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
