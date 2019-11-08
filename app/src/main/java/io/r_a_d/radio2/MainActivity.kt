@@ -15,7 +15,6 @@ import io.r_a_d.radio2.playerstore.PlayerStore
 
 import java.util.Timer
 import android.view.MenuItem
-import android.net.Uri
 import androidx.preference.PreferenceManager
 import com.google.android.material.snackbar.Snackbar
 import io.r_a_d.radio2.ui.songs.request.Requestor
@@ -85,10 +84,10 @@ class MainActivity : BaseActivity() {
             }
             R.id.action_settings -> {
                 val i = Intent(this, ParametersActivity::class.java)
-                // TODO add stuff
                 startActivity(i)
                 true
             }
+            /*
             R.id.action_bug_submit -> {
                 val url = getString(R.string.github_url_new_issue)
                 val i = Intent(Intent.ACTION_VIEW)
@@ -96,6 +95,8 @@ class MainActivity : BaseActivity() {
                 startActivity(i)
                 true
             }
+
+             */
             else -> super.onOptionsItemSelected(item)
         }
     }

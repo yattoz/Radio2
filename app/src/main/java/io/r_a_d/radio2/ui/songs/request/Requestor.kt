@@ -13,7 +13,6 @@ import org.json.JSONObject
 import java.io.BufferedReader
 import java.io.IOException
 import java.io.InputStreamReader
-import java.lang.Exception
 import java.net.CookieHandler
 import java.net.CookieManager
 import java.net.MalformedURLException
@@ -23,6 +22,7 @@ import java.util.regex.Pattern
 
 import javax.net.ssl.HttpsURLConnection
 import kotlin.collections.ArrayList
+import kotlin.random.Random
 
 /**
  * Requests a song via the website's API
@@ -35,6 +35,7 @@ import kotlin.collections.ArrayList
  */
 
 class Requestor {
+    var addRequestMeta: String = ""
     private val cookieManager: CookieManager = CookieManager()
     private val requestUrl = "https://r-a-d.io/request/%1\$d"
     private val searchUrl = "https://r-a-d.io/api/search/%1s?page=%2\$d"
@@ -87,7 +88,7 @@ class Requestor {
                 val lastRequested : Int? = if (item.isNull("lastrequested")) null else item.getInt("lastrequested")
                 val lastPlayed : Int? = if (item.isNull("lastplayed")) null else item.getInt("lastplayed")
                 val requestCount : Int? = if (item.isNull("requestcount")) null else item.getInt("requestcount")
-                val isRequestable = coolDown(lastPlayed, lastRequested, requestCount) < 0
+                val isRequestable = (coolDown(lastPlayed, lastRequested, requestCount) < 0)
                 Log.d(tag, "val : $id")
                 favoritesSongArray.add(Song(artistTitle, id ?: 0, isRequestable))
             }
@@ -247,7 +248,7 @@ class Requestor {
                     line = br.readLine()
                 }
             } else {
-                response = ""
+                response += ""
             }
         } catch (ex: IOException) {
             ex.printStackTrace()
@@ -263,7 +264,7 @@ class Requestor {
         val key = response.names()!!.get(0) as String
         val value = response.getString(key)
 
-        snackBarText.postValue(value)
+        snackBarText.postValue(addRequestMeta + value)
     }
 
 
@@ -273,6 +274,19 @@ class Requestor {
             Async(scrapeToken, postToken, ActionOnError.NOTIFY)
         }
         Async(requestSong, postSong, ActionOnError.NOTIFY, requestSongUrl)
+    }
+
+    fun raF() : Song {
+        // request a random favorite song. HELL YEAH
+        val requestableSongArray = ArrayList<Song>()
+        for (i in 0 until favoritesSongArray.size)
+        {
+            if (favoritesSongArray[i].isRequestable && (favoritesSongArray[i].id ?: 0) > 0)
+                requestableSongArray.add(favoritesSongArray[i])
+        }
+        Log.d(tag, requestableSongArray.toString())
+        val songNbr = Random(System.currentTimeMillis()).nextInt(1, requestableSongArray.size)
+        return requestableSongArray[songNbr]
     }
 
     companion object {

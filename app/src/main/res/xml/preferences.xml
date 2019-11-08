@@ -29,5 +29,11 @@
         app:title="Set user name for favorite songs"
         />
 
+    <Preference
+        app:iconSpaceReserved="false"
+        app:key="submitBug"
+        app:title="Submit a bug (opens GitHub in a web browser)"
+        />
+
 
 </PreferenceScreen>

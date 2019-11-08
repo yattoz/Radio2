@@ -17,11 +17,23 @@
             android:padding="4dp">
             <SearchView
                 android:id="@+id/searchBox"
-                android:layout_width="match_parent"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toStartOf="@id/ra_f_button"
                 android:iconifiedByDefault="false"
                 android:queryHint="Search for a song..."
+                />
+
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/ra_f_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                android:text="@string/ra_f"
+                android:visibility="gone"
                 />
         </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -47,9 +59,6 @@
             >
 
         </androidx.recyclerview.widget.RecyclerView>
-
-
-
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

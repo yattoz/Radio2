@@ -2,8 +2,6 @@ package io.r_a_d.radio2
 
 import android.content.SharedPreferences
 import android.content.res.ColorStateList
-import androidx.preference.PreferenceManager
-
 
 const val tag = "io.r_a_d.radio2"
 const val noConnectionValue = "No connection"

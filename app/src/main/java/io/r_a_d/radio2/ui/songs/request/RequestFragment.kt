@@ -10,7 +10,6 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.google.android.material.snackbar.Snackbar
 import io.r_a_d.radio2.R
 
 class RequestFragment : Fragment() {
@@ -38,15 +37,6 @@ class RequestFragment : Fragment() {
         }
     }
 
-    private val snackBarTextObserver: Observer<String?> = Observer {
-        if (Requestor.instance.snackBarText.value != "")
-        {
-            val s = Snackbar.make(searchView, Requestor.instance.snackBarText.value as CharSequence, Snackbar.LENGTH_LONG)
-            s.show()
-            Requestor.instance.snackBarText.value = "" // resetting afterwards to avoid re-triggering it when we enter again the fragment
-        }
-    }
-
     private val requestSongObserver = Observer<Boolean> {
         Log.d(tag, "request song list changed")
         viewAdapter.notifyDataSetChanged()
@@ -65,7 +55,6 @@ class RequestFragment : Fragment() {
         viewManager = LinearLayoutManager(context)
         viewAdapter = RequestSongAdapter(Requestor.instance.requestSongArray)
 
-
         recyclerView = root.findViewById<RecyclerView>(R.id.request_recycler).apply {
             // use this setting to improve performance if you know that changes
             // in content do not change the layout size of the RecyclerView
@@ -78,12 +67,10 @@ class RequestFragment : Fragment() {
             adapter = viewAdapter
         }
         Requestor.instance.isRequestResultUpdated.observeForever(requestSongObserver)
-        Requestor.instance.snackBarText.observeForever(snackBarTextObserver)
         return root
     }
 
     override fun onDestroyView() {
-        Requestor.instance.snackBarText.removeObserver(snackBarTextObserver)
         Requestor.instance.isRequestResultUpdated.removeObserver(requestSongObserver)
         super.onDestroyView()
     }

@@ -5,21 +5,52 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentPagerAdapter
+import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
-import androidx.viewpager.widget.ViewPager
+import com.google.android.material.snackbar.BaseTransientBottomBar
+import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.tabs.TabLayout
 import io.r_a_d.radio2.R
 import io.r_a_d.radio2.ui.songs.queuelp.LastPlayedFragment
 import io.r_a_d.radio2.ui.songs.queuelp.QueueFragment
 import io.r_a_d.radio2.ui.songs.request.FavoritesFragment
 import io.r_a_d.radio2.ui.songs.request.RequestFragment
+import io.r_a_d.radio2.ui.songs.request.Requestor
 
 class SongsFragment : Fragment() {
 
     private lateinit var songsViewModel: SongsViewModel
     private lateinit var adapter : SongsPagerAdapter
+    private lateinit var snackBar : Snackbar
+
+
+    private val snackBarTextObserver: Observer<String?> = Observer {
+        if (Requestor.instance.snackBarText.value != "")
+        {
+            snackBar = Snackbar.make(songsViewModel.viewPager, "", Snackbar.LENGTH_INDEFINITE)
+            snackBar.setAction("DISMISS") {
+                snackBar.dismiss()
+            }
+            snackBar.behavior = BaseTransientBottomBar.Behavior().apply {
+                setSwipeDirection(BaseTransientBottomBar.Behavior.SWIPE_DIRECTION_ANY)
+            }
+
+            val snackBarView = snackBar.view
+            val textView =
+                snackBarView.findViewById(com.google.android.material.R.id.snackbar_text) as TextView
+            if (Requestor.instance.addRequestMeta != "")
+                textView.maxLines = 4
+            else
+                textView.maxLines = 2
+            snackBar.setText((it as CharSequence))
+            snackBar.show()
+            Requestor.instance.snackBarText.value = "" // resetting afterwards to avoid re-triggering it when we enter again the fragment
+            Requestor.instance.addRequestMeta = ""
+        }
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -49,7 +80,14 @@ class SongsFragment : Fragment() {
             Log.d(tag, "SongFragment view created")
         //}
 
+        Requestor.instance.snackBarText.observeForever(snackBarTextObserver)
+
         return songsViewModel.root
+    }
+
+    override fun onDestroyView() {
+        Requestor.instance.snackBarText.removeObserver(snackBarTextObserver)
+        super.onDestroyView()
     }
 
 }

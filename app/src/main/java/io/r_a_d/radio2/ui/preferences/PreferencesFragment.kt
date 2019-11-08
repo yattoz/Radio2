@@ -1,7 +1,10 @@
 package io.r_a_d.radio2.ui.preferences
 
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import androidx.preference.EditTextPreference
+import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.SeekBarPreference
 import io.r_a_d.radio2.R
@@ -19,5 +22,14 @@ class PreferencesFragment : PreferenceFragmentCompat() {
             Requestor.instance.initFavorites(newValue as String) // need to be as parameter cause the callback is called BEFORE PARAMETER SET
             true
         }
+        val submitBug = preferenceScreen.findPreference<Preference>("submitBug")
+        submitBug!!.setOnPreferenceClickListener {
+            val url = getString(R.string.github_url_new_issue)
+            val i = Intent(Intent.ACTION_VIEW)
+            i.data = Uri.parse(url)
+            startActivity(i)
+            true
+        }
+
     }
 }

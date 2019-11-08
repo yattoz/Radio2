@@ -1,19 +1,19 @@
 package io.r_a_d.radio2.ui.songs.request
 
+import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.SearchView
 import android.widget.TextView
+import androidx.appcompat.widget.AppCompatButton
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.google.android.material.snackbar.Snackbar
-import io.r_a_d.radio2.R
-import io.r_a_d.radio2.preferenceStore
-import kotlinx.android.synthetic.main.fragment_request.*
+import io.r_a_d.radio2.*
+
 
 class FavoritesFragment : Fragment()  {
 
@@ -35,15 +35,6 @@ class FavoritesFragment : Fragment()  {
 
     private val favoritesSongObserver : Observer<Boolean> = Observer {
         viewAdapter.notifyDataSetChanged()
-    }
-
-    private val snackBarTextObserver: Observer<String?> = Observer {
-        if (Requestor.instance.snackBarText.value != "")
-        {
-            val s = Snackbar.make(recyclerView, Requestor.instance.snackBarText.value as CharSequence, Snackbar.LENGTH_LONG)
-            s.show()
-            Requestor.instance.snackBarText.value = "" // resetting afterwards to avoid re-triggering it when we enter again the fragment
-        }
     }
 
     override fun onCreateView(
@@ -68,10 +59,7 @@ class FavoritesFragment : Fragment()  {
         } else {
             noUserNameText.visibility = View.GONE
         }
-
         viewAdapter = RequestSongAdapter(Requestor.instance.favoritesSongArray)
-
-
         recyclerView = root.findViewById<RecyclerView>(R.id.request_recycler).apply {
             // use this setting to improve performance if you know that changes
             // in content do not change the layout size of the RecyclerView
@@ -83,15 +71,29 @@ class FavoritesFragment : Fragment()  {
             // specify an viewAdapter (see also next example)
             adapter = viewAdapter
         }
+        val raFButton : AppCompatButton = root.findViewById(R.id.ra_f_button)
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) // for API21+ Material Design makes ripples on the button.
+            raFButton.supportBackgroundTintList = colorGreenList
+        else // But on API20- no Material Design support, so we add some more color when clicked
+            raFButton.supportBackgroundTintList = colorGreenListCompat
+        raFButton.isEnabled = true
+        raFButton.isClickable = true
+        raFButton.setOnClickListener {
+            val s  = Requestor.instance.raF()
+            Requestor.instance.snackBarText.value = ""
+            Requestor.instance.addRequestMeta = "Request: ${s.artist.value} - ${s.title.value}\n"
+            Requestor.instance.request(s.id)
+        }
+        raFButton.visibility = View.VISIBLE
+
         Requestor.instance.isFavoritesUpdated.observeForever(favoritesSongObserver) // TODO add pull to refresh
-        Requestor.instance.snackBarText.observeForever(snackBarTextObserver)
 
         return root
     }
 
     override fun onDestroyView() {
         Requestor.instance.isFavoritesUpdated.removeObserver(favoritesSongObserver)
-        Requestor.instance.snackBarText.removeObserver(snackBarTextObserver)
         super.onDestroyView()
     }
 
