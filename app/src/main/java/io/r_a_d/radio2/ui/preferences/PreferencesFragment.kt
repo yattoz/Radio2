@@ -8,6 +8,8 @@ import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.SeekBarPreference
 import io.r_a_d.radio2.R
+import io.r_a_d.radio2.streamerNotificationService.startStreamerMonitor
+import io.r_a_d.radio2.streamerNotificationService.stopStreamerMonitor
 import io.r_a_d.radio2.ui.songs.request.Requestor
 
 class PreferencesFragment : PreferenceFragmentCompat() {
@@ -31,5 +33,13 @@ class PreferencesFragment : PreferenceFragmentCompat() {
             true
         }
 
+        val streamerNotification = preferenceScreen.findPreference<Preference>("newStreamerNotification")
+        streamerNotification?.setOnPreferenceChangeListener { _, newValue ->
+            if ((newValue as Boolean))
+                startStreamerMonitor(context!!, force = true)
+            else
+                stopStreamerMonitor(context!!)
+            true
+        }
     }
 }

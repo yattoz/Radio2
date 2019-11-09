@@ -1,5 +1,6 @@
 package io.r_a_d.radio2
 
+import android.app.NotificationManager
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -23,6 +24,7 @@ import android.support.v4.media.MediaMetadataCompat
 import android.telephony.PhoneStateListener
 import android.telephony.TelephonyManager
 import android.view.KeyEvent
+import androidx.core.app.NotificationCompat
 import androidx.lifecycle.Observer
 import androidx.media.AudioAttributesCompat
 import androidx.media.AudioFocusRequestCompat
@@ -183,7 +185,12 @@ class RadioService : MediaBrowserServiceCompat() {
         setupMediaPlayer()
         createMediaSession()
 
-        nowPlayingNotification = NowPlayingNotification()
+        nowPlayingNotification = NowPlayingNotification(
+            notificationChannelId = this.getString(R.string.nowPlayingChannelId),
+            notificationChannel = R.string.nowPlayingNotificationChannel,
+            notificationId = 1,
+            notificationImportance = NotificationCompat.PRIORITY_LOW
+        )
         nowPlayingNotification.create(this, mediaSession)
 
 

@@ -17,6 +17,7 @@ import java.util.Timer
 import android.view.MenuItem
 import androidx.preference.PreferenceManager
 import com.google.android.material.snackbar.Snackbar
+import io.r_a_d.radio2.streamerNotificationService.startStreamerMonitor
 import io.r_a_d.radio2.ui.songs.request.Requestor
 
 
@@ -112,6 +113,9 @@ class MainActivity : BaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         preferenceStore = PreferenceManager.getDefaultSharedPreferences(this)
+
+        // TODO TEST
+        startStreamerMonitor(this)
 
         // initialize programmatically accessible colors
         colorBlue = ResourcesCompat.getColor(resources, R.color.bluereq, null)

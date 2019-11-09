@@ -4,14 +4,13 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     >
 
-    <!--
     <SwitchPreferenceCompat
-        app:key="notifications"
+        app:key="newStreamerNotification"
         app:iconSpaceReserved="false"
         app:title="Enable streamer notification"
         app:singleLineTitle="false"
+        app:defaultValue="false"
         />
-    -->
 
     <SeekBarPreference
         app:key="volume"
@@ -28,6 +27,12 @@
         app:iconSpaceReserved="false"
         app:key="userName"
         app:title="Set user name for favorite songs"
+        />
+
+    <ListPreference
+        app:iconSpaceReserved="false"
+        app:key="streamerMonitorFrequency"
+        app:title="Streamer monitor frequency"
         />
 
     <Preference
