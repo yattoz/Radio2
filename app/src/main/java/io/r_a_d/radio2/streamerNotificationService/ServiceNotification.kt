@@ -38,6 +38,6 @@ class ServiceNotification(
 
         builder.setContentTitle("Never miss a stream! Current: ${StreamerMonitorService.instance.streamerName.value}")
         builder.setContentText("Last update: ${hours}:${minutes}:${seconds}")
-        super.show()
+        notification = builder.build()
     }
 }

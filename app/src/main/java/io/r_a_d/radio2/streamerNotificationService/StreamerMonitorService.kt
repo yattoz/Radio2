@@ -3,6 +3,7 @@ package io.r_a_d.radio2.streamerNotificationService
 import android.app.Service
 import android.content.ComponentName
 import android.content.Intent
+import android.os.Build
 import android.os.IBinder
 import android.util.Log
 import androidx.core.app.NotificationCompat
@@ -34,7 +35,7 @@ class StreamerMonitorService : Service() {
 
     private val streamerNameObserver: Observer<String> = Observer {
         Log.d(tag, "notification updated")
-        var previousStreamer = ""
+        val previousStreamer: String
         if (PreferenceManager.getDefaultSharedPreferences(this).contains("streamerName"))
         {
             previousStreamer = PreferenceManager.getDefaultSharedPreferences(this).getString("streamerName", "") ?: ""
@@ -69,6 +70,11 @@ class StreamerMonitorService : Service() {
     override fun onCreate() {
         super.onCreate()
 
+        with(PreferenceManager.getDefaultSharedPreferences(this).edit()){
+            remove("streamerName")
+            commit() // I commit on main thread to be sure it's been updated before continuing.
+        }
+
         streamerMonitorNotification = ServiceNotification(
             notificationChannelId = this.getString(R.string.streamerServiceChannelId),
             notificationChannel = R.string.streamerServiceChannel,
@@ -76,7 +82,9 @@ class StreamerMonitorService : Service() {
             notificationImportance = NotificationCompat.PRIORITY_LOW
         )
         streamerMonitorNotification.create(this)
-        startForeground(streamerMonitorServiceId, streamerMonitorNotification.notification)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+            startForeground(streamerMonitorServiceId, streamerMonitorNotification.notification)
+
 
         instance.streamerName.observeForever(streamerNameObserver)
 
