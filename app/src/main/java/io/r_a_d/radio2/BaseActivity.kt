@@ -10,8 +10,11 @@ import android.view.ViewTreeObserver
 import android.view.Window
 
 import androidx.appcompat.app.AppCompatActivity
+import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.constraintlayout.widget.ConstraintSet
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.preference.PreferenceManager
+import com.google.android.exoplayer2.text.Cue
 import com.google.android.material.bottomnavigation.BottomNavigationView
 
 abstract class BaseActivity : AppCompatActivity() {
@@ -23,6 +26,7 @@ abstract class BaseActivity : AppCompatActivity() {
         val width =  ((rootLayout?.width ?: 0))
 
         Log.d(tag, "$viewWidth, $viewHeight, $width, $height, ${viewHeight.toDouble()/viewWidth.toDouble()}, ${height.toDouble()/width.toDouble()}")
+
 
 
         val broadcastManager = LocalBroadcastManager.getInstance(this@BaseActivity)
@@ -40,34 +44,95 @@ abstract class BaseActivity : AppCompatActivity() {
             val intent = Intent("KeyboardWillHide")
             broadcastManager.sendBroadcast(intent)
         }
+
+        // modify layout to adapt for portrait/landscape
+        if (viewHeight.toDouble()/viewWidth.toDouble() < 1)
+        {
+            onOrientation(isLandscape = true)
+        } else {
+            onOrientation(isLandscape = false)
+        }
     }
 
     private var keyboardListenersAttached = false
     private var rootLayout: ViewGroup? = null
-/*
-    protected var onShowKeyboard : (keyboardHeight: Int) -> Unit = {
+
+    private fun onOrientation(isLandscape: Boolean = false) {
+        val parentLayout = findViewById<ConstraintLayout>(R.id.parentNowPlaying)
+        val constraintSet = ConstraintSet()
+        constraintSet.clone(parentLayout)
+
+        if (isLandscape)
+        {
+            /*
+            block 1:
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="@id/splitHorizontalLayout"
+            block 2:
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintStart_toEndOf="@id/splitHorizontalLayout"
+             */
+            constraintSet.connect(R.id.layoutBlock1, ConstraintSet.BOTTOM, R.id.parentNowPlaying, ConstraintSet.BOTTOM)
+            constraintSet.connect(R.id.layoutBlock1, ConstraintSet.END, R.id.splitHorizontalLayout, ConstraintSet.END)
+            constraintSet.connect(R.id.layoutBlock2, ConstraintSet.TOP, R.id.parentNowPlaying, ConstraintSet.TOP)
+            constraintSet.connect(R.id.layoutBlock2, ConstraintSet.START, R.id.splitHorizontalLayout, ConstraintSet.END)
+            constraintSet.setMargin(R.id.layoutBlock1, ConstraintSet.END, 16)
+            constraintSet.setMargin(R.id.layoutBlock2, ConstraintSet.START, 16)
+        } else {
+            constraintSet.connect(R.id.layoutBlock1, ConstraintSet.BOTTOM, R.id.splitVerticalLayout, ConstraintSet.BOTTOM)
+            constraintSet.connect(R.id.layoutBlock1, ConstraintSet.END, R.id.parentNowPlaying, ConstraintSet.END)
+            constraintSet.connect(R.id.layoutBlock2, ConstraintSet.TOP, R.id.splitVerticalLayout, ConstraintSet.BOTTOM)
+            constraintSet.connect(R.id.layoutBlock2, ConstraintSet.START, R.id.parentNowPlaying, ConstraintSet.START)
+            constraintSet.setMargin(R.id.layoutBlock1, ConstraintSet.END, 0)
+            constraintSet.setMargin(R.id.layoutBlock2, ConstraintSet.START, 0)
+        }
+
+        // block 1
+        /*
+                app:layout_constraintBottom_toTopOf="@id/nowPlayingGuideline"
+        app:layout_constraintEnd_toEndOf="parent"
+        >
+        <!--
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="@id/splitHorizontalLayout"
+        android:layout_marginRight="8dp"
+        android:layout_marginEnd="8dp"
+        -->
+         */
+
+        // blokc 2
+        /*
+        app:layout_constraintTop_toBottomOf="@id/layoutBlock1"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+
+        >
+        <!--
+
+        android:layout_marginLeft="8dp"
+        android:layout_marginStart="8dp"
+        -->
+
+         */
+        constraintSet.applyTo(parentLayout)
 
     }
-    protected var onHideKeyboard : () -> Unit = {
 
+
+    // keyboard stuff
+    private fun onShowKeyboard(keyboardHeight: Int) {
+        // do things when keyboard is shown
+        val bottomNavigationView = findViewById<BottomNavigationView>(R.id.bottom_nav)
+        bottomNavigationView.visibility = View.GONE
+        Log.d(tag, "bottomNav visibility set to GONE (height $keyboardHeight)")
     }
-
-
- */
-// keyboard stuff
-private fun onShowKeyboard(keyboardHeight: Int) {
-    // do things when keyboard is shown
-    val bottomNavigationView = findViewById<BottomNavigationView>(R.id.bottom_nav)
-    bottomNavigationView.visibility = View.GONE
-    Log.d(tag, "bottomNav visibility set to GONE (height $keyboardHeight)")
-}
 
      private fun onHideKeyboard() {
         // do things when keyboard is hidden
         val bottomNavigationView = findViewById<BottomNavigationView>(R.id.bottom_nav)
         bottomNavigationView.visibility = View.VISIBLE
         Log.d(tag, "bottomNav visibility set to VISIBLE")
-
     }
 
     protected fun attachKeyboardListeners() {
@@ -80,11 +145,6 @@ private fun onShowKeyboard(keyboardHeight: Int) {
         rootLayout!!.viewTreeObserver.addOnGlobalLayoutListener(keyboardLayoutListener)
 
         keyboardListenersAttached = true
-    }
-
-    override fun onCreate(savedInstanceState: Bundle?, persistentState: PersistableBundle?) {
-        super.onCreate(savedInstanceState, persistentState)
-
     }
 
     override fun onDestroy() {
