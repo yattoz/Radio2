@@ -89,7 +89,7 @@ class Requestor {
                 val lastPlayed : Int? = if (item.isNull("lastplayed")) null else item.getInt("lastplayed")
                 val requestCount : Int? = if (item.isNull("requestcount")) null else item.getInt("requestcount")
                 val isRequestable = (coolDown(lastPlayed, lastRequested, requestCount) < 0)
-                Log.d(tag, "val : $id")
+                //Log.d(tag, "val : $id")
                 favoritesSongArray.add(Song(artistTitle, id ?: 0, isRequestable))
             }
             Log.d(tag, "favorites : $favoritesSongArray")
@@ -117,7 +117,6 @@ class Requestor {
         val post : (Any?) -> Unit = {
             val response = RequestResponse(it as JSONObject)
 
-            Log.d(tag, response.toString())
             responseArray.add(response)
             for (i in 0 until response.songs.size)
             {
@@ -284,7 +283,6 @@ class Requestor {
             if (favoritesSongArray[i].isRequestable && (favoritesSongArray[i].id ?: 0) > 0)
                 requestableSongArray.add(favoritesSongArray[i])
         }
-        Log.d(tag, requestableSongArray.toString())
         val songNbr = Random(System.currentTimeMillis()).nextInt(1, requestableSongArray.size)
         return requestableSongArray[songNbr]
     }

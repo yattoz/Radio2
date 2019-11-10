@@ -4,35 +4,39 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     >
 
+
     <SwitchPreferenceCompat
         app:key="newStreamerNotification"
         app:iconSpaceReserved="false"
-        app:title="Enable streamer notification"
+        app:title="New streamer notification (drains battery!)"
         app:singleLineTitle="false"
         app:defaultValue="false"
         />
 
-    <SeekBarPreference
-        app:key="volume"
+    <ListPreference
         app:iconSpaceReserved="false"
-        app:title="Set default volume"
-        app:singleLineTitle="false"
-        app:min="0"
-        android:max="100"
-        android:defaultValue="100"
-        app:showSeekBarValue="true"
+        app:key="streamerMonitorPeriodPref"
+        app:title="Streamer monitor frequency"
+        android:entries="@array/streamerFetchPeriodString"
+        android:entryValues="@array/streamerFetchPeriod"
+        android:defaultValue="1"
         />
 
     <EditTextPreference
         app:iconSpaceReserved="false"
         app:key="userName"
-        app:title="Set user name for favorite songs"
+        app:title="User name for favorite songs"
         />
 
-    <ListPreference
+    <SeekBarPreference
+        app:key="volume"
         app:iconSpaceReserved="false"
-        app:key="streamerMonitorFrequency"
-        app:title="Streamer monitor frequency"
+        app:title="Volume at startup"
+        app:singleLineTitle="false"
+        app:min="0"
+        android:max="100"
+        android:defaultValue="100"
+        app:showSeekBarValue="true"
         />
 
     <Preference

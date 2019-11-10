@@ -1,7 +1,7 @@
 package io.r_a_d.radio2.streamerNotificationService
 
+
 import android.app.Service
-import android.content.ComponentName
 import android.content.Intent
 import android.os.Build
 import android.os.IBinder
@@ -10,31 +10,18 @@ import androidx.core.app.NotificationCompat
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
 import androidx.preference.PreferenceManager
+import androidx.work.*
+import io.r_a_d.radio2.Actions
 import io.r_a_d.radio2.R
-import io.r_a_d.radio2.StreamerMonitorTick
-import io.r_a_d.radio2.preferenceStore
 import io.r_a_d.radio2.tag
 import java.util.Timer
+import java.util.concurrent.TimeUnit
 
 class StreamerMonitorService : Service() {
-
-    // the companion object is meant to access the streamerName (as MutableLiveData)
-    companion object {
-        val instance = StreamerMonitorService()
+    override fun onBind(intent: Intent): IBinder? {
+        return null     // no binding allowed nor needed
     }
-
-    val streamerName = MutableLiveData<String>()
-    private lateinit var streamerMonitorNotification : ServiceNotification
-    private val streamerMonitorServiceId = 2
-    private val tickerPeriod : Long = 4 // seconds
-    private val lightTicker: Timer = Timer()
-
-    init {
-        streamerName.value = ""
-    }
-
     private val streamerNameObserver: Observer<String> = Observer {
-        Log.d(tag, "notification updated")
         val previousStreamer: String
         if (PreferenceManager.getDefaultSharedPreferences(this).contains("streamerName"))
         {
@@ -57,25 +44,11 @@ class StreamerMonitorService : Service() {
             putString("streamerName", it)
             apply()
         }
-
-
-        streamerMonitorNotification.update(this)
-
-    }
-
-    override fun onBind(intent: Intent): IBinder? {
-        return null     // no binding allowed nor needed
     }
 
     override fun onCreate() {
         super.onCreate()
-
-        with(PreferenceManager.getDefaultSharedPreferences(this).edit()){
-            remove("streamerName")
-            commit() // I commit on main thread to be sure it's been updated before continuing.
-        }
-
-        streamerMonitorNotification = ServiceNotification(
+        val streamerMonitorNotification = ServiceNotification(
             notificationChannelId = this.getString(R.string.streamerServiceChannelId),
             notificationChannel = R.string.streamerServiceChannel,
             notificationId = 2,
@@ -83,27 +56,46 @@ class StreamerMonitorService : Service() {
         )
         streamerMonitorNotification.create(this)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
-            startForeground(streamerMonitorServiceId, streamerMonitorNotification.notification)
+        {
+            streamerMonitorNotification.update()
+            streamerMonitorNotification.show()
+            startForeground(2, streamerMonitorNotification.notification)
+        }
 
+        WorkerStore.instance.tickerPeriod = 60 *
+                (if (PreferenceManager.getDefaultSharedPreferences(this).contains("streamerMonitorPeriodPref"))
+                    Integer.parseInt(PreferenceManager.getDefaultSharedPreferences(this).getString("streamerMonitorPeriodPref", "15")!!).toLong()
+                else
+                    15)
+        Log.d(tag, "tickerPeriod = ${WorkerStore.instance.tickerPeriod}")
 
-        instance.streamerName.observeForever(streamerNameObserver)
-
-        lightTicker.scheduleAtFixedRate(StreamerMonitorTick(), 1 * 1000, tickerPeriod * 1000)
+        with(PreferenceManager.getDefaultSharedPreferences(this).edit()){
+            remove("streamerName")
+            commit() // I commit on main thread to be sure it's been updated before continuing.
+        }
+        startAlarm(this)
 
         Log.d(tag, "streamerMonitor created")
-    }
 
-    override fun startService(service: Intent?): ComponentName? {
-        return super.startService(service)
-    }
-
-    override fun onDestroy() {
-        instance.streamerName.removeObserver(streamerNameObserver)
-        lightTicker.cancel()
-        super.onDestroy()
+        WorkerStore.instance.streamerName.observeForever(streamerNameObserver)
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        return super.onStartCommand(intent, flags, startId)
+        when (intent?.getStringExtra("action")) {
+            Actions.NOTIFY.name -> {
+                Log.d(tag, "alarm fire" + Actions.NOTIFY.name)
+                fetchStreamer(this)
+                startAlarm(this) // schedule next alarm
+            }
+            Actions.KILL.name -> {stopForeground(true); stopSelf()}
+        }
+        super.onStartCommand(intent, flags, startId)
+        return START_STICKY
+    }
+
+    override fun onDestroy() {
+        WorkerStore.instance.streamerName.removeObserver(streamerNameObserver)
+        stopAlarm(this)
+        super.onDestroy()
     }
 }
