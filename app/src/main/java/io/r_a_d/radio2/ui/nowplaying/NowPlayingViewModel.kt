@@ -10,6 +10,7 @@ class NowPlayingViewModel: ViewModel() {
        Data persistence is currently in beta, and poorly documented (some pages don't even match!)
        For the moment, we will store data related to playback state in PlayerStore.
     */
+    var isPreviousLandscape = false
 
     var seekBarChangeListener: SeekBar.OnSeekBarChangeListener =
         object : SeekBar.OnSeekBarChangeListener {
