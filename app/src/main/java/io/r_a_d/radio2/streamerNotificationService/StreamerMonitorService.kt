@@ -7,15 +7,12 @@ import android.os.Build
 import android.os.IBinder
 import android.util.Log
 import androidx.core.app.NotificationCompat
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
 import androidx.preference.PreferenceManager
-import androidx.work.*
 import io.r_a_d.radio2.Actions
 import io.r_a_d.radio2.R
 import io.r_a_d.radio2.tag
-import java.util.Timer
-import java.util.concurrent.TimeUnit
+import java.util.*
 
 class StreamerMonitorService : Service() {
     override fun onBind(intent: Intent): IBinder? {
@@ -42,7 +39,7 @@ class StreamerMonitorService : Service() {
 
         with(PreferenceManager.getDefaultSharedPreferences(this).edit()){
             putString("streamerName", it)
-            apply()
+            commit()
         }
     }
 
@@ -54,9 +51,9 @@ class StreamerMonitorService : Service() {
             notificationId = 2,
             notificationImportance = NotificationCompat.PRIORITY_LOW
         )
-        streamerMonitorNotification.create(this)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
         {
+            streamerMonitorNotification.create(this)
             streamerMonitorNotification.update()
             streamerMonitorNotification.show()
             startForeground(2, streamerMonitorNotification.notification)
@@ -73,17 +70,23 @@ class StreamerMonitorService : Service() {
             remove("streamerName")
             commit() // I commit on main thread to be sure it's been updated before continuing.
         }
-        startAlarm(this)
-
-        Log.d(tag, "streamerMonitor created")
-
         WorkerStore.instance.streamerName.observeForever(streamerNameObserver)
+        WorkerStore.instance.isServiceStarted = true
+        startAlarm(this)
+        Log.d(tag, "streamerMonitor created")
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         when (intent?.getStringExtra("action")) {
             Actions.NOTIFY.name -> {
-                Log.d(tag, "alarm fire" + Actions.NOTIFY.name)
+                val date = Date()   // given date
+                val calendar = Calendar.getInstance() // creates a new calendar instance
+                calendar.time = date   // assigns calendar to given date
+                val hours = calendar.get(Calendar.HOUR_OF_DAY) // gets hour in 24h format
+                //val hours_american = calendar.get(Calendar.HOUR)        // gets hour in 12h format
+                val minutes = calendar.get(Calendar.MINUTE)       // gets month number, NOTE this is zero based!
+
+                Log.d(tag, "Fetched streamer name at ${hours}:${if (minutes < 10) "0" else ""}${minutes}")
                 fetchStreamer(this)
                 startAlarm(this) // schedule next alarm
             }
@@ -95,7 +98,7 @@ class StreamerMonitorService : Service() {
 
     override fun onDestroy() {
         WorkerStore.instance.streamerName.removeObserver(streamerNameObserver)
-        stopAlarm(this)
+        WorkerStore.instance.isServiceStarted = false
         super.onDestroy()
     }
 }

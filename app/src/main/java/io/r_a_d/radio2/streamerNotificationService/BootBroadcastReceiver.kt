@@ -29,35 +29,34 @@ class BootBroadcastReceiver : BroadcastReceiver(){
     }
 }
 
-fun stopAlarm(c: Context) {
-    val alarmMgr = c.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-}
-
 fun startAlarm(c: Context){
-    // Hopefully your alarm will have a lower frequency than this!
+    // the notification works with an alarm re-scheduled at fixed rate.
+    // if the service stopped, the alarm is not re-scheduled.
+    if (WorkerStore.instance.isServiceStarted)
+    {
+        val alarmIntent = Intent(c, StreamerMonitorService::class.java).let { intent ->
+            intent.putExtra("action", Actions.NOTIFY.name)
+            PendingIntent.getService(c, 0, intent, 0)
+        }
 
-    val alarmIntent = Intent(c, StreamerMonitorService::class.java).let { intent ->
-        intent.putExtra("action", Actions.NOTIFY.name)
-        PendingIntent.getService(c, 0, intent, 0)
-    }
-
-    val alarmMgr = c.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-    when {
-        Build.VERSION.SDK_INT >= Build.VERSION_CODES.M -> alarmMgr.setExactAndAllowWhileIdle(
-            AlarmManager.ELAPSED_REALTIME_WAKEUP,
-            SystemClock.elapsedRealtime() + WorkerStore.instance.tickerPeriod * 1000,
-            alarmIntent
-        )
-        Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT -> alarmMgr.setExact(
-            AlarmManager.ELAPSED_REALTIME_WAKEUP,
-            SystemClock.elapsedRealtime() + WorkerStore.instance.tickerPeriod * 1000,
-            alarmIntent
-        )
-        else -> alarmMgr.set(
-            AlarmManager.ELAPSED_REALTIME_WAKEUP,
-            SystemClock.elapsedRealtime() + WorkerStore.instance.tickerPeriod * 1000,
-            alarmIntent
-        )
+        val alarmMgr = c.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+        when {
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.M -> alarmMgr.setExactAndAllowWhileIdle(
+                AlarmManager.ELAPSED_REALTIME_WAKEUP,
+                SystemClock.elapsedRealtime() + WorkerStore.instance.tickerPeriod * 1000,
+                alarmIntent
+            )
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT -> alarmMgr.setExact(
+                AlarmManager.ELAPSED_REALTIME_WAKEUP,
+                SystemClock.elapsedRealtime() + WorkerStore.instance.tickerPeriod * 1000,
+                alarmIntent
+            )
+            else -> alarmMgr.set(
+                AlarmManager.ELAPSED_REALTIME_WAKEUP,
+                SystemClock.elapsedRealtime() + WorkerStore.instance.tickerPeriod * 1000,
+                alarmIntent
+            )
+        }
     }
 }
 
@@ -71,7 +70,7 @@ fun stopStreamerMonitor(context: Context)
     } else {
         context.startService(intent)
     }
-    WorkerStore.instance.isServiceStarted.value = false
+
     Log.i(tag, "Service stopped")
 }
 
@@ -81,7 +80,7 @@ fun startStreamerMonitor(context: Context, force: Boolean = false)
     {
         val isNotifyingForNewStreamer = PreferenceManager.getDefaultSharedPreferences(context).getBoolean("newStreamerNotification", false)
         if (!isNotifyingForNewStreamer)
-            return
+                return
     }
 
     val intent = Intent(context, StreamerMonitorService::class.java)
@@ -90,7 +89,7 @@ fun startStreamerMonitor(context: Context, force: Boolean = false)
     } else {
         context.startService(intent)
     }
-    WorkerStore.instance.isServiceStarted.value = true
+
     Log.i(tag, "Service started on boot")
 }
 
@@ -105,7 +104,7 @@ fun fetchStreamer(applicationContext: Context) {
         if (!result.isNull("main"))
         {
             val name = result.getJSONObject("main").getJSONObject("dj").getString("djname")
-            WorkerStore.instance.streamerName.postValue(name)
+            WorkerStore.instance.streamerName.value = name
         }
     }
 
@@ -125,40 +124,3 @@ fun fetchStreamer(applicationContext: Context) {
     } catch (e: Exception) {
     }
 }
-
-/*
-class StreamerFetchWorker(appContext: Context, workerParams: WorkerParameters)
-    : Worker(appContext, workerParams) {
-
-    override fun doWork(): Result {
-
-    }
-}
-
-fun createWorker() : WorkRequest {
-
-    val streamerFetchWorkRequest = OneTimeWorkRequestBuilder<StreamerFetchWorker>()
-    // Add constraints.
-    // the general rule is, for a given tickerPeriod, we want the task to be run within tickerPeriod/10
-    // we allow a 10% jitter on the task execution to let the OS deal with it.
-    // To deal with 5-minute (hence cannot be divided by 10) I do *100 and count it as milliseconds.
-    val constraints = Constraints.Builder().apply {
-        setRequiresDeviceIdle(false)
-        //.setRequiredNetworkType(NetworkType.CONNECTED)
-        setTriggerContentMaxDelay(WorkerStore.instance.tickerPeriod * 100, TimeUnit.MILLISECONDS)
-    }.build()
-
-    streamerFetchWorkRequest.apply {
-        setInitialDelay(0, TimeUnit.SECONDS)
-        setBackoffCriteria(
-            BackoffPolicy.LINEAR,
-            OneTimeWorkRequest.DEFAULT_BACKOFF_DELAY_MILLIS * 6 , // 30s * 6 = 3mn.
-            TimeUnit.MILLISECONDS)
-        addTag("streamerFetchTag")
-    }
-
-    return streamerFetchWorkRequest.setConstraints(constraints).build()
-}
-
-
- */
