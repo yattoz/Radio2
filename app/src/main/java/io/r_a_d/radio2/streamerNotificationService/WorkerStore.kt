@@ -28,7 +28,6 @@ class WorkerStore {
     {
         tickerPeriod = 45
         streamerName.value = ""
-        isServiceStarted = false
         val tickerPeriod = 60 *
                 (if (PreferenceManager.getDefaultSharedPreferences(c).contains("streamerMonitorPeriodPref"))
                     Integer.parseInt(PreferenceManager.getDefaultSharedPreferences(c).getString("streamerMonitorPeriodPref", "15")!!).toLong()

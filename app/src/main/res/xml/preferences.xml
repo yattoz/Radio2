@@ -28,6 +28,14 @@
         app:title="User name for favorite songs"
         />
 
+    <SwitchPreferenceCompat
+        app:key="snackbarPersistent"
+        app:iconSpaceReserved="false"
+        app:title="Make Snackbars persistent"
+        app:singleLineTitle="false"
+        app:defaultValue="false"
+        />
+
     <SeekBarPreference
         app:key="volume"
         app:iconSpaceReserved="false"

@@ -1,6 +1,7 @@
 package io.r_a_d.radio2
 
 import android.app.NotificationManager
+import android.app.Service
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -223,7 +224,7 @@ class RadioService : MediaBrowserServiceCompat() {
             Actions.STOP.name -> stopPlaying()
             Actions.PAUSE.name -> pausePlaying()
             Actions.VOLUME.name -> setVolume(intent.getIntExtra("value", 100))
-            Actions.KILL.name -> {stopForeground(true); stopSelf()}
+            Actions.KILL.name -> {stopForeground(true); stopSelf(); return Service.START_NOT_STICKY}
             Actions.NOTIFY.name -> nowPlayingNotification.update(this)
             //// unused intents.
             //Actions.MUTE.name -> setVolume(0)

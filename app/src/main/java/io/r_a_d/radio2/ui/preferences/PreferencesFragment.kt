@@ -3,19 +3,20 @@ package io.r_a_d.radio2.ui.preferences
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
-import androidx.preference.EditTextPreference
-import androidx.preference.Preference
-import androidx.preference.PreferenceFragmentCompat
-import androidx.work.WorkManager
-import io.r_a_d.radio2.R
 import io.r_a_d.radio2.preferenceStore
 import io.r_a_d.radio2.streamerNotificationService.WorkerStore
 import io.r_a_d.radio2.streamerNotificationService.startStreamerMonitor
 import io.r_a_d.radio2.streamerNotificationService.stopStreamerMonitor
 import io.r_a_d.radio2.ui.songs.request.Requestor
+import androidx.appcompat.app.AlertDialog
+import io.r_a_d.radio2.R
+import android.annotation.SuppressLint
+import androidx.preference.*
+
 
 class PreferencesFragment : PreferenceFragmentCompat() {
 
+    @SuppressLint("ApplySharedPref")
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         setPreferencesFromResource(R.xml.preferences, rootKey)
         preferenceScreen.isIconSpaceReserved = false
@@ -37,28 +38,54 @@ class PreferencesFragment : PreferenceFragmentCompat() {
         val streamerPeriod = preferenceScreen.findPreference<Preference>("streamerMonitorPeriodPref")
 
         val streamerNotification = preferenceScreen.findPreference<Preference>("newStreamerNotification")
-        streamerNotification?.setOnPreferenceChangeListener { _, newValue ->
+        streamerNotification?.setOnPreferenceChangeListener { preference, newValue ->
             if ((newValue as Boolean)) {
-                startStreamerMonitor(context!!, force = true)
-                streamerPeriod?.summary = "Every ${(preferenceStore.getString("streamerMonitorPeriodPref", "") as String)} minutes"
-                streamerPeriod?.isEnabled = true
+                val builder1 = AlertDialog.Builder(context!!)
+                builder1.setMessage(R.string.warningStreamerNotif)
+                builder1.setCancelable(false)
+                builder1.setPositiveButton(
+                    "Yes"
+                ) { dialog, _ ->
+                    startStreamerMonitor(context!!, force = true) // force enabled because the preference value is not yet set when running this callback.
+                    streamerPeriod?.summary = "Every ${(preferenceStore.getString("streamerMonitorPeriodPref", "") as String)} minutes"
+                    streamerPeriod?.isEnabled = true
+                    dialog.cancel()
+                }
+
+                builder1.setNegativeButton(
+                    "No"
+                ) { dialog, _ ->
+                    // we force-reset the switch (that's why I use commit() )
+                    val preferences = PreferenceManager.getDefaultSharedPreferences(context!!)
+                    val editor = preferences.edit()
+                    editor.putBoolean("newStreamerNotification", false)
+                    editor.commit()
+                    stopStreamerMonitor(context!!)
+                    (streamerNotification as SwitchPreferenceCompat).isChecked = false
+                    dialog.cancel()
+                }
+
+                val alert11 = builder1.create()
+                alert11.show()
             }
             else {
                 stopStreamerMonitor(context!!)
                 streamerPeriod?.isEnabled = false
+                WorkerStore.instance.isServiceStarted = false
             }
             true
         }
 
         streamerPeriod?.summary = "Every ${(preferenceStore.getString("streamerMonitorPeriodPref", "") as String)} minutes"
         streamerPeriod?.isEnabled = preferenceStore.getBoolean("newStreamerNotification", true)
-        streamerPeriod?.setOnPreferenceChangeListener { preference, newValue ->
+        streamerPeriod?.setOnPreferenceChangeListener { _, newValue ->
             // quite nothing
             streamerPeriod.summary = "Every ${(newValue as String)} minutes"
-            WorkerStore.instance.tickerPeriod = (Integer.parseInt(newValue as String)).toLong() * 60
-            stopStreamerMonitor(context!!)
-            startStreamerMonitor(context!!, force = true)
+            WorkerStore.instance.tickerPeriod = (Integer.parseInt(newValue)).toLong() * 60
+            // this should be sufficient, the next alarm schedule should take the new tickerPeriod.
             true
         }
     }
+
+
 }

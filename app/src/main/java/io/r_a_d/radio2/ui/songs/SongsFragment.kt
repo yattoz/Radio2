@@ -14,6 +14,7 @@ import com.google.android.material.snackbar.BaseTransientBottomBar
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.tabs.TabLayout
 import io.r_a_d.radio2.R
+import io.r_a_d.radio2.preferenceStore
 import io.r_a_d.radio2.ui.songs.queuelp.LastPlayedFragment
 import io.r_a_d.radio2.ui.songs.queuelp.QueueFragment
 import io.r_a_d.radio2.ui.songs.request.FavoritesFragment
@@ -30,10 +31,16 @@ class SongsFragment : Fragment() {
     private val snackBarTextObserver: Observer<String?> = Observer {
         if (Requestor.instance.snackBarText.value != "")
         {
-            snackBar = Snackbar.make(songsViewModel.viewPager, "", Snackbar.LENGTH_INDEFINITE)
-            snackBar.setAction("DISMISS") {
+            val snackBarLength = if (preferenceStore.getBoolean("snackbarPersistent", false))
+                Snackbar.LENGTH_INDEFINITE
+                else Snackbar.LENGTH_LONG
+            snackBar = Snackbar.make(songsViewModel.viewPager, "", snackBarLength)
+
+            if (snackBarLength == Snackbar.LENGTH_INDEFINITE)
+            snackBar.setAction("OK") {
                 snackBar.dismiss()
             }
+
             snackBar.behavior = BaseTransientBottomBar.Behavior().apply {
                 setSwipeDirection(BaseTransientBottomBar.Behavior.SWIPE_DIRECTION_ANY)
             }

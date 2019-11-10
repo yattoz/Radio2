@@ -57,9 +57,10 @@ fun startAlarm(c: Context){
                 alarmIntent
             )
         }
+    } else {
+        Log.d(tag, "alarm called while service is dead - skipped.")
     }
 }
-
 
 fun stopStreamerMonitor(context: Context)
 {

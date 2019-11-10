@@ -23,7 +23,12 @@ class StreamerMonitorService : Service() {
         if (PreferenceManager.getDefaultSharedPreferences(this).contains("streamerName"))
         {
             previousStreamer = PreferenceManager.getDefaultSharedPreferences(this).getString("streamerName", "") ?: ""
-            if (previousStreamer != it && previousStreamer != "")
+            /* 3 conditions:
+                - the streamer changed from previously
+                - there is a previous non-empty streamer (at least second time running it)
+                - the current streamer is non-empty (this can happen at Activity start where init() is called)
+             */
+            if (previousStreamer != it && previousStreamer != "" && it != "")
             {
                 // notify
                 val newStreamer = StreamerNotification(
@@ -77,6 +82,15 @@ class StreamerMonitorService : Service() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        val isNotifyingForNewStreamer = PreferenceManager.getDefaultSharedPreferences(this).getBoolean("newStreamerNotification", false)
+
+        // it's probably redundant but it shouldn't hurt
+        if (!isNotifyingForNewStreamer || !WorkerStore.instance.isServiceStarted)
+        {
+            stopForeground(true)
+            stopSelf()
+            return START_NOT_STICKY
+        }
         when (intent?.getStringExtra("action")) {
             Actions.NOTIFY.name -> {
                 val date = Date()   // given date
@@ -89,11 +103,16 @@ class StreamerMonitorService : Service() {
                 Log.d(tag, "Fetched streamer name at ${hours}:${if (minutes < 10) "0" else ""}${minutes}")
                 fetchStreamer(this)
                 startAlarm(this) // schedule next alarm
+                return START_STICKY
             }
-            Actions.KILL.name -> {stopForeground(true); stopSelf()}
+            Actions.KILL.name -> {
+                stopForeground(true)
+                stopSelf()
+                return START_NOT_STICKY
+            }
         }
-        super.onStartCommand(intent, flags, startId)
         return START_STICKY
+        //super.onStartCommand(intent, flags, startId)
     }
 
     override fun onDestroy() {

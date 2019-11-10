@@ -41,6 +41,12 @@
 
     <string name="streamerNotificationChannel">New Streamer Notification</string>
     <string name="streamerNotificationChannelId">io.r_a_d.radio2.STREAMER_NOTIFICATION_NEW</string>
+    <string name="warningStreamerNotif">
+        This feature is EXPERIMENTAL.\n
+        It WILL consume your battery by polling the server regularly.\n
+        Using Twitter Push Notifications instead is largely recommended.\n
+        This polling should only be considered as the last resort for people not wanting to register on Twitter or phones without Google Play services.\n
+        \n\nAre you sure you want to enable this?</string>
 
 
 </resources>
