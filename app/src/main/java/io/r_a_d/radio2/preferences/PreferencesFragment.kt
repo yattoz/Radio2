@@ -1,4 +1,4 @@
-package io.r_a_d.radio2.ui.preferences
+package io.r_a_d.radio2.preferences
 
 import android.content.Intent
 import android.net.Uri
@@ -98,8 +98,6 @@ class PreferencesFragment : PreferenceFragmentCompat() {
                 preference.setSummary(R.string.snackbarNonPersistent)
             true
         }
-
-
 
     }
 

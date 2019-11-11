@@ -10,10 +10,7 @@ import android.os.SystemClock
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.preference.PreferenceManager
-import io.r_a_d.radio2.Actions
-import io.r_a_d.radio2.Async
-import io.r_a_d.radio2.R
-import io.r_a_d.radio2.tag
+import io.r_a_d.radio2.*
 import org.json.JSONObject
 import java.net.URL
 
@@ -21,10 +18,11 @@ import java.net.URL
 class BootBroadcastReceiver : BroadcastReceiver(){
 
     override fun onReceive(context: Context, arg1: Intent) {
-        if (arg1.action == Intent.ACTION_BOOT_COMPLETED)
-        {
-            WorkerStore.instance.init(context)
-            startStreamerMonitor(context)
+        when (arg1.action) {
+            Intent.ACTION_BOOT_COMPLETED ->{
+                WorkerStore.instance.init(context)
+                startStreamerMonitor(context)
+            }
         }
     }
 }

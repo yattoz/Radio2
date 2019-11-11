@@ -1,9 +1,7 @@
 package io.r_a_d.radio2
 
 import android.os.Bundle
-import androidx.core.graphics.blue
-import androidx.preference.PreferenceManager
-import io.r_a_d.radio2.ui.preferences.PreferencesFragment
+import io.r_a_d.radio2.preferences.PreferencesFragment
 
 class ParametersActivity : BaseActivity() {
 

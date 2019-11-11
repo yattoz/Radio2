@@ -8,6 +8,7 @@ enum class Actions
     VOLUME,
     KILL,
     NOTIFY,
+    PLAY_OR_FALLBACK
 }
 
 enum class ActionOnError {

@@ -272,7 +272,7 @@
 
         <TextView
             android:id="@+id/endTime"
-            android:layout_width="56sp"
+            android:layout_width="32sp"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
             android:gravity="end"
@@ -283,7 +283,7 @@
 
         <TextView
             android:id="@+id/currentTime"
-            android:layout_width="56sp"
+            android:layout_width="32sp"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
             android:gravity="start"

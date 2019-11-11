@@ -16,4 +16,15 @@
         <item name="25">25</item>
         <item name="30">30</item>
     </string-array>
+
+    <string-array name="weekdays">
+        <item name="monday">Monday</item>
+        <item name="tuesday">Tuesday</item>
+        <item name="wednesday">Wednesday</item>
+        <item name="thursday">Thursday</item>
+        <item name="friday">Friday</item>
+        <item name="saturday">Saturday</item>
+        <item name="sundday">Sunday</item>
+    </string-array>
+
 </resources>

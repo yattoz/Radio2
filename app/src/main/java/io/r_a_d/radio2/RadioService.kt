@@ -1,6 +1,5 @@
 package io.r_a_d.radio2
 
-import android.app.NotificationManager
 import android.app.Service
 import android.content.BroadcastReceiver
 import android.content.Context
@@ -14,8 +13,6 @@ import android.os.*
 import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.media.session.PlaybackStateCompat
 import androidx.media.session.MediaButtonReceiver
-import com.google.android.exoplayer2.ExoPlayerFactory
-import com.google.android.exoplayer2.SimpleExoPlayer
 import com.google.android.exoplayer2.source.ProgressiveMediaSource
 import com.google.android.exoplayer2.util.Util.getUserAgent
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory
@@ -30,7 +27,8 @@ import androidx.lifecycle.Observer
 import androidx.media.AudioAttributesCompat
 import androidx.media.AudioFocusRequestCompat
 import androidx.media.AudioManagerCompat
-import com.google.android.exoplayer2.Player
+import com.google.android.exoplayer2.*
+import com.google.android.exoplayer2.audio.AudioAttributes
 import com.google.android.exoplayer2.metadata.icy.*
 import io.r_a_d.radio2.playerstore.PlayerStore
 import java.util.*
@@ -226,9 +224,7 @@ class RadioService : MediaBrowserServiceCompat() {
             Actions.VOLUME.name -> setVolume(intent.getIntExtra("value", 100))
             Actions.KILL.name -> {stopForeground(true); stopSelf(); return Service.START_NOT_STICKY}
             Actions.NOTIFY.name -> nowPlayingNotification.update(this)
-            //// unused intents.
-            //Actions.MUTE.name -> setVolume(0)
-            //Actions.UN_MUTE.name -> setVolume(PlayerStore.instance.volume.value)
+            Actions.PLAY_OR_FALLBACK.name -> beginPlayingOrFallback()
         }
         Log.d(tag, radioTag + "intent received : " + intent.getStringExtra("action"))
         super.onStartCommand(intent, flags, startId)
@@ -313,6 +309,7 @@ class RadioService : MediaBrowserServiceCompat() {
     private lateinit var metadataBuilder: MediaMetadataCompat.Builder
     private lateinit var player: SimpleExoPlayer
     private lateinit var radioMediaSource: ProgressiveMediaSource
+    private lateinit var fallbackMediaSource: ProgressiveMediaSource
 
     private fun setupMediaPlayer(){
         player = ExoPlayerFactory.newSimpleInstance(this)
@@ -342,6 +339,9 @@ class RadioService : MediaBrowserServiceCompat() {
         // This is the MediaSource representing the media to be played.
         radioMediaSource = ProgressiveMediaSource.Factory(dataSourceFactory)
             .createMediaSource(Uri.parse(getString(R.string.STREAM_URL_RADIO)))
+
+        fallbackMediaSource = ProgressiveMediaSource.Factory(dataSourceFactory)
+            .createMediaSource(Uri.parse("file:///android_asset/the_stream_is_down.mp3"))
     }
 
     private fun createMediaSession() {
@@ -365,8 +365,54 @@ class RadioService : MediaBrowserServiceCompat() {
     // ######### SERVICE START/STOP ###########
     // ########################################
 
-    fun beginPlaying()
+    // this function is playing the stream if available, or a default sound if there's a problem.
+    private fun beginPlayingOrFallback()
     {
+        beginPlaying(isRinging = true, isFallback = false)
+        val wait: (Any?) -> Any = {
+            Thread.sleep(12*1000)
+        }
+        val post: (Any?) -> Unit = {
+            if (mediaSession.controller.playbackState.state != PlaybackStateCompat.STATE_PLAYING)
+            {
+                beginPlaying(isRinging = true, isFallback = true)
+            }
+        }
+        Async(wait, post)
+    }
+
+    fun beginPlaying(isRinging: Boolean = false, isFallback: Boolean = false)
+    {
+        if (isRinging)
+        {
+            //define the audioFocusRequest
+            val audioFocusRequestBuilder = AudioFocusRequestCompat.Builder(AudioManagerCompat.AUDIOFOCUS_GAIN)
+            audioFocusRequestBuilder.setOnAudioFocusChangeListener(focusChangeListener)
+            val audioAttributes = AudioAttributesCompat.Builder()
+            audioAttributes.setContentType(AudioAttributesCompat.CONTENT_TYPE_MUSIC)
+            audioAttributes.setUsage(AudioAttributesCompat.USAGE_ALARM)
+            audioFocusRequestBuilder.setAudioAttributes(audioAttributes.build())
+            audioFocusRequest = audioFocusRequestBuilder.build()
+            player.audioAttributes = AudioAttributes
+                .Builder()
+                .setContentType(C.CONTENT_TYPE_MUSIC)
+                .setUsage(C.USAGE_ALARM)
+                .build()
+        } else {
+            //define the audioFocusRequest
+            val audioFocusRequestBuilder = AudioFocusRequestCompat.Builder(AudioManagerCompat.AUDIOFOCUS_GAIN)
+            audioFocusRequestBuilder.setOnAudioFocusChangeListener(focusChangeListener)
+            val audioAttributes = AudioAttributesCompat.Builder()
+            audioAttributes.setContentType(AudioAttributesCompat.CONTENT_TYPE_MUSIC)
+            audioAttributes.setUsage(AudioAttributesCompat.USAGE_MEDIA)
+            audioFocusRequestBuilder.setAudioAttributes(audioAttributes.build())
+            audioFocusRequest = audioFocusRequestBuilder.build()
+            player.audioAttributes = AudioAttributes
+                .Builder()
+                .setContentType(C.CONTENT_TYPE_MUSIC)
+                .setUsage(C.USAGE_MEDIA)
+                .build()
+        }
         // the old requestAudioFocus is deprecated on API26+. Using AudioManagerCompat library for consistent code across versions
         val result = AudioManagerCompat.requestAudioFocus(audioManager, audioFocusRequest)
         if (result != AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
@@ -379,7 +425,15 @@ class RadioService : MediaBrowserServiceCompat() {
 
         // Reinitialize media player. Otherwise the playback doesn't resume when beginPlaying. Dunno why.
         // Prepare the player with the source.
-        player.prepare(radioMediaSource)
+        if (isFallback)
+        {
+            player.prepare(fallbackMediaSource)
+            player.repeatMode = ExoPlayer.REPEAT_MODE_ALL
+        }
+        else {
+            player.prepare(radioMediaSource)
+            player.repeatMode = ExoPlayer.REPEAT_MODE_OFF
+        }
 
         // START PLAYBACK, LET'S ROCK
         player.playWhenReady = true

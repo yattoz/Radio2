@@ -4,6 +4,13 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     >
 
+    <Preference
+        app:icon="@drawable/ic_settings"
+        app:key="alarmScreen"
+        app:title="Set up alarm clock"
+        app:fragment="io.r_a_d.radio2.preferences.AlarmFragment"
+        />
+
 
     <SwitchPreferenceCompat
         app:key="newStreamerNotification"

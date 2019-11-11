@@ -157,7 +157,7 @@ class NowPlayingFragment : Fragment() {
             PlayerStore.instance.isMuted.value = !PlayerStore.instance.isMuted.value!!
         }
 
-        if (preferenceStore.getBoolean("splitLayout", false))
+        if (preferenceStore.getBoolean("splitLayout", true))
             root.addOnLayoutChangeListener(splitLayoutListener)
 
         return root
@@ -165,7 +165,7 @@ class NowPlayingFragment : Fragment() {
 
     private val splitLayoutListener : View.OnLayoutChangeListener = View.OnLayoutChangeListener { view: View, i: Int, i1: Int, i2: Int, i3: Int, i4: Int, i5: Int, i6: Int, i7: Int ->
 
-        val isSplitLayout = preferenceStore.getBoolean("splitLayout", false)
+        val isSplitLayout = preferenceStore.getBoolean("splitLayout", true)
 
         val viewHeight = (root.rootView?.height ?: 1)
         val viewWidth = (root.rootView?.width ?: 1)
@@ -189,7 +189,7 @@ class NowPlayingFragment : Fragment() {
         val viewHeight = (root.rootView?.height ?: 1)
         val viewWidth = (root.rootView?.width ?: 1)
 
-        val isSplitLayout = preferenceStore.getBoolean("splitLayout", false)
+        val isSplitLayout = preferenceStore.getBoolean("splitLayout", true)
 
         // modify layout to adapt for portrait/landscape
         val isLandscape = viewHeight.toDouble()/viewWidth.toDouble() < 1
@@ -215,6 +215,8 @@ class NowPlayingFragment : Fragment() {
         }
         constraintSet.applyTo(parentLayout)
 
+        // note : we have to COMPARE numbers that are FRACTIONS. And everyone knows that we should NEVER compare DOUBLES because of the imprecision at the end.
+        // So instead, I multiply the result by 100 (to give 2 significant numbers), and do an INTEGER DIVISION. This is the right way to compare ratios.
         nowPlayingViewModel.screenRatio = if (viewWidth > 0)
                 (viewHeight*100)/viewWidth
         else

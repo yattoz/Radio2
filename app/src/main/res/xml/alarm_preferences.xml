@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+
+    <SwitchPreferenceCompat
+        app:key="isWakingUp"
+        app:iconSpaceReserved="false"
+        app:title="Use as alarm clock"
+        app:singleLineTitle="false"
+        app:defaultValue="false"
+        />
+
+    <MultiSelectListPreference
+        app:key="alarmDays"
+        app:iconSpaceReserved="false"
+        app:title="Select days of the week"
+        app:singleLineTitle="false"
+        android:entries="@array/weekdays"
+        android:entryValues="@array/weekdays"
+        android:defaultValue="@array/weekdays"
+        />
+
+</PreferenceScreen>
