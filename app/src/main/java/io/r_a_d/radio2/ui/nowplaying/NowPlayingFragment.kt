@@ -1,28 +1,24 @@
 package io.r_a_d.radio2.ui.nowplaying
 
 import android.annotation.SuppressLint
-import android.content.Context
 import androidx.lifecycle.ViewModelProviders
 import android.os.Bundle
 import android.support.v4.media.session.PlaybackStateCompat
+import android.util.Log
 import android.util.TypedValue
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.ViewTreeObserver
 import android.widget.*
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.core.widget.TextViewCompat
 import androidx.lifecycle.Observer
-import androidx.lifecycle.whenResumed
 import io.r_a_d.radio2.*
 import io.r_a_d.radio2.playerstore.PlayerStore
 import io.r_a_d.radio2.playerstore.Song
-
-
-
+import java.util.concurrent.locks.Lock
 
 
 class NowPlayingFragment : Fragment() {
@@ -161,65 +157,75 @@ class NowPlayingFragment : Fragment() {
             PlayerStore.instance.isMuted.value = !PlayerStore.instance.isMuted.value!!
         }
 
-        root.addOnLayoutChangeListener(splitLayoutListener)
+        if (preferenceStore.getBoolean("splitLayout", false))
+            root.addOnLayoutChangeListener(splitLayoutListener)
+
         return root
     }
 
     private val splitLayoutListener : View.OnLayoutChangeListener = View.OnLayoutChangeListener { view: View, i: Int, i1: Int, i2: Int, i3: Int, i4: Int, i5: Int, i6: Int, i7: Int ->
-        val viewHeight = (root.rootView?.height ?: 0)
-        val viewWidth = (root.rootView?.width ?: 0)
 
-        val height = (root.height)
-        val width = (root.width)
+        val isSplitLayout = preferenceStore.getBoolean("splitLayout", false)
+
+        val viewHeight = (root.rootView?.height ?: 1)
+        val viewWidth = (root.rootView?.width ?: 1)
+
+        val newRatio = if (viewWidth > 0)
+            (viewHeight*100)/viewWidth
+        else
+            100
+
+        if (isSplitLayout && nowPlayingViewModel.screenRatio != newRatio) {
+            onOrientation()
+        }
+    }
+
+    override fun onViewStateRestored(savedInstanceState: Bundle?) {
+        onOrientation()
+        super.onViewStateRestored(savedInstanceState)
+    }
+
+    private fun onOrientation() {
+        val viewHeight = (root.rootView?.height ?: 1)
+        val viewWidth = (root.rootView?.width ?: 1)
+
+        val isSplitLayout = preferenceStore.getBoolean("splitLayout", false)
 
         // modify layout to adapt for portrait/landscape
-        if (viewHeight.toDouble()/viewWidth.toDouble() < 1)
+        val isLandscape = viewHeight.toDouble()/viewWidth.toDouble() < 1
+        val parentLayout = root.findViewById<ConstraintLayout>(R.id.parentNowPlaying)
+        val constraintSet = ConstraintSet()
+        constraintSet.clone(parentLayout)
+
+        if (isLandscape && isSplitLayout)
         {
-            onOrientation(isLandscape = true)
+            constraintSet.connect(R.id.layoutBlock1, ConstraintSet.BOTTOM, R.id.parentNowPlaying, ConstraintSet.BOTTOM)
+            constraintSet.connect(R.id.layoutBlock1, ConstraintSet.END, R.id.splitHorizontalLayout, ConstraintSet.END)
+            constraintSet.connect(R.id.layoutBlock2, ConstraintSet.TOP, R.id.parentNowPlaying, ConstraintSet.TOP)
+            constraintSet.connect(R.id.layoutBlock2, ConstraintSet.START, R.id.splitHorizontalLayout, ConstraintSet.END)
+            constraintSet.setMargin(R.id.layoutBlock1, ConstraintSet.END, 16)
+            constraintSet.setMargin(R.id.layoutBlock2, ConstraintSet.START, 16)
         } else {
-            onOrientation(isLandscape = false)
+            constraintSet.connect(R.id.layoutBlock1, ConstraintSet.BOTTOM, R.id.splitVerticalLayout, ConstraintSet.BOTTOM)
+            constraintSet.connect(R.id.layoutBlock1, ConstraintSet.END, R.id.parentNowPlaying, ConstraintSet.END)
+            constraintSet.connect(R.id.layoutBlock2, ConstraintSet.TOP, R.id.splitVerticalLayout, ConstraintSet.BOTTOM)
+            constraintSet.connect(R.id.layoutBlock2, ConstraintSet.START, R.id.parentNowPlaying, ConstraintSet.START)
+            constraintSet.setMargin(R.id.layoutBlock1, ConstraintSet.END, 0)
+            constraintSet.setMargin(R.id.layoutBlock2, ConstraintSet.START, 0)
         }
+        constraintSet.applyTo(parentLayout)
+
+        nowPlayingViewModel.screenRatio = if (viewWidth > 0)
+                (viewHeight*100)/viewWidth
+        else
+            100
+        Log.d(tag, "orientation set")
     }
 
-    private fun onOrientation(isLandscape: Boolean = false) {
-        if (nowPlayingViewModel.isPreviousLandscape != isLandscape)
-        {
-            nowPlayingViewModel.isPreviousLandscape = isLandscape
-            val parentLayout = root.findViewById<ConstraintLayout>(R.id.parentNowPlaying) ?: 0
-            if (parentLayout == 0)
-                return
-            val constraintSet = ConstraintSet()
-            constraintSet.clone(parentLayout as ConstraintLayout)
-
-            if (isLandscape)
-            {
-                constraintSet.connect(R.id.layoutBlock1, ConstraintSet.BOTTOM, R.id.parentNowPlaying, ConstraintSet.BOTTOM)
-                constraintSet.connect(R.id.layoutBlock1, ConstraintSet.END, R.id.splitHorizontalLayout, ConstraintSet.END)
-                constraintSet.connect(R.id.layoutBlock2, ConstraintSet.TOP, R.id.parentNowPlaying, ConstraintSet.TOP)
-                constraintSet.connect(R.id.layoutBlock2, ConstraintSet.START, R.id.splitHorizontalLayout, ConstraintSet.END)
-                constraintSet.setMargin(R.id.layoutBlock1, ConstraintSet.END, 16)
-                constraintSet.setMargin(R.id.layoutBlock2, ConstraintSet.START, 16)
-            } else {
-                constraintSet.connect(R.id.layoutBlock1, ConstraintSet.BOTTOM, R.id.splitVerticalLayout, ConstraintSet.BOTTOM)
-                constraintSet.connect(R.id.layoutBlock1, ConstraintSet.END, R.id.parentNowPlaying, ConstraintSet.END)
-                constraintSet.connect(R.id.layoutBlock2, ConstraintSet.TOP, R.id.splitVerticalLayout, ConstraintSet.BOTTOM)
-                constraintSet.connect(R.id.layoutBlock2, ConstraintSet.START, R.id.parentNowPlaying, ConstraintSet.START)
-                constraintSet.setMargin(R.id.layoutBlock1, ConstraintSet.END, 0)
-                constraintSet.setMargin(R.id.layoutBlock2, ConstraintSet.START, 0)
-            }
-            constraintSet.applyTo(parentLayout)
-        }
+    override fun onResume() {
+        super.onResume()
+        onOrientation()
     }
-
-    override fun onStart() {
-        super.onStart()
-        if (nowPlayingViewModel.isPreviousLandscape)
-        {
-            nowPlayingViewModel.isPreviousLandscape = false
-            onOrientation(isLandscape = true)
-        }
-    }
-
 
     private fun syncPlayPauseButtonImage(v: View)
     {

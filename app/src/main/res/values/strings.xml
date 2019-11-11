@@ -47,6 +47,8 @@
         Using Twitter Push Notifications instead is largely recommended.\n
         This polling should only be considered as the last resort for people not wanting to register on Twitter or phones without Google Play services.\n
         \n\nAre you sure you want to enable this?</string>
+    <string name="snackbarPersistent">Stay visible, can be closed with "OK" button</string>
+    <string name="snackbarNonPersistent">Disappear after some time</string>
 
 
 </resources>

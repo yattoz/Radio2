@@ -85,6 +85,22 @@ class PreferencesFragment : PreferenceFragmentCompat() {
             // this should be sufficient, the next alarm schedule should take the new tickerPeriod.
             true
         }
+
+        val snackbarPersistent = preferenceScreen.findPreference<SwitchPreferenceCompat>("snackbarPersistent")
+        snackbarPersistent!!.summary = if (preferenceStore.getBoolean("snackbarPersistent", true))
+            getString(R.string.snackbarPersistent)
+            else
+            getString(R.string.snackbarNonPersistent)
+        snackbarPersistent.setOnPreferenceChangeListener { preference, newValue ->
+            if (newValue as Boolean)
+                preference.setSummary(R.string.snackbarPersistent)
+            else
+                preference.setSummary(R.string.snackbarNonPersistent)
+            true
+        }
+
+
+
     }
 
 

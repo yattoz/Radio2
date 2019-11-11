@@ -36,6 +36,15 @@
         app:defaultValue="false"
         />
 
+    <SwitchPreferenceCompat
+        app:key="splitLayout"
+        app:iconSpaceReserved="false"
+        app:title="Use horizontal split layout"
+        app:summary="Split Now Playing screen in 2 blocks when device is horizontal"
+        app:singleLineTitle="false"
+        app:defaultValue="true"
+        />
+
     <SeekBarPreference
         app:key="volume"
         app:iconSpaceReserved="false"
