@@ -35,9 +35,9 @@ class RadioAlarm {
     fun setAlarm(c: Context)
     {
         val alarmManager = c.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-        alarmIntent = Intent(c, RadioService::class.java).let { intent ->
-            intent.putExtra("action", Actions.PLAY_OR_FALLBACK.name)
-            PendingIntent.getService(c, 0, intent, 0)
+        alarmIntent = Intent(c, BootBroadcastReceiver::class.java).let { intent ->
+            intent.putExtra("action", "io.r_a_d.radio2.${Actions.PLAY_OR_FALLBACK.name}")
+            PendingIntent.getBroadcast(c, 0, intent, 0)
         }
         val showIntent = Intent(c, ParametersActivity::class.java).let { intent ->
             PendingIntent.getActivity(c, 0, intent, 0)

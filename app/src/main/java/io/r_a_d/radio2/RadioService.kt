@@ -28,7 +28,6 @@ import androidx.media.AudioAttributesCompat
 import androidx.media.AudioFocusRequestCompat
 import androidx.media.AudioManagerCompat
 import com.google.android.exoplayer2.*
-import com.google.android.exoplayer2.audio.AudioAttributes
 import com.google.android.exoplayer2.metadata.icy.*
 import io.r_a_d.radio2.playerstore.PlayerStore
 import java.util.*
@@ -393,7 +392,7 @@ class RadioService : MediaBrowserServiceCompat() {
             audioAttributes.setUsage(AudioAttributesCompat.USAGE_ALARM)
             audioFocusRequestBuilder.setAudioAttributes(audioAttributes.build())
             audioFocusRequest = audioFocusRequestBuilder.build()
-            player.audioAttributes = AudioAttributes
+            player.audioAttributes = com.google.android.exoplayer2.audio.AudioAttributes
                 .Builder()
                 .setContentType(C.CONTENT_TYPE_MUSIC)
                 .setUsage(C.USAGE_ALARM)
@@ -407,7 +406,7 @@ class RadioService : MediaBrowserServiceCompat() {
             audioAttributes.setUsage(AudioAttributesCompat.USAGE_MEDIA)
             audioFocusRequestBuilder.setAudioAttributes(audioAttributes.build())
             audioFocusRequest = audioFocusRequestBuilder.build()
-            player.audioAttributes = AudioAttributes
+            player.audioAttributes = com.google.android.exoplayer2.audio.AudioAttributes
                 .Builder()
                 .setContentType(C.CONTENT_TYPE_MUSIC)
                 .setUsage(C.USAGE_MEDIA)

@@ -11,6 +11,7 @@ import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.preference.PreferenceManager
 import io.r_a_d.radio2.*
+import io.r_a_d.radio2.playerstore.PlayerStore
 import org.json.JSONObject
 import java.net.URL
 
@@ -18,11 +19,24 @@ import java.net.URL
 class BootBroadcastReceiver : BroadcastReceiver(){
 
     override fun onReceive(context: Context, arg1: Intent) {
-        when (arg1.action) {
-            Intent.ACTION_BOOT_COMPLETED ->{
+        Log.d(tag, "Broadcast Receiver received ${arg1}")
+        if (arg1.action == Intent.ACTION_BOOT_COMPLETED) {
                 WorkerStore.instance.init(context)
                 startStreamerMonitor(context)
             }
+        if (arg1.getStringExtra("action") == "io.r_a_d.radio2.${Actions.PLAY_OR_FALLBACK.name}" )
+        {
+            // define preferenceStore
+            preferenceStore = PreferenceManager.getDefaultSharedPreferences(context)
+            PlayerStore.instance.initPicture(context)
+            PlayerStore.instance.initApi()
+            PlayerStore.instance.volume.value = 100
+            val i = Intent(context, RadioService::class.java)
+            i.putExtra("action", Actions.PLAY_OR_FALLBACK.name)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+                context.startForegroundService(i)
+            else
+                context.startService(i)
         }
     }
 }

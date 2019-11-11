@@ -35,9 +35,13 @@
             android:enabled="true"
             android:exported="true"/>
 
-        <receiver android:name=".streamerNotificationService.BootBroadcastReceiver">
+        <receiver android:name=".streamerNotificationService.BootBroadcastReceiver"
+            android:directBootAware="true"
+            tools:targetApi="n">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="io.r_a_d.radio2.PLAY_OR_FALLBACK" />
+                <category android:name="android.intent.category.DEFAULT"/>
             </intent-filter>
         </receiver>
 
