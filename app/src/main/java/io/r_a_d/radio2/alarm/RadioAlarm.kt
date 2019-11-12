@@ -51,7 +51,7 @@ class RadioAlarm {
             AlarmManagerCompat.setAlarmClock(alarmManager, time, showIntent, alarmIntent)
     }
 
-    private fun findNextAlarmTime(c: Context, forceTime: Int? = null, forceDays: Set<String>? = null) : Long
+    fun findNextAlarmTime(c: Context, forceTime: Int? = null, forceDays: Set<String>? = null) : Long
     {
         val calendar = Calendar.getInstance()
 

@@ -11,71 +11,25 @@
         app:fragment="io.r_a_d.radio2.preferences.AlarmFragment"
         />
 
-
-    <EditTextPreference
-        app:iconSpaceReserved="false"
-        app:key="userName"
-        app:title="User name for favorite songs"
+    <Preference
+        app:icon="@drawable/ic_customize"
+        app:key="CustomizeFragment"
+        app:title="Customize app behavior"
+        app:fragment="io.r_a_d.radio2.preferences.CustomizeFragment"
         />
 
-    <SwitchPreferenceCompat
-        app:key="snackbarPersistent"
-        app:iconSpaceReserved="false"
-        app:title="Make Snackbars persistent"
-        app:singleLineTitle="false"
-        app:defaultValue="false"
+    <Preference
+        app:icon="@drawable/ic_notification"
+        app:key="streamerNotifServiceFragment"
+        app:title="Streamer Notification Service"
+        app:fragment="io.r_a_d.radio2.preferences.StreamerNotifServiceFragment"
         />
 
-    <SwitchPreferenceCompat
-        app:key="splitLayout"
-        app:iconSpaceReserved="false"
-        app:title="Use horizontal split layout"
-        app:summary="Split Now Playing screen in 2 blocks when device is horizontal"
-        app:singleLineTitle="false"
-        app:defaultValue="true"
+    <Preference
+        app:key="submitBug"
+        app:title="Submit a bug (opens GitHub in a web browser)"
+        app:icon="@drawable/ic_bug"
         />
-
-    <SeekBarPreference
-        app:key="volume"
-        app:iconSpaceReserved="false"
-        app:title="Volume at startup"
-        app:singleLineTitle="false"
-        app:min="0"
-        android:max="100"
-        android:defaultValue="100"
-        app:showSeekBarValue="true"
-        />
-
-    <PreferenceCategory
-        app:title="Advanced"
-        app:iconSpaceReserved="false"
-        >
-
-        <SwitchPreferenceCompat
-            app:key="newStreamerNotification"
-            app:iconSpaceReserved="false"
-            app:title="New streamer notification (drains battery!)"
-            app:singleLineTitle="false"
-            app:defaultValue="false"
-            />
-
-        <ListPreference
-            app:iconSpaceReserved="false"
-            app:key="streamerMonitorPeriodPref"
-            app:title="Streamer monitor frequency"
-            android:entries="@array/streamerFetchPeriodString"
-            android:entryValues="@array/streamerFetchPeriod"
-            android:defaultValue="10"
-            />
-
-        <Preference
-            app:iconSpaceReserved="false"
-            app:key="submitBug"
-            app:title="Submit a bug (opens GitHub in a web browser)"
-            />
-
-
-    </PreferenceCategory>
 
 
 </PreferenceScreen>

@@ -1,7 +1,7 @@
 package io.r_a_d.radio2
 
 import android.os.Bundle
-import io.r_a_d.radio2.preferences.PreferencesFragment
+import io.r_a_d.radio2.preferences.MainPreferenceFragment
 
 class ParametersActivity : BaseActivity() {
 
@@ -20,7 +20,7 @@ class ParametersActivity : BaseActivity() {
 
         supportFragmentManager
             .beginTransaction()
-            .replace(R.id.parameters_host_container, PreferencesFragment())
+            .replace(R.id.parameters_host_container, MainPreferenceFragment())
             .commit()
     }
 }

@@ -1,40 +1,22 @@
 package io.r_a_d.radio2.preferences
 
-import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
+import androidx.appcompat.app.AlertDialog
+import androidx.preference.Preference
+import androidx.preference.PreferenceFragmentCompat
+import androidx.preference.PreferenceManager
+import androidx.preference.SwitchPreferenceCompat
+import io.r_a_d.radio2.R
 import io.r_a_d.radio2.preferenceStore
 import io.r_a_d.radio2.streamerNotificationService.WorkerStore
 import io.r_a_d.radio2.streamerNotificationService.startStreamerMonitor
 import io.r_a_d.radio2.streamerNotificationService.stopStreamerMonitor
-import io.r_a_d.radio2.ui.songs.request.Requestor
-import androidx.appcompat.app.AlertDialog
-import io.r_a_d.radio2.R
-import android.annotation.SuppressLint
-import androidx.preference.*
 
-
-class PreferencesFragment : PreferenceFragmentCompat() {
-
-    @SuppressLint("ApplySharedPref")
+class StreamerNotifServiceFragment : PreferenceFragmentCompat() {
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
-        setPreferencesFromResource(R.xml.preferences, rootKey)
-        preferenceScreen.isIconSpaceReserved = false
-        val userNamePref = preferenceScreen.findPreference<EditTextPreference>("userName")
-        userNamePref!!.summary = userNamePref.text
-        userNamePref.setOnPreferenceChangeListener { preference, newValue ->
-            preference.summary = newValue as CharSequence
-            Requestor.instance.initFavorites(newValue as String) // need to be as parameter cause the callback is called BEFORE PARAMETER SET
-            true
-        }
-        val submitBug = preferenceScreen.findPreference<Preference>("submitBug")
-        submitBug!!.setOnPreferenceClickListener {
-            val url = getString(R.string.github_url_new_issue)
-            val i = Intent(Intent.ACTION_VIEW)
-            i.data = Uri.parse(url)
-            startActivity(i)
-            true
-        }
+        setPreferencesFromResource(R.xml.streamer_notif_service_preferences, rootKey)
+
+
         val streamerPeriod = preferenceScreen.findPreference<Preference>("streamerMonitorPeriodPref")
 
         val streamerNotification = preferenceScreen.findPreference<Preference>("newStreamerNotification")
@@ -86,20 +68,6 @@ class PreferencesFragment : PreferenceFragmentCompat() {
             true
         }
 
-        val snackbarPersistent = preferenceScreen.findPreference<SwitchPreferenceCompat>("snackbarPersistent")
-        snackbarPersistent!!.summary = if (preferenceStore.getBoolean("snackbarPersistent", true))
-            getString(R.string.snackbarPersistent)
-            else
-            getString(R.string.snackbarNonPersistent)
-        snackbarPersistent.setOnPreferenceChangeListener { preference, newValue ->
-            if (newValue as Boolean)
-                preference.setSummary(R.string.snackbarPersistent)
-            else
-                preference.setSummary(R.string.snackbarNonPersistent)
-            true
-        }
 
     }
-
-
 }

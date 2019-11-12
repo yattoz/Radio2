@@ -80,7 +80,7 @@
             app:layout_constraintVertical_weight="5"
             android:gravity="top|center_horizontal"
             android:text="@string/listeners"
-            android:lines="1"
+            android:lines="2"
             android:textAlignment="center"
             android:textStyle=""
             android:layout_marginTop="0dp"

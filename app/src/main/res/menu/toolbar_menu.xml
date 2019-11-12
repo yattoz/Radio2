@@ -4,7 +4,6 @@
 
     <item
         android:id="@+id/action_refresh"
-        android:icon="@drawable/ic_refresh"
         android:title="@string/action_refresh"
         app:showAsAction="never"/>
 
@@ -17,7 +16,6 @@
 
     <item android:id="@+id/action_settings"
         android:title="@string/action_settings"
-        android:icon="@drawable/ic_settings"
         app:showAsAction="never"/>
 
 
