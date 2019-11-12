@@ -283,8 +283,12 @@ class Requestor {
             if (favoritesSongArray[i].isRequestable && (favoritesSongArray[i].id ?: 0) > 0)
                 requestableSongArray.add(favoritesSongArray[i])
         }
-        val songNbr = Random(System.currentTimeMillis()).nextInt(1, requestableSongArray.size)
-        return requestableSongArray[songNbr]
+        return if (requestableSongArray.isNotEmpty()) {
+            val songNbr =  Random(System.currentTimeMillis()).nextInt(1, requestableSongArray.size)
+            requestableSongArray[songNbr]
+        } else {
+            Song("No song requestable - ")
+        }
     }
 
     companion object {

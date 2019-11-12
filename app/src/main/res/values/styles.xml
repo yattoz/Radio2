@@ -25,7 +25,6 @@
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
-        <item name="icon">@drawable/actionbar_logo</item>
         <item name="android:textColorHighlight">@color/rblue</item>
         <item name="android:colorBackground">@color/colorPrimaryDark</item>
     </style>

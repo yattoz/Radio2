@@ -2,9 +2,11 @@
     <!-- The background color, preferably the same as your normal theme -->
     <item android:drawable="@color/colorPrimary"/>
     <!-- Your product logo - 144dp color version of your app icon -->
-    <item>
+    <item
+        >
         <bitmap
             android:src="@drawable/actionbar_logo"
-            android:gravity="center"/>
+            android:gravity="center"
+            />
     </item>
 </layer-list>
