@@ -18,6 +18,7 @@ R/a/dio is a webradio that was founded 7+ years ago with the intention of bringi
 - Chat in the IRC with the embedded WebIRC!
 - Wake up with the sound of R/a/dio with the built-in Alarm Clock feature! Don't worry: if there is no network, it will play a default sound instead.
 - Never miss a stream with the Streamer Notification Service! (**Warning: this feature polls the server regularly and consumes battery. It is MUCH MORE RECOMMENDED to register to Hanyuu-sama's updates on Twitter and use the Twitter app. But if for some reason you don't (or can't) use the Twitter App, this should get you covered.**)
+- Supports lastFM, LibreFM and Listenbrainz scrobblers with [Pano Scrobbler](https://play.google.com/store/apps/details?id=com.arn.scrobble)
 
 As always, thanks for listening!
 
