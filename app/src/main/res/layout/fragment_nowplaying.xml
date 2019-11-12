@@ -48,7 +48,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            app:layout_constraintGuide_percent="0.70" />
+            app:layout_constraintGuide_percent="0.68" />
 
         <androidx.constraintlayout.widget.Guideline
             android:id="@+id/imageLeftGuideline"
@@ -61,17 +61,33 @@
             android:id="@+id/streamerName"
             android:layout_width="0dp"
             android:layout_height="0dp"
-            android:gravity="top|center_horizontal"
+            android:gravity="bottom|center_horizontal"
             android:text="@string/now_streaming"
             android:lines="1"
             android:textAlignment="center"
             android:textStyle="bold"
-            android:layout_marginTop="8dp"
-            app:layout_constraintBottom_toTopOf="@id/topInfoGuideline"
+            android:layout_marginTop="2dp"
+            app:layout_constraintBottom_toTopOf="@id/listenersCount"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="1.0"
+            app:layout_constraintVertical_weight="3"
             app:layout_constraintStart_toStartOf="@id/streamerPicture"
             app:layout_constraintTop_toBottomOf="@id/streamerPicture" />
+        <TextView
+            android:id="@+id/listenersCount"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            app:layout_constraintVertical_weight="3"
+            android:gravity="top|center_horizontal"
+            android:text="@string/listeners"
+            android:lines="1"
+            android:textAlignment="center"
+            android:textStyle=""
+            android:layout_marginTop="0dp"
+            app:layout_constraintBottom_toTopOf="@id/topInfoGuideline"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="@id/streamerPicture"
+            app:layout_constraintTop_toBottomOf="@id/streamerName" />
 
         <androidx.constraintlayout.widget.Guideline
             android:id="@+id/topInfoGuideline"
@@ -272,7 +288,7 @@
 
         <TextView
             android:id="@+id/endTime"
-            android:layout_width="32sp"
+            android:layout_width="44sp"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
             android:gravity="end"
@@ -283,7 +299,7 @@
 
         <TextView
             android:id="@+id/currentTime"
-            android:layout_width="32sp"
+            android:layout_width="44sp"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
             android:gravity="start"
@@ -319,8 +335,8 @@
             android:contextClickable="false"
             android:cropToPadding="false"
             android:scaleType="fitCenter"
-            android:layout_marginLeft="16dp"
-            android:layout_marginRight="16dp"
+            android:layout_marginLeft="8dp"
+            android:layout_marginRight="8dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/endTime"
             app:layout_constraintStart_toEndOf="@+id/currentTime"

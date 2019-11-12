@@ -32,6 +32,7 @@ class PlayerStore : ViewModel() {
     val isQueueUpdated: MutableLiveData<Boolean> = MutableLiveData()
     val isLpUpdated: MutableLiveData<Boolean> = MutableLiveData()
     val isMuted : MutableLiveData<Boolean> = MutableLiveData()
+    val listenersCount: MutableLiveData<Int> = MutableLiveData()
     private val urlToScrape = "https://r-a-d.io/api"
     private var latencyCompensator : Long = 0
     var isInitialized: Boolean = false
@@ -47,6 +48,7 @@ class PlayerStore : ViewModel() {
         isLpUpdated.value = false
         isMuted.value = false
         currentSong.title.value = noConnectionValue
+        listenersCount.value = 0
     }
 
     fun initPicture(c: Context) {
@@ -84,6 +86,8 @@ class PlayerStore : ViewModel() {
             fetchImage(streamerPictureUrl)
             streamerName.value = newStreamer
         }
+        val listeners = resMain.getInt("listeners")
+        listenersCount.value = listeners
         Log.d(tag, playerStoreTag +  "store updated")
     }
 

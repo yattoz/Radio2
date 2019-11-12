@@ -52,6 +52,7 @@
     <string name="every_day">Every day</string>
     <string name="working_days">Working days</string>
     <string name="song_to_clipboard">Song copied to clipboard!</string>
+    <string name="listeners">Listeners</string>
 
 
 </resources>

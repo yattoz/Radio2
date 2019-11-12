@@ -22,7 +22,6 @@ import com.google.android.material.snackbar.Snackbar
 import io.r_a_d.radio2.*
 import io.r_a_d.radio2.playerstore.PlayerStore
 import io.r_a_d.radio2.playerstore.Song
-import io.r_a_d.radio2.ui.songs.request.Requestor
 
 
 class NowPlayingFragment : Fragment() {
@@ -60,10 +59,13 @@ class NowPlayingFragment : Fragment() {
         val songTitleNextText: TextView = root.findViewById(R.id.text_song_title_next)
         val songArtistNextText: TextView = root.findViewById(R.id.text_song_artist_next)
         val volumeIconImage : ImageView = root.findViewById(R.id.volume_icon)
+        val listenersText : TextView = root.findViewById(R.id.listenersCount)
 
 
         TextViewCompat.setAutoSizeTextTypeUniformWithConfiguration(
-            streamerNameText,8, 16, 2, TypedValue.COMPLEX_UNIT_SP)
+            streamerNameText,8, 20, 2, TypedValue.COMPLEX_UNIT_SP)
+        TextViewCompat.setAutoSizeTextTypeUniformWithConfiguration(
+            listenersText,8, 16, 2, TypedValue.COMPLEX_UNIT_SP)
         /*
         TextViewCompat.setAutoSizeTextTypeUniformWithConfiguration(
             songTitleText,4, 24, 2, TypedValue.COMPLEX_UNIT_SP)
@@ -117,6 +119,10 @@ class NowPlayingFragment : Fragment() {
             streamerNameText.text = it
         })
 
+        PlayerStore.instance.listenersCount.observe(viewLifecycleOwner, Observer {
+            listenersText.text = "${getString(R.string.listeners)}: $it"
+        })
+
         // fuck it, do it on main thread
         PlayerStore.instance.currentTime.observe(viewLifecycleOwner, Observer {
             val dd = (PlayerStore.instance.currentTime.value!! - PlayerStore.instance.currentSong.startTime.value!!).toInt()
@@ -161,7 +167,7 @@ class NowPlayingFragment : Fragment() {
             PlayerStore.instance.isMuted.value = !PlayerStore.instance.isMuted.value!!
         }
 
-        val setClipboardListener: View.OnLongClickListener = View.OnLongClickListener(){
+        val setClipboardListener: View.OnLongClickListener = View.OnLongClickListener {
             val text = PlayerStore.instance.currentSong.artist.value + " - " + PlayerStore.instance.currentSong.title.value
             val clipboard = context!!.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
             val clip = android.content.ClipData.newPlainText("Copied Text", text)
@@ -191,7 +197,7 @@ class NowPlayingFragment : Fragment() {
         return root
     }
 
-    private val splitLayoutListener : View.OnLayoutChangeListener = View.OnLayoutChangeListener { view: View, i: Int, i1: Int, i2: Int, i3: Int, i4: Int, i5: Int, i6: Int, i7: Int ->
+    private val splitLayoutListener : View.OnLayoutChangeListener = View.OnLayoutChangeListener { _: View, _: Int, _: Int, _: Int, _: Int, _: Int, _: Int, _: Int, _: Int ->
 
         val isSplitLayout = preferenceStore.getBoolean("splitLayout", true)
 
