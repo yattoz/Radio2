@@ -33,6 +33,19 @@ class CustomizeFragment : PreferenceFragmentCompat() {
             true
         }
 
+        val splitLayout = preferenceScreen.findPreference<SwitchPreferenceCompat>("splitLayout")
+        splitLayout!!.summary = if (preferenceStore.getBoolean("splitLayout", true))
+            getString(R.string.splitLayout)
+        else
+            getString(R.string.notSplitLayout)
+        splitLayout.setOnPreferenceChangeListener { preference, newValue ->
+            if (newValue as Boolean)
+                preference.setSummary(R.string.splitLayout)
+            else
+                preference.setSummary(R.string.notSplitLayout)
+            true
+        }
+
     }
 
 

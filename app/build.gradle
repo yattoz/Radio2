@@ -93,10 +93,14 @@ dependencies {
     implementation deps.navigation.ui_ktx
 
     // Android Testing Support Library's runner and rules
+
+    /*
     androidTestImplementation deps.atsl.runner
     androidTestImplementation deps.atsl.rules
     androidTestImplementation deps.room.testing
     androidTestImplementation deps.arch_core.testing
+
+     */
 
     // Espresso UI Testing
     androidTestImplementation deps.espresso.core

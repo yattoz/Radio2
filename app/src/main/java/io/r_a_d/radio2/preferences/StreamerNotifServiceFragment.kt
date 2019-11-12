@@ -20,7 +20,7 @@ class StreamerNotifServiceFragment : PreferenceFragmentCompat() {
         val streamerPeriod = preferenceScreen.findPreference<Preference>("streamerMonitorPeriodPref")
 
         val streamerNotification = preferenceScreen.findPreference<Preference>("newStreamerNotification")
-        streamerNotification?.setOnPreferenceChangeListener { preference, newValue ->
+        streamerNotification?.setOnPreferenceChangeListener { _, newValue ->
             if ((newValue as Boolean)) {
                 val builder1 = AlertDialog.Builder(context!!)
                 builder1.setMessage(R.string.warningStreamerNotif)

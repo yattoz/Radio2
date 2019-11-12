@@ -30,7 +30,7 @@
     <string name="action_refresh">Force data refresh</string>
     <string name="action_bug_submit">Submit a bug (GitHub)</string>
     <string name="github_url_new_issue">https://github.com/yattoz/Radio2/issues/</string>
-    <string name="no_user_name">To display your favorite, set you IRC user name in Settings -> Customize app behavior.</string>
+    <string name="no_user_name">To display your favorite, set you IRC user name in Settings → Customize app behavior.</string>
     <string name="ra_f">.ra f</string>
 
     <string name="nowPlayingNotificationChannel">R/a/dio Stream Service</string>
@@ -54,6 +54,8 @@
     <string name="song_to_clipboard">Song copied to clipboard!</string>
     <string name="listeners">Listeners</string>
     <string name="r_a_dio_icon">r/a/dio icon</string>
+    <string name="splitLayout">Split Now Playing screen in 2 blocks when device is horizontal</string>
+    <string name="notSplitLayout">Keep the same layout when horizontal as in vertical</string>
 
 
 </resources>

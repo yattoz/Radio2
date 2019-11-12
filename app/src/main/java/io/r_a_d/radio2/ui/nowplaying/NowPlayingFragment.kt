@@ -172,7 +172,7 @@ class NowPlayingFragment : Fragment() {
             val clipboard = context!!.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
             val clip = android.content.ClipData.newPlainText("Copied Text", text)
             clipboard.setPrimaryClip(clip)
-            val snackBarLength = if (preferenceStore.getBoolean("snackbarPersistent", false))
+            val snackBarLength = if (preferenceStore.getBoolean("snackbarPersistent", true))
                 Snackbar.LENGTH_INDEFINITE
             else Snackbar.LENGTH_LONG
             val snackBar = Snackbar.make(it, "", snackBarLength)
