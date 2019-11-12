@@ -10,6 +10,7 @@ R/a/dio is a webradio that was founded 7+ years ago with the intention of bringi
 
 - Listen to R/a/dio!
 - Fine-tune the volume in the app to go lower than the lowest volume of Android!
+- Adapt to all screens: small phone, big tablet, horizontal, vertical, split screen!
 - Start and stop the stream by headphones plugging/unplugging, or with a bluetooth headset!
 - Check last played and queued tracks!
 - Request any title to the AFK streamer Hanyuu-sama!
@@ -24,5 +25,5 @@ Gato-goto choo-choo!
 
 # Releases
 
-# 1.0 (November 12, 2019)
-First release, app is stable and ready to 
+## 1.0 (November 12, 2019)
+First release, the app is packed with all the original features, plus a lot more.
