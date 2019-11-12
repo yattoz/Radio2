@@ -11,6 +11,7 @@ import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.preference.PreferenceManager
 import io.r_a_d.radio2.*
+import io.r_a_d.radio2.alarm.RadioAlarm
 import io.r_a_d.radio2.playerstore.PlayerStore
 import org.json.JSONObject
 import java.net.URL
@@ -19,15 +20,20 @@ import java.net.URL
 class BootBroadcastReceiver : BroadcastReceiver(){
 
     override fun onReceive(context: Context, arg1: Intent) {
-        Log.d(tag, "Broadcast Receiver received ${arg1}")
+        Log.d(tag, "Broadcast Receiver received $arg1")
         if (arg1.action == Intent.ACTION_BOOT_COMPLETED) {
                 WorkerStore.instance.init(context)
                 startStreamerMonitor(context)
+
+
+                RadioAlarm.instance.setNextAlarm(context) // schedule next alarm
             }
         if (arg1.getStringExtra("action") == "io.r_a_d.radio2.${Actions.PLAY_OR_FALLBACK.name}" )
         {
             // define preferenceStore
             preferenceStore = PreferenceManager.getDefaultSharedPreferences(context)
+            RadioAlarm.instance.setNextAlarm(context) // schedule next alarm
+
             PlayerStore.instance.initPicture(context)
             PlayerStore.instance.initApi()
             PlayerStore.instance.volume.value = 100
@@ -41,7 +47,7 @@ class BootBroadcastReceiver : BroadcastReceiver(){
     }
 }
 
-fun startAlarm(c: Context){
+fun startNextAlarmStreamer(c: Context){
     // the notification works with an alarm re-scheduled at fixed rate.
     // if the service stopped, the alarm is not re-scheduled.
     if (WorkerStore.instance.isServiceStarted)

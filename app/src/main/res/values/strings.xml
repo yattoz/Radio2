@@ -49,6 +49,8 @@
         \n\nAre you sure you want to enable this?</string>
     <string name="snackbarPersistent">Stay visible, can be closed with "OK" button</string>
     <string name="snackbarNonPersistent">Disappear after some time</string>
+    <string name="every_day">Every day</string>
+    <string name="working_days">Working days</string>
 
 
 </resources>

@@ -24,7 +24,7 @@
         <item name="thursday">Thursday</item>
         <item name="friday">Friday</item>
         <item name="saturday">Saturday</item>
-        <item name="sundday">Sunday</item>
+        <item name="sunday">Sunday</item>
     </string-array>
 
 </resources>

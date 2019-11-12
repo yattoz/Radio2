@@ -77,7 +77,7 @@ class StreamerMonitorService : Service() {
         }
         WorkerStore.instance.streamerName.observeForever(streamerNameObserver)
         WorkerStore.instance.isServiceStarted = true
-        startAlarm(this)
+        startNextAlarmStreamer(this)
         Log.d(tag, "streamerMonitor created")
     }
 
@@ -102,7 +102,7 @@ class StreamerMonitorService : Service() {
 
                 Log.d(tag, "Fetched streamer name at ${hours}:${if (minutes < 10) "0" else ""}${minutes}")
                 fetchStreamer(this)
-                startAlarm(this) // schedule next alarm
+                startNextAlarmStreamer(this) // schedule next alarm
                 return START_STICKY
             }
             Actions.KILL.name -> {

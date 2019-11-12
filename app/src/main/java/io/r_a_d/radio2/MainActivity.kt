@@ -17,6 +17,7 @@ import java.util.Timer
 import android.view.MenuItem
 import androidx.preference.PreferenceManager
 import com.google.android.material.snackbar.Snackbar
+import io.r_a_d.radio2.alarm.RadioAlarm
 import io.r_a_d.radio2.streamerNotificationService.WorkerStore
 import io.r_a_d.radio2.streamerNotificationService.startStreamerMonitor
 import io.r_a_d.radio2.ui.songs.request.Requestor
@@ -115,8 +116,12 @@ class MainActivity : BaseActivity() {
         super.onCreate(savedInstanceState)
         preferenceStore = PreferenceManager.getDefaultSharedPreferences(this)
 
+
         WorkerStore.instance.init(this)
-        startStreamerMonitor(this)
+        startStreamerMonitor(this) // this checks the preferenceStore before actually starting a service, don't worry.
+
+        RadioAlarm.instance.cancelAlarm(c = this)
+        RadioAlarm.instance.setNextAlarm(c = this) // this checks the preferenceStore before actually setting an alarm, don't worry.
 
         // initialize programmatically accessible colors
         colorBlue = ResourcesCompat.getColor(resources, R.color.bluereq, null)

@@ -353,9 +353,6 @@ class RadioService : MediaBrowserServiceCompat() {
         playbackStateBuilder.setActions(PlaybackStateCompat.ACTION_PLAY_PAUSE)
             .setState(PlaybackStateCompat.STATE_STOPPED, 0, 1.0f, SystemClock.elapsedRealtime())
 
-        /* TODO for the moment, the notification is manually updated every time the song or state changes.
-            it could be nice to use metadata to update it when it's playing, and manual updated when it's not.
-         */
         metadataBuilder = MediaMetadataCompat.Builder()
         mediaSession.setPlaybackState(playbackStateBuilder.build())
     }
@@ -369,10 +366,24 @@ class RadioService : MediaBrowserServiceCompat() {
     {
         beginPlaying(isRinging = true, isFallback = false)
         val wait: (Any?) -> Any = {
-            Thread.sleep(12*1000)
+            /*  here, we check every 50ms during 12 seconds whether the stream has started.
+                if it has started, we set isStarted to TRUE (and it will stay that way with Boolean OR)
+                This was, we don't need to launch the fallback audio.
+                This covers the situation where the stream plays, but the user stops it within 12 seconds.
+             */
+            var i = 0
+            var isStarted = false
+            while (i < 12*20)
+            {
+                Thread.sleep(50)
+                i++
+                isStarted = isStarted || (mediaSession.controller.playbackState.state == PlaybackStateCompat.STATE_PLAYING)
+            }
+            Log.d(tag, "isStared: $isStarted")
+            isStarted
         }
         val post: (Any?) -> Unit = {
-            if (mediaSession.controller.playbackState.state != PlaybackStateCompat.STATE_PLAYING)
+            if (!(it as Boolean))
             {
                 beginPlaying(isRinging = true, isFallback = true)
             }

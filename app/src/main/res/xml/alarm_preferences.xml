@@ -11,6 +11,13 @@
         app:defaultValue="false"
         />
 
+    <Preference
+        app:key="timeSet"
+        app:iconSpaceReserved="false"
+        app:title="Set time"
+        app:singleLineTitle="false"
+        app:defaultValue="false"/>
+
     <MultiSelectListPreference
         app:key="alarmDays"
         app:iconSpaceReserved="false"
