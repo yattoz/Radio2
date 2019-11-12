@@ -34,7 +34,7 @@ class PlayerStore : ViewModel() {
     val isMuted : MutableLiveData<Boolean> = MutableLiveData()
     val listenersCount: MutableLiveData<Int> = MutableLiveData()
     private val urlToScrape = "https://r-a-d.io/api"
-    private var latencyCompensator : Long = 0
+    var latencyCompensator : Long = 0
     var isInitialized: Boolean = false
 
     init {

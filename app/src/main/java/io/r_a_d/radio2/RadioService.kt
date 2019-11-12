@@ -333,6 +333,23 @@ class RadioService : MediaBrowserServiceCompat() {
                     val data = entry.title!!
                     PlayerStore.instance.currentSong.setTitleArtist(data)
                 }
+                val d : Long = ((PlayerStore.instance.currentSong.stopTime.value?.minus(PlayerStore.instance.currentSong.startTime.value!!) ?: 0) / 1000)
+                val duration = if (d > 0) d - (PlayerStore.instance.latencyCompensator) else 0
+                metadataBuilder.putString(
+                    MediaMetadataCompat.METADATA_KEY_TITLE,
+                    PlayerStore.instance.currentSong.title.value
+                )
+                    .putString(MediaMetadataCompat.METADATA_KEY_ARTIST, PlayerStore.instance.currentSong.artist.value)
+                    .putLong(MediaMetadataCompat.METADATA_KEY_DURATION, duration)
+
+                mediaSession.setMetadata(metadataBuilder.build())
+
+                val intent = Intent("com.android.music.metachanged")
+                intent.putExtra("artist", PlayerStore.instance.currentSong.artist.value)
+                intent.putExtra("track", PlayerStore.instance.currentSong.title.value)
+                intent.putExtra("duration", duration)
+                intent.putExtra("position", 0)
+                sendBroadcast(intent)
             }
         }
         // this listener allows to reset numberOfSongs if the connection is lost.
