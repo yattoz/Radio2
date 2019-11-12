@@ -39,7 +39,7 @@ class AlarmFragment : PreferenceFragmentCompat() {
                 RadioAlarm.instance.cancelAlarm(context!!)
                 RadioAlarm.instance.setNextAlarm(context!!, isForce = true, forceTime = hourOfDay*60+minute)
             }
-            val timeNew = PreferenceManager.getDefaultSharedPreferences(context!!).getInt("alarmTimeFromMidnight", 7*60*60) / 60
+            val timeNew = PreferenceManager.getDefaultSharedPreferences(context!!).getInt("alarmTimeFromMidnight", 7*60)
             val hourOfDayNew = timeNew / 60
             val minuteNew = timeNew % 60
             val timePicker = TimePickerDialog(context, timePickerOnTimeSetListener, hourOfDayNew, minuteNew, true)

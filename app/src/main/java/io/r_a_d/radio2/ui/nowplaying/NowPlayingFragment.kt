@@ -59,7 +59,7 @@ class NowPlayingFragment : Fragment() {
 
 
         TextViewCompat.setAutoSizeTextTypeUniformWithConfiguration(
-            streamerNameText,4, 24, 2, TypedValue.COMPLEX_UNIT_SP)
+            streamerNameText,8, 16, 2, TypedValue.COMPLEX_UNIT_SP)
         /*
         TextViewCompat.setAutoSizeTextTypeUniformWithConfiguration(
             songTitleText,4, 24, 2, TypedValue.COMPLEX_UNIT_SP)

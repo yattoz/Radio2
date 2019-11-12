@@ -135,7 +135,15 @@ class RadioService : MediaBrowserServiceCompat() {
     }
 
     private val streamerObserver = Observer<String> {
-        PlayerStore.instance.initApi()
+        val wait: (Any?) -> Any = {
+            if (PlayerStore.instance.streamerName.value != "")
+                Thread.sleep(2000) // we wait 2 seconds for the Queue to populate
+        }
+        val post: (Any?) -> Unit = {
+            PlayerStore.instance.initApi()
+            nowPlayingNotification.update(this) // should update the streamer icon
+        }
+        Async(wait, post)
     }
 
 

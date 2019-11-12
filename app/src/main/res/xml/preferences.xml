@@ -5,29 +5,12 @@
     >
 
     <Preference
-        app:icon="@drawable/ic_settings"
+        app:icon="@drawable/ic_alarm"
         app:key="alarmScreen"
         app:title="Set up alarm clock"
         app:fragment="io.r_a_d.radio2.preferences.AlarmFragment"
         />
 
-
-    <SwitchPreferenceCompat
-        app:key="newStreamerNotification"
-        app:iconSpaceReserved="false"
-        app:title="New streamer notification (drains battery!)"
-        app:singleLineTitle="false"
-        app:defaultValue="false"
-        />
-
-    <ListPreference
-        app:iconSpaceReserved="false"
-        app:key="streamerMonitorPeriodPref"
-        app:title="Streamer monitor frequency"
-        android:entries="@array/streamerFetchPeriodString"
-        android:entryValues="@array/streamerFetchPeriod"
-        android:defaultValue="10"
-        />
 
     <EditTextPreference
         app:iconSpaceReserved="false"
@@ -63,11 +46,36 @@
         app:showSeekBarValue="true"
         />
 
-    <Preference
+    <PreferenceCategory
+        app:title="Advanced"
         app:iconSpaceReserved="false"
-        app:key="submitBug"
-        app:title="Submit a bug (opens GitHub in a web browser)"
-        />
+        >
+
+        <SwitchPreferenceCompat
+            app:key="newStreamerNotification"
+            app:iconSpaceReserved="false"
+            app:title="New streamer notification (drains battery!)"
+            app:singleLineTitle="false"
+            app:defaultValue="false"
+            />
+
+        <ListPreference
+            app:iconSpaceReserved="false"
+            app:key="streamerMonitorPeriodPref"
+            app:title="Streamer monitor frequency"
+            android:entries="@array/streamerFetchPeriodString"
+            android:entryValues="@array/streamerFetchPeriod"
+            android:defaultValue="10"
+            />
+
+        <Preference
+            app:iconSpaceReserved="false"
+            app:key="submitBug"
+            app:title="Submit a bug (opens GitHub in a web browser)"
+            />
+
+
+    </PreferenceCategory>
 
 
 </PreferenceScreen>
