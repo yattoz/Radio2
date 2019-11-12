@@ -51,6 +51,7 @@
     <string name="snackbarNonPersistent">Disappear after some time</string>
     <string name="every_day">Every day</string>
     <string name="working_days">Working days</string>
+    <string name="song_to_clipboard">Song copied to clipboard!</string>
 
 
 </resources>

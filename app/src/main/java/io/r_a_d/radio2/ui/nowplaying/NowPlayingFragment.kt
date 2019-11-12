@@ -1,6 +1,8 @@
 package io.r_a_d.radio2.ui.nowplaying
 
 import android.annotation.SuppressLint
+import android.content.ClipboardManager
+import android.content.Context
 import androidx.lifecycle.ViewModelProviders
 import android.os.Bundle
 import android.support.v4.media.session.PlaybackStateCompat
@@ -15,10 +17,12 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.core.widget.TextViewCompat
 import androidx.lifecycle.Observer
+import com.google.android.material.snackbar.BaseTransientBottomBar
+import com.google.android.material.snackbar.Snackbar
 import io.r_a_d.radio2.*
 import io.r_a_d.radio2.playerstore.PlayerStore
 import io.r_a_d.radio2.playerstore.Song
-import java.util.concurrent.locks.Lock
+import io.r_a_d.radio2.ui.songs.request.Requestor
 
 
 class NowPlayingFragment : Fragment() {
@@ -156,6 +160,30 @@ class NowPlayingFragment : Fragment() {
         volumeIconImage.setOnClickListener{
             PlayerStore.instance.isMuted.value = !PlayerStore.instance.isMuted.value!!
         }
+
+        val setClipboardListener: View.OnLongClickListener = View.OnLongClickListener(){
+            val text = PlayerStore.instance.currentSong.artist.value + " - " + PlayerStore.instance.currentSong.title.value
+            val clipboard = context!!.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+            val clip = android.content.ClipData.newPlainText("Copied Text", text)
+            clipboard.setPrimaryClip(clip)
+            val snackBarLength = if (preferenceStore.getBoolean("snackbarPersistent", false))
+                Snackbar.LENGTH_INDEFINITE
+            else Snackbar.LENGTH_LONG
+            val snackBar = Snackbar.make(it, "", snackBarLength)
+
+            if (snackBarLength == Snackbar.LENGTH_INDEFINITE)
+                snackBar.setAction("OK") { snackBar.dismiss() }
+
+            snackBar.behavior = BaseTransientBottomBar.Behavior().apply {
+                setSwipeDirection(BaseTransientBottomBar.Behavior.SWIPE_DIRECTION_ANY)
+            }
+            snackBar.setText(getString(R.string.song_to_clipboard))
+            snackBar.show()
+            true
+        }
+
+        songTitleText.setOnLongClickListener(setClipboardListener)
+        songArtistText.setOnLongClickListener(setClipboardListener)
 
         if (preferenceStore.getBoolean("splitLayout", true))
             root.addOnLayoutChangeListener(splitLayoutListener)
