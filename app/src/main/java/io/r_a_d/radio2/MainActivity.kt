@@ -114,8 +114,6 @@ class MainActivity : BaseActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        preferenceStore = PreferenceManager.getDefaultSharedPreferences(this)
-
 
         WorkerStore.instance.init(this)
         startStreamerMonitor(this) // this checks the preferenceStore before actually starting a service, don't worry.

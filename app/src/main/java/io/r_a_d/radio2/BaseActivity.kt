@@ -2,19 +2,14 @@ package io.r_a_d.radio2
 
 import android.content.Intent
 import android.os.Bundle
-import android.os.PersistableBundle
 import android.util.Log
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewTreeObserver
-import android.view.Window
 
 import androidx.appcompat.app.AppCompatActivity
-import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.constraintlayout.widget.ConstraintSet
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.preference.PreferenceManager
-import com.google.android.exoplayer2.text.Cue
 import com.google.android.material.bottomnavigation.BottomNavigationView
 
 abstract class BaseActivity : AppCompatActivity() {
@@ -74,6 +69,11 @@ abstract class BaseActivity : AppCompatActivity() {
         rootLayout!!.viewTreeObserver.addOnGlobalLayoutListener(keyboardLayoutListener)
 
         keyboardListenersAttached = true
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        preferenceStore = PreferenceManager.getDefaultSharedPreferences(this)
     }
 
     override fun onDestroy() {
