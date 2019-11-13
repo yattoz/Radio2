@@ -43,6 +43,7 @@ class RadioService : MediaBrowserServiceCompat() {
     private val radioServiceId = 1
     private var numberOfSongs = 0
     private val apiTicker: Timer = Timer()
+    private var isAlarmStopped = false
 
     // Define the broadcast receiver to handle any broadcasts
     private val receiver = object : BroadcastReceiver() {
@@ -226,8 +227,8 @@ class RadioService : MediaBrowserServiceCompat() {
 
         when (intent.getStringExtra("action")) {
             Actions.PLAY.name -> beginPlaying()
-            Actions.STOP.name -> stopPlaying()
-            Actions.PAUSE.name -> pausePlaying()
+            Actions.STOP.name -> { isAlarmStopped = true; stopPlaying() }
+            Actions.PAUSE.name -> { isAlarmStopped = true; pausePlaying() }
             Actions.VOLUME.name -> setVolume(intent.getIntExtra("value", 100))
             Actions.KILL.name -> {stopForeground(true); stopSelf(); return Service.START_NOT_STICKY}
             Actions.NOTIFY.name -> nowPlayingNotification.update(this)
@@ -391,24 +392,23 @@ class RadioService : MediaBrowserServiceCompat() {
     {
         beginPlaying(isRinging = true, isFallback = false)
         val wait: (Any?) -> Any = {
-            /*  here, we check every 50ms during 12 seconds whether the stream has started.
-                if it has started, we set isStarted to TRUE (and it will stay that way with Boolean OR)
-                This was, we don't need to launch the fallback audio.
-                This covers the situation where the stream plays, but the user stops it within 12 seconds.
+            /*
+            Here we lower the isAlarmStopped flag and we wait for 12s.
+            If the player stops the alarm (by calling an intent), the isAlarmStopped flag will be raised.
              */
+            isAlarmStopped = false // reset the flag
             var i = 0
-            var isStarted = false
-            while (i < 12*20)
+            while (i < 12)
             {
-                Thread.sleep(50)
+                Thread.sleep(1000)
                 i++
-                isStarted = isStarted || (mediaSession.controller.playbackState.state == PlaybackStateCompat.STATE_PLAYING)
             }
-            Log.d(tag, "isStared: $isStarted")
-            isStarted
         }
         val post: (Any?) -> Unit = {
-            if (!(it as Boolean))
+            // we verify : if the player is not playing, and if the user didn't stop it, it means that there's a network issue.
+            // So we use the fallback sound to wake up the user!!
+            // (note: player.isPlaying is only accessible on main thread, so we can't check in the wait() lambda)
+            if (!player.isPlaying && !isAlarmStopped)
             {
                 beginPlaying(isRinging = true, isFallback = true)
             }
