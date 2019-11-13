@@ -26,5 +26,5 @@ Gato-goto choo-choo!
 
 # Releases
 
-## 1.0 (November 12, 2019)
-First release, the app is packed with all the original features, plus a lot more.
+## Release 1.0
+Incoming! The date will be announced when it reaches the Play Store.
