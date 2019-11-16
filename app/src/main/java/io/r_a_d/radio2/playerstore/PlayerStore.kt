@@ -79,7 +79,7 @@ class PlayerStore : ViewModel() {
         currentTime.value = (resMain.getLong("current"))*1000 - (latencyCompensator)
 
         val newStreamer = resMain.getJSONObject("dj").getString("djname")
-        if (newStreamer != instance.streamerName.value)
+        if (newStreamer != streamerName.value)
         {
             val streamerPictureUrl =
                 "${urlToScrape}/dj-image/${resMain.getJSONObject("dj").getString("djimage")}"
@@ -112,7 +112,7 @@ class PlayerStore : ViewModel() {
                 updateApi(resMain)
                 currentSongBackup.copy(currentSong)
                 queue.clear()
-                if (resMain.has("queue") && resMain.getBoolean("isafkstream"))
+                if (resMain.has("queue") && resMain.getBoolean("requesting"))
                 {
                     val queueJSON =
                         resMain.getJSONArray("queue")
@@ -148,14 +148,25 @@ class PlayerStore : ViewModel() {
     private fun fetchLastRequest()
     {
         val sleepScrape: (Any?) -> String = {
-            Thread.sleep(12000) // we wait a bit (12s) for the API to get updated on R/a/dio side!
+            // we can speed up the retrieval by specifically waiting for the number of seconds we measure between ICY metadata and API change.
+            // we add 1 second just to be sure the API has correctly updated.
+            // and if no latencyCompensator is set yet, we just wait for 12 seconds, which is a large enough wait.
+            val sleepTime = if (latencyCompensator > 0) latencyCompensator + 1000 else 12000
+            Thread.sleep(sleepTime) // we wait a bit (10s) for the API to get updated on R/a/dio side!
             URL(urlToScrape).readText()
         }
         val post: (parameter: Any?) -> Unit = {
             val result = JSONObject(it as String)
             if (result.has("main")) {
                 val resMain = result.getJSONObject("main")
-                if (resMain.has("queue")) {
+                if (resMain.has("requesting") && !resMain.getBoolean("requesting") && queue.isNotEmpty())
+                {
+                    queue.clear() //we're not requesting anything anymore.
+                    isQueueUpdated.value = true
+                } else if (resMain.has("requesting") && resMain.getBoolean("requesting") && queue.isEmpty())
+                {
+                    initApi()
+                } else if (resMain.has("queue")) {
                     val queueJSON =
                         resMain.getJSONArray("queue")
                     val t = extractSong(queueJSON[4] as JSONObject)
@@ -183,9 +194,9 @@ class PlayerStore : ViewModel() {
     }
 
     fun updateQueue() {
+        fetchLastRequest()
         if (queue.isNotEmpty()){
             queue.remove(queue.first())
-            fetchLastRequest()
             Log.d(tag, playerStoreTag +  queue.toString())
             isQueueUpdated.value = true
         } else {

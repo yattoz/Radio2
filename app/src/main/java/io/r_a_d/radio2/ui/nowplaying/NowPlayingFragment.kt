@@ -93,7 +93,8 @@ class NowPlayingFragment : Fragment() {
             songArtistNextText.text = t.artist.value
         })
 
-        PlayerStore.instance.volume.observe(viewLifecycleOwner, Observer {
+        fun volumeIcon(it: Int)
+        {
             volumeText.text = "$it%"
             when {
                 it > 66 -> volumeIconImage.setImageResource(R.drawable.ic_volume_high)
@@ -101,13 +102,17 @@ class NowPlayingFragment : Fragment() {
                 it in 0..33 -> volumeIconImage.setImageResource(R.drawable.ic_volume_low)
                 else -> volumeIconImage.setImageResource(R.drawable.ic_volume_off)
             }
+        }
+
+        PlayerStore.instance.volume.observe(viewLifecycleOwner, Observer {
+            volumeIcon(it)
         })
 
         PlayerStore.instance.isMuted.observe(viewLifecycleOwner, Observer {
             if (it)
                 volumeIconImage.setImageResource(R.drawable.ic_volume_off)
             else
-                PlayerStore.instance.volume.value = PlayerStore.instance.volume.value // force trigger volume observer
+                volumeIcon(PlayerStore.instance.volume.value!!)
         })
 
 

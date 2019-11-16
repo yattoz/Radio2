@@ -136,15 +136,8 @@ class RadioService : MediaBrowserServiceCompat() {
     }
 
     private val streamerObserver = Observer<String> {
-        val wait: (Any?) -> Any = {
-            if (PlayerStore.instance.streamerName.value != "")
-                Thread.sleep(2000) // we wait 2 seconds for the Queue to populate
-        }
-        val post: (Any?) -> Unit = {
-            PlayerStore.instance.initApi()
-            nowPlayingNotification.update(this) // should update the streamer icon
-        }
-        Async(wait, post)
+        PlayerStore.instance.initApi()
+        nowPlayingNotification.update(this) // should update the streamer icon
     }
 
 
@@ -300,7 +293,7 @@ class RadioService : MediaBrowserServiceCompat() {
     private val focusChangeListener =
         AudioManager.OnAudioFocusChangeListener { focusChange ->
             when (focusChange) {
-                AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK -> setVolume(20) //20%
+                AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK -> setVolume((0.20f * PlayerStore.instance.volume.value!!).toInt()) //20% of current volume.
                 AudioManager.AUDIOFOCUS_LOSS_TRANSIENT -> setVolume(0)
                 AudioManager.AUDIOFOCUS_LOSS -> stopPlaying()
                 AudioManager.AUDIOFOCUS_GAIN -> setVolume(PlayerStore.instance.volume.value!!)
