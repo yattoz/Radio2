@@ -73,9 +73,9 @@ class RadioAlarm {
             return 0
 
 
-        val currentDay = calendar.get(Calendar.DAY_OF_WEEK)
+        val currentDay = calendar.get(Calendar.DAY_OF_WEEK) // 1 (Sunday) to 7 (Saturday)
         val datePassed = if (calendar.get(Calendar.HOUR_OF_DAY)*60 + calendar.get(Calendar.MINUTE) >= time ) 1 else 0
-        var nextSelectedDay = currentDay + datePassed
+        var nextSelectedDay = (currentDay-1 + datePassed)%7 + 1 // I use currentDay-1 to have a [0-6] scale, add 1 if the alarm is for tomorrow (datePassed=1). If that exceeds 7, use modulo. Then add 1 to get back to [1-7] scale.
         var i = 0 + datePassed
         while (!selectedDays.contains(nextSelectedDay))
         {
