@@ -66,20 +66,20 @@ class RadioAlarm {
         for (item in fullWeekOrdered)
         {
             if (days!!.contains(item))
-                selectedDays.add(fullWeekOrdered.indexOf(item)+1)
+                selectedDays.add(fullWeekOrdered.indexOf(item))
         }
 
         if (selectedDays.isEmpty()) // in case the user uncheck all boxes... do nothing.
             return 0
 
 
-        val currentDay = calendar.get(Calendar.DAY_OF_WEEK) // 1 (Sunday) to 7 (Saturday)
+        val currentDay = calendar.get(Calendar.DAY_OF_WEEK) - 1 // 0 (Sunday) to 6 (Saturday)
         val datePassed = if (calendar.get(Calendar.HOUR_OF_DAY)*60 + calendar.get(Calendar.MINUTE) >= time ) 1 else 0
-        var nextSelectedDay = (currentDay-1 + datePassed)%7 + 1 // I use currentDay-1 to have a [0-6] scale, add 1 if the alarm is for tomorrow (datePassed=1). If that exceeds 7, use modulo. Then add 1 to get back to [1-7] scale.
+        var nextSelectedDay = (currentDay + datePassed)%7
         var i = 0 + datePassed
         while (!selectedDays.contains(nextSelectedDay))
         {
-            nextSelectedDay = (nextSelectedDay)%7 + 1
+            nextSelectedDay = (nextSelectedDay + 1)%7
             i++
         }
         // We found out the next selected day in the list.
