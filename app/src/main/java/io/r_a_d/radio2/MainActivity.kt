@@ -137,7 +137,7 @@ class MainActivity : BaseActivity() {
             500
         )
 
-        PlayerStore.instance.fetchApi()
+        // PlayerStore.instance.fetchApi() // unneeded, the service will call the initApi on defining the streamerName Observer
 
         // Post-UI Launch
         if (savedInstanceState?.getBoolean("isInitialized") == true && PlayerStore.instance.isInitialized)

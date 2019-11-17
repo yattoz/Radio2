@@ -168,9 +168,17 @@ class NowPlayingFragment : Fragment() {
             PlayerStore.instance.isPlaying.value = PlayerStore.instance.playbackState.value == PlaybackStateCompat.STATE_STOPPED
         }
 
+        /*
+            /* TODO : disabled volumeIconImage click listener, it creates weird behaviors when switching fragments.
+                in particular, the mute state isn't retained when switching fragments, and it creates visual error
+                (displaying the mute icon when it's not muted).
+                So for the moment it's safer to disable it altogether.
+             */
         volumeIconImage.setOnClickListener{
             PlayerStore.instance.isMuted.value = !PlayerStore.instance.isMuted.value!!
         }
+
+         */
 
         val setClipboardListener: View.OnLongClickListener = View.OnLongClickListener {
             val text = PlayerStore.instance.currentSong.artist.value + " - " + PlayerStore.instance.currentSong.title.value

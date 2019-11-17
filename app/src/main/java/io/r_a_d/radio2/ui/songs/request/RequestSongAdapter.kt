@@ -59,7 +59,11 @@ class RequestSongAdapter(private val dataSet: ArrayList<Song>
     override fun onBindViewHolder(holder: MyViewHolder, position: Int) {
 
         if (itemCount <= 1)
+        {
+            // in any case, if there's nothing, don't display the loadMore button!!
+            holder.itemView.loadMoreButton.visibility = View.GONE
             return
+        }
 
         if (holder.itemViewType == viewTypeFooter)
         {

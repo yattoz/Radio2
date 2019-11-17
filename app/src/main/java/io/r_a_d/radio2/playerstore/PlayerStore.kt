@@ -149,9 +149,9 @@ class PlayerStore : ViewModel() {
     {
         val sleepScrape: (Any?) -> String = {
             // we can speed up the retrieval by specifically waiting for the number of seconds we measure between ICY metadata and API change.
-            // we add 1 second just to be sure the API has correctly updated.
+            // we add 2 seconds just to be sure the API has correctly updated. (the latency compensator can have a jitter of 1 second usually)
             // and if no latencyCompensator is set yet, we just wait for 12 seconds, which is a large enough wait.
-            val sleepTime = if (latencyCompensator > 0) latencyCompensator + 1000 else 12000
+            val sleepTime = if (latencyCompensator > 0) latencyCompensator + 2000 else 12000
             Thread.sleep(sleepTime) // we wait a bit (10s) for the API to get updated on R/a/dio side!
             URL(urlToScrape).readText()
         }
@@ -194,11 +194,13 @@ class PlayerStore : ViewModel() {
     }
 
     fun updateQueue() {
-        fetchLastRequest()
-        if (queue.isNotEmpty()){
+        if (queue.isNotEmpty()) {
             queue.remove(queue.first())
-            Log.d(tag, playerStoreTag +  queue.toString())
+            Log.d(tag, playerStoreTag + queue.toString())
+            fetchLastRequest()
             isQueueUpdated.value = true
+        } else if (isInitialized) {
+            fetchLastRequest()
         } else {
             Log.d(tag, playerStoreTag +  "queue is empty!")
         }
