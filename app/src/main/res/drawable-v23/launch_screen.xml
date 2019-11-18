@@ -5,10 +5,10 @@
     <!-- Your product logo - 144dp color version of your app icon -->
 
     <item
+        android:drawable="@drawable/ic_radio_logo_round"
+        android:gravity="center"
+        android:height="144dp"
+        android:width="144dp"
         >
-        <bitmap
-            android:src="@drawable/splash_logo"
-            android:gravity="center"
-            />
     </item>
 </layer-list>
