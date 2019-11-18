@@ -22,17 +22,6 @@ class FavoritesFragment : Fragment()  {
     private lateinit var viewManager: RecyclerView.LayoutManager
     private lateinit var searchView: SearchView
 
-    private val listener : SearchView.OnQueryTextListener = object : SearchView.OnQueryTextListener{
-        override fun onQueryTextSubmit(query: String?): Boolean {
-            // do nothing
-            return true
-        }
-        override fun onQueryTextChange(newText: String?): Boolean {
-            (viewAdapter as RequestSongAdapter).filter(newText ?: "")
-            return true
-        }
-    }
-
     private val favoritesSongObserver : Observer<Boolean> = Observer {
         viewAdapter.notifyDataSetChanged()
     }
@@ -45,10 +34,25 @@ class FavoritesFragment : Fragment()  {
         super.onCreateView(inflater, container, savedInstanceState)
         val root = inflater.inflate(R.layout.fragment_request, container, false)
 
+        viewAdapter = RequestSongAdapter(Requestor.instance.favoritesSongArray)
+
+        val listener : SearchView.OnQueryTextListener = object : SearchView.OnQueryTextListener{
+            override fun onQueryTextSubmit(query: String?): Boolean {
+                // do nothing
+                return true
+            }
+            override fun onQueryTextChange(newText: String?): Boolean {
+                (viewAdapter as RequestSongAdapter).filter(newText ?: "")
+                return true
+            }
+        }
+
         searchView = root.findViewById(R.id.searchBox)
         searchView.queryHint = "Search filter..."
         searchView.setOnQueryTextListener(listener)
         viewManager = LinearLayoutManager(context)
+
+
 
         val userName = preferenceStore.getString("userName", null)
         val noUserNameText : TextView = root.findViewById(R.id.noUserNameText)
@@ -59,7 +63,6 @@ class FavoritesFragment : Fragment()  {
         } else {
             noUserNameText.visibility = View.GONE
         }
-        viewAdapter = RequestSongAdapter(Requestor.instance.favoritesSongArray)
         recyclerView = root.findViewById<RecyclerView>(R.id.request_recycler).apply {
             // use this setting to improve performance if you know that changes
             // in content do not change the layout size of the RecyclerView
