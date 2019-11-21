@@ -23,10 +23,12 @@ import android.telephony.PhoneStateListener
 import android.telephony.TelephonyManager
 import android.view.KeyEvent
 import androidx.core.app.NotificationCompat
+import androidx.core.content.edit
 import androidx.lifecycle.Observer
 import androidx.media.AudioAttributesCompat
 import androidx.media.AudioFocusRequestCompat
 import androidx.media.AudioManagerCompat
+import androidx.preference.PreferenceManager
 import com.google.android.exoplayer2.*
 import com.google.android.exoplayer2.metadata.icy.*
 import io.r_a_d.radio2.playerstore.PlayerStore
@@ -261,6 +263,11 @@ class RadioService : MediaBrowserServiceCompat() {
 
         PlayerStore.instance.isServiceStarted.value = false
         PlayerStore.instance.isInitialized = false
+
+        PreferenceManager.getDefaultSharedPreferences(this).edit {
+            this.putBoolean("isSleeping", false)
+            this.commit()
+        }
 
         apiTicker.cancel() // stops the timer.
         Log.d(tag, radioTag + "destroyed")

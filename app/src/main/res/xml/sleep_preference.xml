@@ -1,4 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
-<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <SwitchPreferenceCompat
+        app:key="isSleeping"
+        app:iconSpaceReserved="false"
+        app:title="Sleep - close app after some time"
+        app:singleLineTitle="false"
+        app:defaultValue="false"
+        />
+
+    <EditTextPreference
+        app:key="sleepDuration"
+        app:iconSpaceReserved="false"
+        app:title="Set duration (minutes)"
+        app:singleLineTitle="false"
+        app:defaultValue="15"
+        />
 
 </PreferenceScreen>
