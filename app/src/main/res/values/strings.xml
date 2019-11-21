@@ -56,6 +56,7 @@
     <string name="r_a_dio_icon">r/a/dio icon</string>
     <string name="splitLayout">Split Now Playing screen in 2 blocks when device is horizontal</string>
     <string name="notSplitLayout">Keep the same layout when horizontal as in vertical</string>
+    <string name="action_sleep">Sleep</string>
 
 
 </resources>

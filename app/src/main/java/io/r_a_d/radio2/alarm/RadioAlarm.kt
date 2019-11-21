@@ -10,8 +10,6 @@ import io.r_a_d.radio2.streamerNotificationService.BootBroadcastReceiver
 import androidx.preference.PreferenceManager
 import io.r_a_d.radio2.*
 import java.util.*
-import kotlin.collections.ArrayList
-
 
 class RadioAlarm {
 
@@ -44,6 +42,7 @@ class RadioAlarm {
             PendingIntent.getBroadcast(c, 0, intent, 0)
         }
         val showIntent = Intent(c, ParametersActivity::class.java).let { intent ->
+            intent.putExtra("action", "alarm")
             PendingIntent.getActivity(c, 0, intent, 0)
         }
         val time = findNextAlarmTime(c, forceTime, forceDays)

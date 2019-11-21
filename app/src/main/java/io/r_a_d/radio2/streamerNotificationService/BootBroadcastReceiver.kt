@@ -24,8 +24,6 @@ class BootBroadcastReceiver : BroadcastReceiver(){
         if (arg1.action == Intent.ACTION_BOOT_COMPLETED) {
                 WorkerStore.instance.init(context)
                 startStreamerMonitor(context)
-
-
                 RadioAlarm.instance.setNextAlarm(context) // schedule next alarm
             }
         if (arg1.getStringExtra("action") == "io.r_a_d.radio2.${Actions.PLAY_OR_FALLBACK.name}" )

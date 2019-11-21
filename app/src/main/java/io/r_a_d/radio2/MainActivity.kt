@@ -90,6 +90,12 @@ class MainActivity : BaseActivity() {
                 startActivity(i)
                 true
             }
+            R.id.action_sleep -> {
+                val i = Intent(this, ParametersActivity::class.java)
+                i.putExtra("action", "sleep") // TODO change value with Actions.something
+                startActivity(i)
+                true
+            }
             /*
             R.id.action_bug_submit -> {
                 val url = getString(R.string.github_url_new_issue)

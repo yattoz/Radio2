@@ -3,6 +3,13 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
+        android:id="@+id/action_sleep"
+        android:title="@string/action_sleep"
+        android:icon="@drawable/ic_timer"
+        app:showAsAction="ifRoom"/>
+
+
+    <item
         android:id="@+id/action_refresh"
         android:title="@string/action_refresh"
         app:showAsAction="never"/>

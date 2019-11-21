@@ -1,7 +1,10 @@
 package io.r_a_d.radio2
 
 import android.os.Bundle
+import io.r_a_d.radio2.preferences.AlarmFragment
 import io.r_a_d.radio2.preferences.MainPreferenceFragment
+import io.r_a_d.radio2.preferences.SleepFragment
+
 
 class ParametersActivity : BaseActivity() {
 
@@ -18,9 +21,22 @@ class ParametersActivity : BaseActivity() {
         // Get a support ActionBar corresponding to this toolbar and enable the Up button
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
+        val extra = if (savedInstanceState == null) {
+            intent.extras?.getString("action")
+        } else {
+            savedInstanceState.getSerializable("action") as String
+        }
+
+        val fragmentToLoad = when(extra) {
+            "alarm" -> AlarmFragment()
+            "sleep" -> SleepFragment()
+            else -> MainPreferenceFragment()
+        }
+
+
         supportFragmentManager
             .beginTransaction()
-            .replace(R.id.parameters_host_container, MainPreferenceFragment())
+            .replace(R.id.parameters_host_container, fragmentToLoad)
             .commit()
     }
 }
