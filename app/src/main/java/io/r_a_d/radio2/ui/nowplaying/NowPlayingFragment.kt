@@ -107,6 +107,7 @@ class NowPlayingFragment : Fragment() {
 
         PlayerStore.instance.volume.observe(viewLifecycleOwner, Observer {
             volumeIcon(it)
+            seekBarVolume.progress = it // this updates the seekbar if it's set by the Service when going to sleep.
         })
 
         PlayerStore.instance.isMuted.observe(viewLifecycleOwner, Observer {
