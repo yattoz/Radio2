@@ -5,7 +5,6 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.os.Handler
-import android.os.SystemClock
 import android.util.Log
 import androidx.core.app.AlarmManagerCompat
 import androidx.lifecycle.MutableLiveData
@@ -21,14 +20,14 @@ class RadioSleeper {
         }
     }
 
-    val durationMillis: MutableLiveData<Long?> = MutableLiveData()
+    val sleepAtMillis: MutableLiveData<Long?> = MutableLiveData()
     private val handler = Handler()
     private val lowerVolumeRunnable = LowerVolumeRunnable()
     init
     {
         // the companion object is lazy, and is invoked by a Ticker, so a background thread.
         // we MUST use postValue to set it correctly.
-        durationMillis.postValue(null)
+        sleepAtMillis.postValue(null)
     }
 
     private lateinit var alarmIntent: PendingIntent
@@ -60,7 +59,7 @@ class RadioSleeper {
                 // In any case, the volume decrease is not absolutely vital, so I guess I'll leave it as this for now.
                 handler.postDelayed(lowerVolumeRunnable, ((minutes) * 60 * 1000 - (i * 2 * 1000)))
             }
-            durationMillis.value = minutes * 60 * 1000 - 1 // this -1 allows to round the division for display at the right integer
+            sleepAtMillis.value = System.currentTimeMillis() + (minutes * 60 * 1000) - 1 // this -1 allows to round the division for display at the right integer
             Log.d(tag, "set sleep to $minutes minutes")
         }
     }
@@ -83,6 +82,6 @@ class RadioSleeper {
             handler.removeCallbacks(lowerVolumeRunnable)
             Log.d(tag, "cancelled sleep")
         }
-        durationMillis.value = null
+        sleepAtMillis.value = null
     }
 }

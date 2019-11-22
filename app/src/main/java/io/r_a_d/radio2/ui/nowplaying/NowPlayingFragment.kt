@@ -107,7 +107,7 @@ class NowPlayingFragment : Fragment() {
 
         PlayerStore.instance.volume.observe(viewLifecycleOwner, Observer {
             volumeIcon(it)
-            seekBarVolume.progress = it // this updates the seekbar if it's set by the Service when going to sleep.
+            seekBarVolume.progress = it // this updates the seekbar if it's set by something else when going to sleep.
         })
 
         PlayerStore.instance.isMuted.observe(viewLifecycleOwner, Observer {
@@ -153,18 +153,19 @@ class NowPlayingFragment : Fragment() {
             val minutes: String = ((PlayerStore.instance.currentTime.value!! - PlayerStore.instance.currentSong.startTime.value!!)/60/1000).toString()
             val seconds: String = ((PlayerStore.instance.currentTime.value!! - PlayerStore.instance.currentSong.startTime.value!!)/1000%60).toString()
             t.text = "$minutes:${if (seconds.toInt() < 10) "0" else ""}$seconds"
-        })
 
-        RadioSleeper.instance.durationMillis.observe(viewLifecycleOwner, Observer {
             val sleepInfoText = root.findViewById<TextView>(R.id.sleepInfo)
-            if (it != null)
+            val sleepAtMillis = RadioSleeper.instance.sleepAtMillis.value
+            if (sleepAtMillis != null)
             {
-                sleepInfoText.text = "Will close in ${1 + (it / (60 * 1000))} minute${if (1 + (it / (60 * 1000)) > 1) "s" else ""}" // I put 1 + it because the division rounds to the lower integer. I'd like to display the round up, like it's usually done.
+                val duration = ((sleepAtMillis - System.currentTimeMillis()).toFloat() / (60f * 1000f) + 1).toInt() // I put 1 + it because the division rounds to the lower integer. I'd like to display the round up, like it's usually done.
+                sleepInfoText.text = "Will close in $duration minute${if (duration > 1) "s" else ""}"
                 sleepInfoText.visibility = View.VISIBLE
             } else {
                 sleepInfoText.visibility = View.GONE
             }
         })
+
 
         seekBarVolume.setOnSeekBarChangeListener(nowPlayingViewModel.seekBarChangeListener)
         seekBarVolume.progress = PlayerStore.instance.volume.value!!
