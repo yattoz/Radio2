@@ -39,7 +39,7 @@
             app:layout_constraintEnd_toEndOf="parent"
 
             app:layout_constraintStart_toStartOf="@id/imageGuideline"
-            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintTop_toTopOf="@id/seek_bar_volume"
             app:srcCompat="@drawable/actionbar_logo"
             tools:ignore="HardcodedText" />
 
@@ -96,6 +96,19 @@
             android:orientation="horizontal"
             app:layout_constraintGuide_percent="0.80" />
 
+        <TextView
+            android:id="@+id/sleepInfo"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            android:textColor="@color/button_red"
+            android:gravity="center"
+            android:textAlignment="center"
+            android:textStyle="bold"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="@id/imageGuideline"
+            />
 
         <androidx.appcompat.widget.AppCompatSeekBar
             android:id="@+id/seek_bar_volume"
@@ -107,7 +120,7 @@
             android:progress="100"
             app:layout_constraintEnd_toStartOf="@id/volume_text"
             app:layout_constraintStart_toEndOf="@id/volume_icon"
-            app:layout_constraintTop_toTopOf="@id/streamerPicture"
+            app:layout_constraintTop_toBottomOf="@id/sleepInfo"
             app:layout_constraintBottom_toBottomOf="@id/volume_icon"/>
         <!--         android:progressDrawable="@drawable/seek_bar_progress"
             android:thumb="@drawable/seek_bar_thumb" -->

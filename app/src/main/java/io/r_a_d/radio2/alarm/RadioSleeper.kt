@@ -6,9 +6,9 @@ import android.content.Context
 import android.content.Intent
 import android.util.Log
 import androidx.core.app.AlarmManagerCompat
+import androidx.lifecycle.MutableLiveData
 import androidx.preference.PreferenceManager
 import io.r_a_d.radio2.*
-import io.r_a_d.radio2.streamerNotificationService.BootBroadcastReceiver
 
 class RadioSleeper {
 
@@ -18,8 +18,16 @@ class RadioSleeper {
         }
     }
 
-    lateinit var alarmIntent: PendingIntent
+    val durationMillis: MutableLiveData<Long?> = MutableLiveData()
 
+    init
+    {
+        // the companion object is lazy, and is invoked by a Ticker, so a background thread.
+        // we MUST use postValue to set it correctly.
+        durationMillis.postValue(null)
+    }
+
+    lateinit var alarmIntent: PendingIntent
 
     fun setSleep(c: Context, isForce: Boolean = false, forceDuration: Long? = null)
     {
@@ -27,7 +35,7 @@ class RadioSleeper {
         if (!PreferenceManager.getDefaultSharedPreferences(c).getBoolean("isSleeping", false) && !isForce)
             return
 
-        val minutesDuration: Long = forceDuration ?: Integer.parseInt(PreferenceManager.getDefaultSharedPreferences(c).getString("sleepDuration", "1") ?: "1").toLong()
+        val minutes: Long = forceDuration ?: Integer.parseInt(PreferenceManager.getDefaultSharedPreferences(c).getString("sleepDuration", "1") ?: "1").toLong()
 
         val alarmManager = c.getSystemService(Context.ALARM_SERVICE) as AlarmManager
         alarmIntent = Intent(c, RadioService::class.java).let { intent ->
@@ -35,9 +43,12 @@ class RadioSleeper {
             PendingIntent.getService(c, 0, intent, 0)
         }
 
-        if (minutesDuration > 0)
-            AlarmManagerCompat.setExactAndAllowWhileIdle(alarmManager, AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + minutesDuration * 60 * 1000,  alarmIntent)
-        Log.d(tag, "set sleep to $minutesDuration minutes")
+        if (minutes > 0)
+        {
+            AlarmManagerCompat.setExactAndAllowWhileIdle(alarmManager, AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + minutes * 60 * 1000,  alarmIntent)
+            durationMillis.value = minutes * 60 * 1000 - 1 // this -1 allows to round the division for display at the right integer
+            Log.d(tag, "set sleep to $minutes minutes")
+        }
     }
 
 
@@ -49,5 +60,6 @@ class RadioSleeper {
             alarmManager.cancel(alarmIntent)
             Log.d(tag, "cancelled sleep")
         }
+        durationMillis.value = null
     }
 }

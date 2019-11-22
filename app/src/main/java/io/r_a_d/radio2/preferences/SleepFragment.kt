@@ -23,6 +23,8 @@ class SleepFragment : PreferenceFragmentCompat() {
             true
         }
 
+        durationBeforeSleep?.summary = PreferenceManager.getDefaultSharedPreferences(context).getString("sleepDuration", "15")
+
         durationBeforeSleep?.setOnBindEditTextListener {
             it.inputType = InputType.TYPE_CLASS_NUMBER
         }
@@ -30,11 +32,14 @@ class SleepFragment : PreferenceFragmentCompat() {
         durationBeforeSleep?.setOnPreferenceChangeListener {preference, newValue ->
             preference.summary = newValue as String
             val time = Integer.parseInt(newValue)
-            RadioSleeper.instance.setSleep(context!!, isForce = true, forceDuration = time.toLong())
-            isSleeping?.isChecked = true
-            true
+            if (time > 0)
+            {
+                RadioSleeper.instance.setSleep(context!!, isForce = true, forceDuration = time.toLong())
+                isSleeping?.isChecked = true
+                true
+            } else {
+                false
+            }
         }
-
-
     }
 }

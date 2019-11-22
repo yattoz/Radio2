@@ -20,6 +20,7 @@ import androidx.lifecycle.Observer
 import com.google.android.material.snackbar.BaseTransientBottomBar
 import com.google.android.material.snackbar.Snackbar
 import io.r_a_d.radio2.*
+import io.r_a_d.radio2.alarm.RadioSleeper
 import io.r_a_d.radio2.playerstore.PlayerStore
 import io.r_a_d.radio2.playerstore.Song
 
@@ -151,6 +152,17 @@ class NowPlayingFragment : Fragment() {
             val minutes: String = ((PlayerStore.instance.currentTime.value!! - PlayerStore.instance.currentSong.startTime.value!!)/60/1000).toString()
             val seconds: String = ((PlayerStore.instance.currentTime.value!! - PlayerStore.instance.currentSong.startTime.value!!)/1000%60).toString()
             t.text = "$minutes:${if (seconds.toInt() < 10) "0" else ""}$seconds"
+        })
+
+        RadioSleeper.instance.durationMillis.observe(viewLifecycleOwner, Observer {
+            val sleepInfoText = root.findViewById<TextView>(R.id.sleepInfo)
+            if (it != null)
+            {
+                sleepInfoText.text = "Will close in ${1 + (it / (60 * 1000))} minute${if (1 + (it / (60 * 1000)) > 1) "s" else ""}" // I put 1 + it because the division rounds to the lower integer. I'd like to display the round up, like it's usually done.
+                sleepInfoText.visibility = View.VISIBLE
+            } else {
+                sleepInfoText.visibility = View.GONE
+            }
         })
 
         seekBarVolume.setOnSeekBarChangeListener(nowPlayingViewModel.seekBarChangeListener)

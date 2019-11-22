@@ -31,6 +31,7 @@ import androidx.media.AudioManagerCompat
 import androidx.preference.PreferenceManager
 import com.google.android.exoplayer2.*
 import com.google.android.exoplayer2.metadata.icy.*
+import io.r_a_d.radio2.alarm.RadioSleeper
 import io.r_a_d.radio2.playerstore.PlayerStore
 import java.util.*
 import kotlin.math.exp
@@ -268,6 +269,7 @@ class RadioService : MediaBrowserServiceCompat() {
             this.putBoolean("isSleeping", false)
             this.commit()
         }
+        RadioSleeper.instance.cancelAlarm(this)
 
         apiTicker.cancel() // stops the timer.
         Log.d(tag, radioTag + "destroyed")
