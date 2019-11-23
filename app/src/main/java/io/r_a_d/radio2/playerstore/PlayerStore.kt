@@ -159,11 +159,13 @@ class PlayerStore : ViewModel() {
             val result = JSONObject(it as String)
             if (result.has("main")) {
                 val resMain = result.getJSONObject("main")
-                if (resMain.has("requesting") && !resMain.getBoolean("requesting") && queue.isNotEmpty())
+                if ((resMain.has("isafkstream") && !resMain.getBoolean("isafkstream")) &&
+                    queue.isNotEmpty())
                 {
                     queue.clear() //we're not requesting anything anymore.
                     isQueueUpdated.value = true
-                } else if (resMain.has("requesting") && resMain.getBoolean("requesting") && queue.isEmpty())
+                } else if (resMain.has("isafkstream") && resMain.getBoolean("isafkstream") &&
+                            queue.isEmpty())
                 {
                     initApi()
                 } else if (resMain.has("queue")) {
