@@ -66,8 +66,9 @@ class Requestor {
         favoritesSongArray.clear()
         if (userName == null)
         {
-            // TODO display something special like "no user set. Go to Preferences to set it."
+            // Display is done by default in the XML.
             Log.d(tag, "no user name set for favorites")
+            isFavoritesUpdated.value = true
             return
         }
         val favoritesUserUrl = String.format(Locale.getDefault(), favoritesUrl, userName)

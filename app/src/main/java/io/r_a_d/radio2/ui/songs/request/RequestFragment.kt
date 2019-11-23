@@ -10,6 +10,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import io.r_a_d.radio2.R
 
 class RequestFragment : Fragment() {
@@ -48,6 +49,9 @@ class RequestFragment : Fragment() {
     ): View? {
         // Inflate the layout for this fragment
         val root = inflater.inflate(R.layout.fragment_request, container, false)
+
+        val recyclerSwipe = root.findViewById(R.id.recyclerSwipe) as SwipeRefreshLayout
+        recyclerSwipe.isEnabled = false // don't need to pull-to-refresh for Request
 
         searchView = root.findViewById(R.id.searchBox)
         searchView.setOnQueryTextListener(listener)

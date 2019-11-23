@@ -15,8 +15,9 @@ class CustomizeFragment : PreferenceFragmentCompat() {
         val userNamePref = preferenceScreen.findPreference<EditTextPreference>("userName")
         userNamePref!!.summary = userNamePref.text
         userNamePref.setOnPreferenceChangeListener { preference, newValue ->
-            preference.summary = newValue as CharSequence
-            Requestor.instance.initFavorites(newValue as String) // need to be as parameter cause the callback is called BEFORE PARAMETER SET
+            val name = newValue as String
+            preference.summary = name
+            Requestor.instance.initFavorites(name) // need to be as parameter cause the callback is called BEFORE PARAMETER SET
             true
         }
 
