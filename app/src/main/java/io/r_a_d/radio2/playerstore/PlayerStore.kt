@@ -148,15 +148,24 @@ class PlayerStore : ViewModel() {
     private fun fetchLastRequest()
     {
         val sleepScrape: (Any?) -> String = {
-            // we can speed up the retrieval by specifically waiting for the number of seconds we measure between ICY metadata and API change.
-            // we add 2 seconds just to be sure the API has correctly updated. (the latency compensator can have a jitter of 1 second usually)
-            // and if no latencyCompensator is set yet, we just wait for 12 seconds, which is a large enough wait.
-            val sleepTime = if (latencyCompensator > 0) latencyCompensator + 2000 else 12000
+            /* we can maximize our chances to retrieve the last queued song by specifically waiting for the number of seconds we measure between ICY metadata and API change.
+             we add 2 seconds just to get a higher probability that the API has correctly updated. (the latency compensator can have a jitter of 1 second usually)
+             If, against all odds, the API hasn't updated yet, we will retry in the same amount of seconds. So we'll have the data anyway.
+            This way to fetch at the most probable time is a good compromise between fetch speed and fetch frequency
+            We don't fetch too often, and we start to fetch at the most *probable* time.
+            If there's no latencyCompensator measured yet, we only wait for 3 seconds.
+            If the song is the same, it will be called again. 3 seconds is a good compromise between speed and frequency:
+            it might be called twice, rarely 3 times, and it's only the 2 first songs ; after these, the latencyCompensator is set to fetch at the most probable time.
+             */
+            val sleepTime: Long = if (latencyCompensator > 0) latencyCompensator + 2000 else 3000
             Thread.sleep(sleepTime) // we wait a bit (10s) for the API to get updated on R/a/dio side!
             URL(urlToScrape).readText()
         }
-        val post: (parameter: Any?) -> Unit = {
-            val result = JSONObject(it as String)
+
+        lateinit var post: (parameter: Any?) -> Unit
+
+        fun postFun(result: JSONObject)
+        {
             if (result.has("main")) {
                 val resMain = result.getJSONObject("main")
                 if ((resMain.has("isafkstream") && !resMain.getBoolean("isafkstream")) &&
@@ -165,18 +174,36 @@ class PlayerStore : ViewModel() {
                     queue.clear() //we're not requesting anything anymore.
                     isQueueUpdated.value = true
                 } else if (resMain.has("isafkstream") && resMain.getBoolean("isafkstream") &&
-                            queue.isEmpty())
+                    queue.isEmpty())
                 {
                     initApi()
                 } else if (resMain.has("queue")) {
                     val queueJSON =
                         resMain.getJSONArray("queue")
                     val t = extractSong(queueJSON[4] as JSONObject)
-                    queue.add(queue.size, t)
-                    Log.d(tag, playerStoreTag +  "added last queue song: $t")
-                    isQueueUpdated.value = true
+                    if (t.title.value == queue.last().title.value && t.artist.value == queue.last().artist.value )
+                    {
+                        Log.d(tag, playerStoreTag +  "Song already in there: $t")
+                        Async(sleepScrape, post)
+                    } else {
+                        queue.add(queue.size, t)
+                        Log.d(tag, playerStoreTag +  "added last queue song: $t")
+                        isQueueUpdated.value = true
+                    }
                 }
             }
+        }
+
+        post = {
+            val result = JSONObject(it as String)
+            /*  The goal is to pass the result to a function that will process it (postFun).
+                The magic trick is, under circumstances, the last queue song might not have been updated yet when we fetch it.
+                So if this is detected ==> if (t.title.value == queue.last().title.value && t.artist.value == queue.last().artist.value )
+                Then the function re-schedule an Async(sleepScrape, post).
+                To do that, the "post" must be defined BEFORE the function, but the function must be defined BEFORE the "post" value.
+                So I declare "post" as lateinit var, define the function, then define the "post" that calls the function. IT SHOULD WORK.
+             */
+            postFun(result)
         }
 
         Async(sleepScrape, post)
