@@ -27,7 +27,6 @@ class FavoritesFragment : Fragment()  {
     private lateinit var recyclerSwipe: SwipeRefreshLayout
 
     private val favoritesSongObserver : Observer<Boolean> = Observer {
-
         viewAdapter.notifyDataSetChanged()
         createView() // force-re-create the view!
         recyclerSwipe.isRefreshing = false // disable refreshing animation. Needs to be done manually...
@@ -42,11 +41,6 @@ class FavoritesFragment : Fragment()  {
         root = inflater.inflate(R.layout.fragment_request, container, false)
 
         return createView()
-    }
-
-    override fun onResume() {
-        super.onResume()
-        createView() // brutally re-create the fragment on resume. This is brutal, but it allows to correctly re-create the whole thing when exiting the Parameters!
     }
 
     private fun createView() : View?
