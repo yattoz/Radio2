@@ -46,7 +46,7 @@ class FavoritesFragment : Fragment()  {
 
     override fun onResume() {
         super.onResume()
-        createView() // brutally re-create the fragment on resume. This is brutal, but
+        createView() // brutally re-create the fragment on resume. This is brutal, but it allows to correctly re-create the whole thing when exiting the Parameters!
     }
 
     private fun createView() : View?
@@ -81,15 +81,29 @@ class FavoritesFragment : Fragment()  {
             adapter = viewAdapter
         }
 
-
         val userName = preferenceStore.getString("userName", null)
         val noUserNameText : TextView = root.findViewById(R.id.noUserNameText)
-        if (userName == null || userName == "")
+
+        recyclerSwipe = root.findViewById(R.id.recyclerSwipe) as SwipeRefreshLayout
+        recyclerSwipe.setOnRefreshListener {
+            val userName1 = preferenceStore.getString("userName", null)
+            Log.d(tag,"userName = $userName1")
+            if (userName1 != null && !userName1.isBlank())
+            {
+                noUserNameText.visibility = View.GONE
+                Requestor.instance.initFavorites()
+            } else {
+                noUserNameText.visibility = View.VISIBLE
+                recyclerSwipe.isRefreshing = false
+            }
+        }
+
+        if (userName != null && !userName.isBlank())
         {
+            noUserNameText.visibility = View.GONE
+        } else {
             noUserNameText.visibility = View.VISIBLE
             return root
-        } else {
-            noUserNameText.visibility = View.GONE
         }
         val raFButton : AppCompatButton = root.findViewById(R.id.ra_f_button)
 
@@ -109,19 +123,7 @@ class FavoritesFragment : Fragment()  {
 
         Requestor.instance.isFavoritesUpdated.observeForever(favoritesSongObserver)
 
-        recyclerSwipe = root.findViewById(R.id.recyclerSwipe) as SwipeRefreshLayout
-        recyclerSwipe.setOnRefreshListener {
-            val userName1 = preferenceStore.getString("userName", null)
-            Log.d(tag,"userName = $userName1")
-            if (userName1 != null && !userName1.isBlank())
-            {
-                noUserNameText.visibility = View.GONE
-                Requestor.instance.initFavorites()
-            } else {
-                noUserNameText.visibility = View.VISIBLE
-                recyclerSwipe.isRefreshing = false
-            }
-        }
+
         return root
     }
 
