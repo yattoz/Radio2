@@ -1,7 +1,10 @@
 package io.r_a_d.radio2.preferences
 
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import androidx.preference.EditTextPreference
+import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.SwitchPreferenceCompat
 import io.r_a_d.radio2.R
@@ -47,7 +50,13 @@ class CustomizeFragment : PreferenceFragmentCompat() {
             true
         }
 
+        val helpFavorites = preferenceScreen.findPreference<Preference>("helpFavorites")
+        helpFavorites?.setOnPreferenceClickListener { _ ->
+            val url = getString(R.string.github_url_wiki_irc_for_favorites)
+            val i = Intent(Intent.ACTION_VIEW)
+            i.data = Uri.parse(url)
+            startActivity(i)
+            true
+        }
     }
-
-
 }

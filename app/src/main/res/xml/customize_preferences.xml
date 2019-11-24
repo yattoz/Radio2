@@ -37,5 +37,11 @@
         app:defaultValue="true"
         />
 
+    <Preference
+        app:key="helpFavorites"
+        app:title="Help to use favorites with IRC"
+        app:summary="Opens the wiki in your web browser"
+        app:icon="@drawable/ic_open_in_browser"
+        />
 
 </PreferenceScreen>
