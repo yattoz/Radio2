@@ -28,7 +28,7 @@ class FavoritesFragment : Fragment()  {
 
     private val favoritesSongObserver : Observer<Boolean> = Observer {
         viewAdapter.notifyDataSetChanged()
-        createView() // force-re-create the view!
+        createView(isCallback = true) // force-re-create the view, but do not call again the initFavorites (avoid callback loop)
         recyclerSwipe.isRefreshing = false // disable refreshing animation. Needs to be done manually...
     }
 
@@ -43,7 +43,7 @@ class FavoritesFragment : Fragment()  {
         return createView()
     }
 
-    private fun createView() : View?
+    private fun createView(isCallback: Boolean = false) : View?
     {
 
         viewAdapter = RequestSongAdapter(Requestor.instance.favoritesSongArray)
@@ -75,7 +75,6 @@ class FavoritesFragment : Fragment()  {
             adapter = viewAdapter
         }
 
-        val userName = preferenceStore.getString("userName", null)
         val noUserNameText : TextView = root.findViewById(R.id.noUserNameText)
 
         recyclerSwipe = root.findViewById(R.id.recyclerSwipe) as SwipeRefreshLayout
@@ -92,13 +91,19 @@ class FavoritesFragment : Fragment()  {
             }
         }
 
-        if (userName != null && !userName.isBlank())
+
+        val userName1 = preferenceStore.getString("userName", null)
+        Log.d(tag,"userName = $userName1")
+        if (userName1 != null && !userName1.isBlank())
         {
             noUserNameText.visibility = View.GONE
+            if (!isCallback) // avoid callback loop if called from the Observer.
+                Requestor.instance.initFavorites()
         } else {
             noUserNameText.visibility = View.VISIBLE
-            return root
+            recyclerSwipe.isRefreshing = false
         }
+
         val raFButton : AppCompatButton = root.findViewById(R.id.ra_f_button)
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) // for API21+ Material Design makes ripples on the button.
