@@ -16,6 +16,8 @@ class AlarmFragment : PreferenceFragmentCompat() {
         val timeSet = findPreference<Preference>("timeSet")
         val isWakingUp = findPreference<SwitchPreferenceCompat>("isWakingUp")
         val alarmDays = findPreference<MultiSelectListPreference>("alarmDays")
+        val snoozeDuration = findPreference<ListPreference>("snoozeDuration")
+
 
         fun updateIsWakingUpSummary(preference: SwitchPreferenceCompat?, newValue: Boolean? = true,  forceTime: Int? = null, forceDays: Set<String>? = null)
         {
@@ -105,28 +107,31 @@ class AlarmFragment : PreferenceFragmentCompat() {
             true
         }
 
-        //
-
-
+        snoozeDuration?.summary = snoozeDuration?.entry
+        snoozeDuration?.setOnPreferenceChangeListener { _ , newValue ->
+            snoozeDuration.summary = (newValue as String)
+            true
+        }
 
         updateIsWakingUpSummary(isWakingUp, isWakingUp?.isChecked)
 
         isWakingUp?.setOnPreferenceChangeListener { _, newValue ->
-            if (newValue as Boolean) {
+            if (newValue as Boolean)
                 RadioAlarm.instance.setNextAlarm(context!!, isForce = true)
-                timeSet?.isEnabled = true
-                alarmDays?.isEnabled = true
-            } else {
+            else
                 RadioAlarm.instance.cancelAlarm(context!!)
-                timeSet?.isEnabled = false
-                alarmDays?.isEnabled = false
-            }
+            timeSet?.isEnabled = newValue
+            alarmDays?.isEnabled = newValue
+            snoozeDuration?.isEnabled = newValue
             updateIsWakingUpSummary(isWakingUp, newValue)
             true
         }
 
+
         alarmDays?.isEnabled = isWakingUp?.isChecked ?: false
         timeSet?.isEnabled = isWakingUp?.isChecked ?: false
+        snoozeDuration?.isEnabled = isWakingUp?.isChecked ?: false
+
     }
 
 

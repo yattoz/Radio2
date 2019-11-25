@@ -88,12 +88,15 @@ class NowPlayingNotification(
             builder.addAction(stopAction)
 
             if (isRinging) {
+                val snoozeString = preferenceStore.getString("snoozeDuration", "10") ?: "10"
+                val snoozeMinutes = if (snoozeString == "Disable snooze") 0  else Integer.parseInt(snoozeString)
+
                 val snoozeIntent = Intent(c, BootBroadcastReceiver::class.java)
                 snoozeIntent.putExtra("action", "io.r_a_d.radio2.${Actions.NOTIFY.name}")
                 val pendingSnoozeIntent = PendingIntent.getBroadcast(c, 2, snoozeIntent, PendingIntent.FLAG_UPDATE_CURRENT)
-                val snoozeMinutes = 10 // TODO add settings to specify for how long to snooze.
                 val snoozeAction = NotificationCompat.Action.Builder(R.drawable.ic_alarm, "Snooze ($snoozeMinutes min.)", pendingSnoozeIntent ).build()
-                builder.addAction(snoozeAction)
+                if (snoozeMinutes > 0)
+                    builder.addAction(snoozeAction)
                 builder.setStyle(NotificationCompat.DecoratedCustomViewStyle())
             } else {
                 builder.setStyle(mediaStyle)
