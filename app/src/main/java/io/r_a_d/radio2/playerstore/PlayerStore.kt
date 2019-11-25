@@ -177,7 +177,7 @@ class PlayerStore : ViewModel() {
                     queue.isEmpty())
                 {
                     initApi()
-                } else if (resMain.has("queue")) {
+                } else if (resMain.has("queue") && queue.isNotEmpty()) {
                     val queueJSON =
                         resMain.getJSONArray("queue")
                     val t = extractSong(queueJSON[4] as JSONObject)
