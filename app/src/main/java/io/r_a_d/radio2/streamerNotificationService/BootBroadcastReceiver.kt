@@ -47,7 +47,7 @@ class BootBroadcastReceiver : BroadcastReceiver(){
         }
         if (arg1.getStringExtra("action") == "io.r_a_d.radio2.${Actions.NOTIFY.name}" ) {
             // Snooze the shit out of it
-
+            RadioAlarm.instance.snooze(context)
         }
     }
 }

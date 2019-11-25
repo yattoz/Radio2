@@ -48,11 +48,7 @@ class RadioService : MediaBrowserServiceCompat() {
     private val radioServiceId = 1
     private var numberOfSongs = 0
     private val apiTicker: Timer = Timer()
-    private var isAlarmStopped: MutableLiveData<Boolean> = MutableLiveData()
-
-    init {
-        isAlarmStopped.value = false
-    }
+    private var isAlarmStopped: Boolean = false
 
     // Define the broadcast receiver to handle any broadcasts
     private val receiver = object : BroadcastReceiver() {
@@ -144,16 +140,6 @@ class RadioService : MediaBrowserServiceCompat() {
         nowPlayingNotification.update(this) // should update the streamer icon
     }
 
-    private val isAlarmStoppedObserver = Observer<Boolean> {
-        // when the alarm rings, the volume is set to 100.
-        // if an action is taken, reset the volume to the user's preference.
-        if (it)
-        {
-            setVolume(PlayerStore.instance.volume.value)
-        }
-    }
-
-
     override fun onLoadChildren(
         parentId: String,
         result: Result<MutableList<MediaBrowserCompat.MediaItem>>
@@ -214,9 +200,6 @@ class RadioService : MediaBrowserServiceCompat() {
         PlayerStore.instance.isPlaying.observeForever(isPlayingObserver)
         PlayerStore.instance.isMuted.observeForever(isMutedObserver)
 
-        isAlarmStopped.observeForever(isAlarmStoppedObserver)
-
-
         startForeground(radioServiceId, nowPlayingNotification.notification)
 
         // start ticker for when the player is stopped
@@ -235,8 +218,8 @@ class RadioService : MediaBrowserServiceCompat() {
 
         when (intent.getStringExtra("action")) {
             Actions.PLAY.name -> beginPlaying()
-            Actions.STOP.name -> { isAlarmStopped.value = true; stopPlaying() }
-            Actions.PAUSE.name -> { isAlarmStopped.value = true; pausePlaying() }
+            Actions.STOP.name -> { isAlarmStopped = true; PlayerStore.instance.volume.value = PlayerStore.instance.volume.value; stopPlaying() }
+            Actions.PAUSE.name -> { isAlarmStopped = true; PlayerStore.instance.volume.value = PlayerStore.instance.volume.value; pausePlaying() }
             Actions.VOLUME.name -> setVolume(intent.getIntExtra("value", 100))
             Actions.KILL.name -> {stopForeground(true); stopSelf(); return Service.START_NOT_STICKY}
             Actions.NOTIFY.name -> nowPlayingNotification.update(this)
@@ -267,8 +250,6 @@ class RadioService : MediaBrowserServiceCompat() {
         PlayerStore.instance.volume.removeObserver(volumeObserver)
         PlayerStore.instance.isPlaying.removeObserver(isPlayingObserver)
         PlayerStore.instance.isMuted.removeObserver(isMutedObserver)
-
-        isAlarmStopped.removeObserver(isAlarmStoppedObserver)
 
         mediaSession.isActive = false
         mediaSession.setMediaButtonReceiver(null)
@@ -414,12 +395,12 @@ class RadioService : MediaBrowserServiceCompat() {
         beginPlaying(isRinging = true, isFallback = false)
         val wait: (Any?) -> Any = {
             /*
-            Here we lower the isAlarmStopped flag and we wait for 12s.
+            Here we lower the isAlarmStopped flag and we wait for 17s. (seems like 12 could be a bit too short since I increased the buffer!!)
             If the player stops the alarm (by calling an intent), the isAlarmStopped flag will be raised.
              */
-            isAlarmStopped.value = false // reset the flag
+            isAlarmStopped = false // reset the flag
             var i = 0
-            while (i < 12)
+            while (i < 17)
             {
                 Thread.sleep(1000)
                 i++
@@ -429,10 +410,8 @@ class RadioService : MediaBrowserServiceCompat() {
             // we verify : if the player is not playing, and if the user didn't stop it, it means that there's a network issue.
             // So we use the fallback sound to wake up the user!!
             // (note: player.isPlaying is only accessible on main thread, so we can't check in the wait() lambda)
-            if (!player.isPlaying && !isAlarmStopped.value!!)
-            {
+            if (!player.isPlaying && !isAlarmStopped)
                 beginPlaying(isRinging = true, isFallback = true)
-            }
         }
         Async(wait, post)
     }
