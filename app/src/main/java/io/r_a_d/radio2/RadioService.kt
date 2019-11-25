@@ -24,6 +24,7 @@ import android.telephony.TelephonyManager
 import android.view.KeyEvent
 import androidx.core.app.NotificationCompat
 import androidx.core.content.edit
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
 import androidx.media.AudioAttributesCompat
 import androidx.media.AudioFocusRequestCompat
@@ -31,6 +32,7 @@ import androidx.media.AudioManagerCompat
 import androidx.preference.PreferenceManager
 import com.google.android.exoplayer2.*
 import com.google.android.exoplayer2.metadata.icy.*
+import com.google.android.exoplayer2.trackselection.DefaultTrackSelector
 import io.r_a_d.radio2.alarm.RadioSleeper
 import io.r_a_d.radio2.playerstore.PlayerStore
 import java.util.*
@@ -46,7 +48,11 @@ class RadioService : MediaBrowserServiceCompat() {
     private val radioServiceId = 1
     private var numberOfSongs = 0
     private val apiTicker: Timer = Timer()
-    private var isAlarmStopped = false
+    private var isAlarmStopped: MutableLiveData<Boolean> = MutableLiveData()
+
+    init {
+        isAlarmStopped.value = false
+    }
 
     // Define the broadcast receiver to handle any broadcasts
     private val receiver = object : BroadcastReceiver() {
@@ -112,12 +118,7 @@ class RadioService : MediaBrowserServiceCompat() {
     }
 
     private val isMutedObserver: Observer<Boolean> = Observer {
-        setVolume(
-            if (it)
-                null
-            else
-                -1
-        )
+        setVolume(if (it) null else -1)
     }
 
     private val isPlayingObserver: Observer<Boolean> = Observer {
@@ -141,6 +142,15 @@ class RadioService : MediaBrowserServiceCompat() {
     private val streamerObserver = Observer<String> {
         PlayerStore.instance.initApi()
         nowPlayingNotification.update(this) // should update the streamer icon
+    }
+
+    private val isAlarmStoppedObserver = Observer<Boolean> {
+        // when the alarm rings, the volume is set to 100.
+        // if an action is taken, reset the volume to the user's preference.
+        if (it)
+        {
+            setVolume(PlayerStore.instance.volume.value)
+        }
     }
 
 
@@ -204,6 +214,8 @@ class RadioService : MediaBrowserServiceCompat() {
         PlayerStore.instance.isPlaying.observeForever(isPlayingObserver)
         PlayerStore.instance.isMuted.observeForever(isMutedObserver)
 
+        isAlarmStopped.observeForever(isAlarmStoppedObserver)
+
 
         startForeground(radioServiceId, nowPlayingNotification.notification)
 
@@ -223,8 +235,8 @@ class RadioService : MediaBrowserServiceCompat() {
 
         when (intent.getStringExtra("action")) {
             Actions.PLAY.name -> beginPlaying()
-            Actions.STOP.name -> { isAlarmStopped = true; stopPlaying() }
-            Actions.PAUSE.name -> { isAlarmStopped = true; pausePlaying() }
+            Actions.STOP.name -> { isAlarmStopped.value = true; stopPlaying() }
+            Actions.PAUSE.name -> { isAlarmStopped.value = true; pausePlaying() }
             Actions.VOLUME.name -> setVolume(intent.getIntExtra("value", 100))
             Actions.KILL.name -> {stopForeground(true); stopSelf(); return Service.START_NOT_STICKY}
             Actions.NOTIFY.name -> nowPlayingNotification.update(this)
@@ -256,6 +268,7 @@ class RadioService : MediaBrowserServiceCompat() {
         PlayerStore.instance.isPlaying.removeObserver(isPlayingObserver)
         PlayerStore.instance.isMuted.removeObserver(isMutedObserver)
 
+        isAlarmStopped.removeObserver(isAlarmStoppedObserver)
 
         mediaSession.isActive = false
         mediaSession.setMediaButtonReceiver(null)
@@ -322,7 +335,12 @@ class RadioService : MediaBrowserServiceCompat() {
     private lateinit var fallbackMediaSource: ProgressiveMediaSource
 
     private fun setupMediaPlayer(){
-        player = ExoPlayerFactory.newSimpleInstance(this)
+
+        val loadControl = DefaultLoadControl.Builder().apply {
+            setBufferDurationsMs(minBufferMillis, maxBufferMillis, bufferForPlayback, bufferForPlaybackAfterRebuffer)
+        }.createDefaultLoadControl()
+
+        player = ExoPlayerFactory.newSimpleInstance(this, DefaultTrackSelector(), loadControl)
         player.addMetadataOutput {
             for (i in 0 until it.length()) {
                 val entry  = it.get(i)
@@ -392,13 +410,14 @@ class RadioService : MediaBrowserServiceCompat() {
     // this function is playing the stream if available, or a default sound if there's a problem.
     private fun beginPlayingOrFallback()
     {
+        setVolume(100) // we set the max volume for exoPlayer to be sure it rings correctly.
         beginPlaying(isRinging = true, isFallback = false)
         val wait: (Any?) -> Any = {
             /*
             Here we lower the isAlarmStopped flag and we wait for 12s.
             If the player stops the alarm (by calling an intent), the isAlarmStopped flag will be raised.
              */
-            isAlarmStopped = false // reset the flag
+            isAlarmStopped.value = false // reset the flag
             var i = 0
             while (i < 12)
             {
@@ -410,7 +429,7 @@ class RadioService : MediaBrowserServiceCompat() {
             // we verify : if the player is not playing, and if the user didn't stop it, it means that there's a network issue.
             // So we use the fallback sound to wake up the user!!
             // (note: player.isPlaying is only accessible on main thread, so we can't check in the wait() lambda)
-            if (!player.isPlaying && !isAlarmStopped)
+            if (!player.isPlaying && !isAlarmStopped.value!!)
             {
                 beginPlaying(isRinging = true, isFallback = true)
             }
@@ -420,13 +439,13 @@ class RadioService : MediaBrowserServiceCompat() {
 
     fun beginPlaying(isRinging: Boolean = false, isFallback: Boolean = false)
     {
+        //define the audioFocusRequest
+        val audioFocusRequestBuilder = AudioFocusRequestCompat.Builder(AudioManagerCompat.AUDIOFOCUS_GAIN)
+        audioFocusRequestBuilder.setOnAudioFocusChangeListener(focusChangeListener)
+        val audioAttributes = AudioAttributesCompat.Builder()
+        audioAttributes.setContentType(AudioAttributesCompat.CONTENT_TYPE_MUSIC)
         if (isRinging)
         {
-            //define the audioFocusRequest
-            val audioFocusRequestBuilder = AudioFocusRequestCompat.Builder(AudioManagerCompat.AUDIOFOCUS_GAIN)
-            audioFocusRequestBuilder.setOnAudioFocusChangeListener(focusChangeListener)
-            val audioAttributes = AudioAttributesCompat.Builder()
-            audioAttributes.setContentType(AudioAttributesCompat.CONTENT_TYPE_MUSIC)
             audioAttributes.setUsage(AudioAttributesCompat.USAGE_ALARM)
             audioFocusRequestBuilder.setAudioAttributes(audioAttributes.build())
             audioFocusRequest = audioFocusRequestBuilder.build()
@@ -436,11 +455,6 @@ class RadioService : MediaBrowserServiceCompat() {
                 .setUsage(C.USAGE_ALARM)
                 .build()
         } else {
-            //define the audioFocusRequest
-            val audioFocusRequestBuilder = AudioFocusRequestCompat.Builder(AudioManagerCompat.AUDIOFOCUS_GAIN)
-            audioFocusRequestBuilder.setOnAudioFocusChangeListener(focusChangeListener)
-            val audioAttributes = AudioAttributesCompat.Builder()
-            audioAttributes.setContentType(AudioAttributesCompat.CONTENT_TYPE_MUSIC)
             audioAttributes.setUsage(AudioAttributesCompat.USAGE_MEDIA)
             audioFocusRequestBuilder.setAudioAttributes(audioAttributes.build())
             audioFocusRequest = audioFocusRequestBuilder.build()
@@ -456,7 +470,7 @@ class RadioService : MediaBrowserServiceCompat() {
             return
         }
 
-        if (mediaSession.controller.playbackState.state == PlaybackStateCompat.STATE_PLAYING)
+        if (mediaSession.controller.playbackState.state == PlaybackStateCompat.STATE_PLAYING && !isRinging)
             return // nothing to do here
         PlayerStore.instance.playbackState.value = PlaybackStateCompat.STATE_PLAYING
 
@@ -474,7 +488,7 @@ class RadioService : MediaBrowserServiceCompat() {
 
         // START PLAYBACK, LET'S ROCK
         player.playWhenReady = true
-        nowPlayingNotification.update(this, true)
+        nowPlayingNotification.update(this, isUpdatingNotificationButton =  true, isRinging = isRinging)
 
         playbackStateBuilder.setState(
             PlaybackStateCompat.STATE_PLAYING,
