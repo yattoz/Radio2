@@ -1,5 +1,7 @@
 package io.r_a_d.radio2
 
+import android.app.AlarmManager
+import android.app.PendingIntent
 import android.app.Service
 import android.content.BroadcastReceiver
 import android.content.Context
@@ -22,6 +24,7 @@ import android.support.v4.media.MediaMetadataCompat
 import android.telephony.PhoneStateListener
 import android.telephony.TelephonyManager
 import android.view.KeyEvent
+import androidx.core.app.AlarmManagerCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.content.edit
 import androidx.lifecycle.MutableLiveData
@@ -38,6 +41,7 @@ import io.r_a_d.radio2.playerstore.PlayerStore
 import java.util.*
 import kotlin.math.exp
 import kotlin.math.ln
+import kotlin.math.pow
 import kotlin.system.exitProcess
 
 
@@ -160,6 +164,8 @@ class RadioService : MediaBrowserServiceCompat() {
     override fun onCreate() {
         super.onCreate()
 
+        preferenceStore = PreferenceManager.getDefaultSharedPreferences(this)
+
         // Define managers
         telephonyManager = getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
         telephonyManager?.listen(phoneStateListener, PhoneStateListener.LISTEN_CALL_STATE)
@@ -206,12 +212,21 @@ class RadioService : MediaBrowserServiceCompat() {
         val periodString = PreferenceManager.getDefaultSharedPreferences(this).getString("fetchPeriod", "10") ?: "10"
         val period: Long = Integer.parseInt(periodString).toLong()
         if (period > 0)
-            apiTicker.schedule(ApiFetchTick(), 0, period * 1000)
+            apiTicker.schedule(ApiFetchTick(), 2 * 1000, period * 1000)
 
         PlayerStore.instance.isServiceStarted.value = true
         Log.d(tag, radioTag + "created")
     }
 
+    private val handler = Handler()
+    class LowerVolumeRunnable : Runnable {
+        override fun run() {
+            PlayerStore.instance.volume.postValue(
+                (PlayerStore.instance.volume.value!!.toFloat() * (9f / 10f)).toInt()
+            ) // the setVolume is called by the volumeObserver in RadioService (on main thread for ExoPlayer!)
+        }
+    }
+    private val lowerVolumeRunnable = LowerVolumeRunnable()
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         if (intent?.getStringExtra("action") == null)
             return super.onStartCommand(intent, flags, startId)
@@ -227,6 +242,16 @@ class RadioService : MediaBrowserServiceCompat() {
             Actions.KILL.name -> {stopForeground(true); stopSelf(); return Service.START_NOT_STICKY}
             Actions.NOTIFY.name -> nowPlayingNotification.update(this)
             Actions.PLAY_OR_FALLBACK.name -> beginPlayingOrFallback()
+            Actions.FADE_OUT.name -> {
+                for (i in 1 until 30) // we schedule 30 "LowerVolumeRunnable" every 2 seconds (i * 2)
+                {
+                    // I couldn't find how to send multiple times the same PendingIntent using AlarmManager, so I relied on Handler instead.
+                    // I think there's no guarantee of exact time with the Handler, especially when the device is in deep sleep,
+                    // But when I force-set the Deep Sleep mode with ADB, it worked fine, so I'll leave it as this.
+                    handler.postDelayed(lowerVolumeRunnable, (i * 2 * 1000).toLong())
+                }
+            }
+            Actions.CANCEL_FADE_OUT.name -> { handler.removeCallbacks(lowerVolumeRunnable) }
         }
         Log.d(tag, radioTag + "intent received : " + intent.getStringExtra("action"))
         super.onStartCommand(intent, flags, startId)
