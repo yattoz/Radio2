@@ -203,7 +203,10 @@ class RadioService : MediaBrowserServiceCompat() {
         startForeground(radioServiceId, nowPlayingNotification.notification)
 
         // start ticker for when the player is stopped
-        apiTicker.schedule(ApiFetchTick(),10 * 1000,10 * 1000)
+        val periodString = PreferenceManager.getDefaultSharedPreferences(this).getString("fetchPeriod", "10") ?: "10"
+        val period: Long = Integer.parseInt(periodString).toLong()
+        if (period > 0)
+            apiTicker.schedule(ApiFetchTick(), period * 1000, period * 1000)
 
         PlayerStore.instance.isServiceStarted.value = true
         Log.d(tag, radioTag + "created")
@@ -218,8 +221,8 @@ class RadioService : MediaBrowserServiceCompat() {
 
         when (intent.getStringExtra("action")) {
             Actions.PLAY.name -> beginPlaying()
-            Actions.STOP.name -> { isAlarmStopped = true; PlayerStore.instance.volume.value = PlayerStore.instance.volume.value; stopPlaying() }
-            Actions.PAUSE.name -> { isAlarmStopped = true; PlayerStore.instance.volume.value = PlayerStore.instance.volume.value; pausePlaying() }
+            Actions.STOP.name -> { isAlarmStopped = true; setVolume(PlayerStore.instance.volume.value); stopPlaying() } // setVolume is here to reset the volume to the user's preference when the alarm (that sets volume to 100) is dismissed
+            Actions.PAUSE.name -> { isAlarmStopped = true; setVolume(PlayerStore.instance.volume.value); pausePlaying() }
             Actions.VOLUME.name -> setVolume(intent.getIntExtra("value", 100))
             Actions.KILL.name -> {stopForeground(true); stopSelf(); return Service.START_NOT_STICKY}
             Actions.NOTIFY.name -> nowPlayingNotification.update(this)

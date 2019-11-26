@@ -37,6 +37,16 @@
         app:defaultValue="true"
         />
 
+    <ListPreference
+        app:key="fetchPeriod"
+        app:iconSpaceReserved="false"
+        android:title="Set update period when stopped"
+        app:singleLineTitle="false"
+        android:entries="@array/fetchPeriodString"
+        android:entryValues="@array/fetchPeriodValues"
+        android:defaultValue="10"
+        />
+
     <Preference
         app:key="helpFavorites"
         app:title="Help to use favorites with IRC"

@@ -107,12 +107,6 @@ class AlarmFragment : PreferenceFragmentCompat() {
             true
         }
 
-        snoozeDuration?.summary = snoozeDuration?.entry
-        snoozeDuration?.setOnPreferenceChangeListener { _ , newValue ->
-            snoozeDuration.summary = (newValue as String)
-            true
-        }
-
         updateIsWakingUpSummary(isWakingUp, isWakingUp?.isChecked)
 
         isWakingUp?.setOnPreferenceChangeListener { _, newValue ->

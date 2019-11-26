@@ -2,10 +2,7 @@ package io.r_a_d.radio2.preferences
 
 import android.os.Bundle
 import androidx.appcompat.app.AlertDialog
-import androidx.preference.Preference
-import androidx.preference.PreferenceFragmentCompat
-import androidx.preference.PreferenceManager
-import androidx.preference.SwitchPreferenceCompat
+import androidx.preference.*
 import io.r_a_d.radio2.R
 import io.r_a_d.radio2.preferenceStore
 import io.r_a_d.radio2.streamerNotificationService.WorkerStore
@@ -58,12 +55,10 @@ class StreamerNotifServiceFragment : PreferenceFragmentCompat() {
             true
         }
 
-        streamerPeriod?.summary = "Every ${(preferenceStore.getString("streamerMonitorPeriodPref", "") as String)} minutes"
+        streamerPeriod?.summaryProvider = ListPreference.SimpleSummaryProvider.getInstance()
         streamerPeriod?.isEnabled = preferenceStore.getBoolean("newStreamerNotification", true)
         streamerPeriod?.setOnPreferenceChangeListener { _, newValue ->
-            // quite nothing
-            streamerPeriod.summary = "Every ${(newValue as String)} minutes"
-            WorkerStore.instance.tickerPeriod = (Integer.parseInt(newValue)).toLong() * 60
+            WorkerStore.instance.tickerPeriod = (Integer.parseInt(newValue as String)).toLong() * 60
             // this should be sufficient, the next alarm schedule should take the new tickerPeriod.
             true
         }

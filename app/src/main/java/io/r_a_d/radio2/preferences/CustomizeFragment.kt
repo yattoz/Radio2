@@ -3,10 +3,9 @@ package io.r_a_d.radio2.preferences
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
-import androidx.preference.EditTextPreference
-import androidx.preference.Preference
-import androidx.preference.PreferenceFragmentCompat
-import androidx.preference.SwitchPreferenceCompat
+import android.util.Log
+import androidx.appcompat.app.AlertDialog
+import androidx.preference.*
 import io.r_a_d.radio2.R
 import io.r_a_d.radio2.preferenceStore
 import io.r_a_d.radio2.ui.songs.request.Requestor
@@ -16,10 +15,9 @@ class CustomizeFragment : PreferenceFragmentCompat() {
         setPreferencesFromResource(R.xml.customize_preferences, rootKey)
 
         val userNamePref = preferenceScreen.findPreference<EditTextPreference>("userName")
-        userNamePref!!.summary = userNamePref.text
-        userNamePref.setOnPreferenceChangeListener { preference, newValue ->
+        userNamePref?.summaryProvider = EditTextPreference.SimpleSummaryProvider.getInstance()
+        userNamePref?.setOnPreferenceChangeListener { _, newValue ->
             val name = newValue as String
-            preference.summary = name
             Requestor.instance.initFavorites(name) // need to be as parameter cause the callback is called BEFORE PARAMETER SET
             true
         }
@@ -39,14 +37,14 @@ class CustomizeFragment : PreferenceFragmentCompat() {
 
         val splitLayout = preferenceScreen.findPreference<SwitchPreferenceCompat>("splitLayout")
         splitLayout!!.summary = if (preferenceStore.getBoolean("splitLayout", true))
-            getString(R.string.splitLayout)
+            getString(R.string.split_layout)
         else
-            getString(R.string.notSplitLayout)
+            getString(R.string.not_split_layout)
         splitLayout.setOnPreferenceChangeListener { preference, newValue ->
             if (newValue as Boolean)
-                preference.setSummary(R.string.splitLayout)
+                preference.setSummary(R.string.split_layout)
             else
-                preference.setSummary(R.string.notSplitLayout)
+                preference.setSummary(R.string.not_split_layout)
             true
         }
 
@@ -58,5 +56,25 @@ class CustomizeFragment : PreferenceFragmentCompat() {
             startActivity(i)
             true
         }
+
+        val fetchPeriod = preferenceScreen.findPreference<ListPreference>("fetchPeriod")
+        fetchPeriod?.summaryProvider = ListPreference.SimpleSummaryProvider.getInstance()
+        fetchPeriod?.setOnPreferenceChangeListener { _, newValue ->
+            val builder1 = AlertDialog.Builder(context!!)
+            if (Integer.parseInt(newValue as String) == 0)
+                builder1.setMessage(R.string.fetch_disabled_restart_the_app)
+            else
+                builder1.setMessage(R.string.restart_the_app)
+            builder1.setCancelable(true)
+
+            builder1.setPositiveButton("Close" ) { dialog, _ ->
+                dialog.cancel()
+            }
+
+            val alert11 = builder1.create()
+            alert11.show()
+            true
+        }
+
     }
 }

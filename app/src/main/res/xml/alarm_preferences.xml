@@ -27,6 +27,7 @@
         android:entryValues="@array/weekdays"
         android:defaultValue="@array/weekdays"
         />
+
     <ListPreference
         app:key="snoozeDuration"
         app:iconSpaceReserved="false"
@@ -35,6 +36,7 @@
         android:entries="@array/snoozeValues"
         android:entryValues="@array/snoozeValues"
         android:defaultValue="10"
+        android:summary="%s"
         />
 
 </PreferenceScreen>

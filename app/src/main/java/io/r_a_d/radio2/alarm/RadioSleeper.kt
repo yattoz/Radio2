@@ -55,8 +55,8 @@ class RadioSleeper {
                 //AlarmManagerCompat.setExactAndAllowWhileIdle(alarmManager, AlarmManager.RTC_WAKEUP,System.currentTimeMillis() + ((minutes) * 60 * 1000 - (i * 2 * 1000), LowerVolumeRunnable().run())
 
                 // I couldn't find how to send multiple times the same PendingIntent using AlarmManager, so I relied on Handler instead.
-                // There's no guarantee of exact time with the Handler, especially when the device is in deep sleep.
-                // In any case, the volume decrease is not absolutely vital, so I guess I'll leave it as this for now.
+                // I think there's no guarantee of exact time with the Handler, especially when the device is in deep sleep,
+                // But when I force-set the Deep Sleep mode with ADB, it worked fine, so I'll leave it as this.
                 handler.postDelayed(lowerVolumeRunnable, ((minutes) * 60 * 1000 - (i * 2 * 1000)))
             }
             sleepAtMillis.value = System.currentTimeMillis() + (minutes * 60 * 1000) - 1 // this -1 allows to round the division for display at the right integer
@@ -68,7 +68,7 @@ class RadioSleeper {
         override fun run() {
             PlayerStore.instance.volume.postValue(
                 (PlayerStore.instance.volume.value!!.toFloat() * (9f / 10f)).toInt()
-            ) // the setVolume is called by the volumeObserver (on main thread for ExoPlayer!)
+            ) // the setVolume is called by the volumeObserver in RadioService (on main thread for ExoPlayer!)
         }
     }
 
