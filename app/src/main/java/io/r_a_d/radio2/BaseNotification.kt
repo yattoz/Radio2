@@ -11,9 +11,9 @@ import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
 
 abstract class BaseNotification(private val notificationChannelId: String,
-                       private val notificationChannel : Int,
-                       protected val notificationId: Int,
-                       private val notificationImportance: Int
+                                private val notificationChannel : Int,
+                                private val notificationId: Int,
+                                private val notificationImportance: Int
                        ) {
 
 

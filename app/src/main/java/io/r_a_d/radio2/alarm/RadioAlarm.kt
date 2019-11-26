@@ -91,4 +91,27 @@ class RadioAlarm {
 
         return calendar.timeInMillis
     }
+
+    fun snooze(c: Context)
+    {
+        val snoozeString = preferenceStore.getString("snoozeDuration", "10") ?: "10"
+        val snoozeMinutes = if (snoozeString == "Disable snooze") 0  else Integer.parseInt(snoozeString)
+        if (snoozeMinutes > 0)
+        {
+            val alarmManager = c.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+            alarmIntent = Intent(c, BootBroadcastReceiver::class.java).let { intent ->
+                intent.putExtra("action", "io.r_a_d.radio2.${Actions.PLAY_OR_FALLBACK.name}")
+                PendingIntent.getBroadcast(c, 0, intent, 0)
+            }
+            val showIntent = Intent(c, ParametersActivity::class.java).let { intent ->
+                intent.putExtra("action", "alarm")
+                PendingIntent.getActivity(c, 0, intent, 0)
+            }
+
+            AlarmManagerCompat.setAlarmClock(alarmManager, Calendar.getInstance().timeInMillis + (snoozeMinutes * 60 * 1000), showIntent, alarmIntent)
+
+            // now that the next alarm has been scheduled, kill the app
+            c.startService(Intent(c, RadioService::class.java).putExtra("action", Actions.KILL.name))
+        }
+    }
 }

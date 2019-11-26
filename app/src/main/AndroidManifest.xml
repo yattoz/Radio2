@@ -41,6 +41,7 @@
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
                 <action android:name="io.r_a_d.radio2.PLAY_OR_FALLBACK" />
+                <action android:name="io.r_a_d.radio2.NOTIFY" /> <!-- this is for Snooze -->
                 <category android:name="android.intent.category.DEFAULT"/>
             </intent-filter>
         </receiver>

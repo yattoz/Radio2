@@ -7,6 +7,7 @@ import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.media.session.PlaybackStateCompat
 import androidx.core.app.NotificationCompat
 import io.r_a_d.radio2.playerstore.PlayerStore
+import io.r_a_d.radio2.streamerNotificationService.BootBroadcastReceiver
 
 class NowPlayingNotification(
     notificationChannelId: String,
@@ -26,6 +27,8 @@ class NowPlayingNotification(
     // ###### NOW PLAYING NOTIFICATION ########
     // ########################################
 
+    lateinit var mediaStyle: androidx.media.app.NotificationCompat.DecoratedMediaCustomViewStyle
+
     fun create(c: Context, m: MediaSessionCompat) {
         super.create(c)
 
@@ -35,17 +38,16 @@ class NowPlayingNotification(
         val deleteIntent = PendingIntent.getService(c, 0, delIntent, PendingIntent.FLAG_NO_CREATE)
         builder.setDeleteIntent(deleteIntent)
 
-        builder.setStyle(
-            androidx.media.app.NotificationCompat.DecoratedMediaCustomViewStyle()
-            //androidx.media.app.NotificationCompat.MediaStyle()
-                .setMediaSession(m.sessionToken)
-                .setShowActionsInCompactView(0)
-                .setCancelButtonIntent(deleteIntent)
-        )
+        mediaStyle = androidx.media.app.NotificationCompat.DecoratedMediaCustomViewStyle().also {
+            it.setMediaSession(m.sessionToken)
+            it.setShowActionsInCompactView(0) // index 0 = show actions 0 and 1 (show action #0 (play/pause))
+            it.setCancelButtonIntent(deleteIntent)
+        }
+        builder.setStyle(mediaStyle)
         update(c)
     }
 
-    fun update(c: Context, isUpdatingNotificationButton: Boolean = false) {
+    fun update(c: Context, isUpdatingNotificationButton: Boolean = false, isRinging: Boolean = false) {
 
         if (isUpdatingNotificationButton)
             builder.mActions.clear()
@@ -65,10 +67,6 @@ class NowPlayingNotification(
             builder.setShowWhen(true)
         }
 
-        builder.setLargeIcon(PlayerStore.instance.streamerPicture.value)
-
-        // Note : I was unreasonably triggered by the fact that the stop icon was smaller than the others.
-        // So I downloaded and used the icons from https://materialdesignicons.com/ (version Android 4, Holo Dark)
         if (builder.mActions.isEmpty()) {
             val intent = Intent(c, RadioService::class.java)
             val playPauseAction: NotificationCompat.Action
@@ -83,11 +81,29 @@ class NowPlayingNotification(
                 NotificationCompat.Action.Builder(R.drawable.ic_play,"Play", pendingButtonIntent).build()
             }
             builder.addAction(playPauseAction)
-            intent.putExtra("action", Actions.KILL.name)
-            val pendingButtonIntent = PendingIntent.getService(c, 2, intent, PendingIntent.FLAG_UPDATE_CURRENT)
+            val intent2 = Intent(c, RadioService::class.java)
+            intent2.putExtra("action", Actions.KILL.name)
+            val pendingButtonIntent = PendingIntent.getService(c, 2, intent2, PendingIntent.FLAG_UPDATE_CURRENT)
             val stopAction = NotificationCompat.Action.Builder(R.drawable.ic_stop,"Stop", pendingButtonIntent).build()
             builder.addAction(stopAction)
+
+            if (isRinging) {
+                val snoozeString = preferenceStore.getString("snoozeDuration", "10") ?: "10"
+                val snoozeMinutes = if (snoozeString == "Disable snooze") 0  else Integer.parseInt(snoozeString)
+
+                val snoozeIntent = Intent(c, BootBroadcastReceiver::class.java)
+                snoozeIntent.putExtra("action", "io.r_a_d.radio2.${Actions.NOTIFY.name}")
+                val pendingSnoozeIntent = PendingIntent.getBroadcast(c, 2, snoozeIntent, PendingIntent.FLAG_UPDATE_CURRENT)
+                val snoozeAction = NotificationCompat.Action.Builder(R.drawable.ic_alarm, "Snooze ($snoozeMinutes min.)", pendingSnoozeIntent ).build()
+                if (snoozeMinutes > 0)
+                    builder.addAction(snoozeAction)
+                builder.setStyle(NotificationCompat.DecoratedCustomViewStyle())
+            } else {
+                builder.setStyle(mediaStyle)
+            }
         }
+        builder.setLargeIcon(PlayerStore.instance.streamerPicture.value)
+
         super.show()
     }
 }
