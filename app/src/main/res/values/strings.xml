@@ -42,10 +42,10 @@
     <string name="streamerNotificationChannel">New Streamer Notification</string>
     <string name="streamerNotificationChannelId">io.r_a_d.radio2.STREAMER_NOTIFICATION_NEW</string>
     <string name="warningStreamerNotif">
-        This feature is EXPERIMENTAL.\n
-        It WILL consume your battery by polling the server regularly.\n
-        Using Twitter Push Notifications instead is largely recommended.\n
-        This polling should only be considered as the last resort for people not wanting to register on Twitter or phones without Google Play services.\n
+        This feature is EXPERIMENTAL.
+        \nIt WILL consume your battery by polling the server regularly.
+        \nUsing Twitter Push Notifications instead is largely recommended.
+        \nThis polling should only be considered as the last resort for people not wanting to register on Twitter or phones without Google Play services.\n
         \n\nAre you sure you want to enable this?</string>
     <string name="snackbarPersistent">Stay visible, can be closed with \"OK\" button</string>
     <string name="snackbarNonPersistent">Disappear after some time</string>
@@ -65,5 +65,6 @@
         \n\nYou need to restart the app to apply the changes for this setting.
     </string>
     <string name="action_alarm">Alarm</string>
+    <string name="sleep_fade_out_text">One minute before the end of the timer, the volume will gradually decrease.</string>
 
 </resources>

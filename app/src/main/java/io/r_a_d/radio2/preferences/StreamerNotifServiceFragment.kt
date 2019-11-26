@@ -26,7 +26,6 @@ class StreamerNotifServiceFragment : PreferenceFragmentCompat() {
                     "Yes"
                 ) { dialog, _ ->
                     startStreamerMonitor(context!!, force = true) // force enabled because the preference value is not yet set when running this callback.
-                    streamerPeriod?.summary = "Every ${(preferenceStore.getString("streamerMonitorPeriodPref", "") as String)} minutes"
                     streamerPeriod?.isEnabled = true
                     dialog.cancel()
                 }

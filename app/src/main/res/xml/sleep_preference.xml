@@ -18,4 +18,14 @@
         app:defaultValue="15"
         />
 
+    <Preference
+        app:key="sleepFadeText"
+        app:iconSpaceReserved="false"
+        app:title=""
+        android:selectable="false"
+        android:persistent="false"
+        app:summary="@string/sleep_fade_out_text"
+        app:singleLineTitle="false"
+        />
+
 </PreferenceScreen>

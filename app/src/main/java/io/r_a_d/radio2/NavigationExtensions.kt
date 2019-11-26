@@ -13,6 +13,14 @@ import androidx.navigation.fragment.NavHostFragment
 import com.google.android.material.bottomnavigation.BottomNavigationView
 
 /**
+ * YATTOZ' NOTE : this file has been scavenged from Android's "architecture-components-samples" repo.
+ * See it here:
+ * https://github.com/android/architecture-components-samples/blob/master/NavigationAdvancedSample/app/src/main/java/com/example/android/navigationadvancedsample/NavigationExtensions.kt
+ * it allows, among other things, to keep and restore fragments' state when they're swapped. Useful for IRC.
+ */
+
+
+/**
  * Manages the various graphs needed for a [BottomNavigationView].
  *
  * This sample is a workaround until the Navigation Component supports multiple back stacks.
@@ -87,7 +95,7 @@ fun BottomNavigationView.setupWithNavController(
                     // Commit a transaction that cleans the back stack and adds the first fragment
                     // to it, creating the fixed started destination.
                     fragmentManager.beginTransaction()
-                    /* // disabling animations, it feels snappier and more in place.
+                    /* // YATTOZ' NOTE - disabling animations, it feels snappier and more in place.
                         .setCustomAnimations(
                             R.anim.nav_default_enter_anim,
                             R.anim.nav_default_exit_anim,
