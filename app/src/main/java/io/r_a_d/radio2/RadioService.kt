@@ -206,7 +206,7 @@ class RadioService : MediaBrowserServiceCompat() {
         val periodString = PreferenceManager.getDefaultSharedPreferences(this).getString("fetchPeriod", "10") ?: "10"
         val period: Long = Integer.parseInt(periodString).toLong()
         if (period > 0)
-            apiTicker.schedule(ApiFetchTick(), period * 1000, period * 1000)
+            apiTicker.schedule(ApiFetchTick(), 0, period * 1000)
 
         PlayerStore.instance.isServiceStarted.value = true
         Log.d(tag, radioTag + "created")

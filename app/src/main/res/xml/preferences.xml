@@ -12,6 +12,13 @@
         />
 
     <Preference
+        app:icon="@drawable/ic_av_timer"
+        app:key="sleepScreen"
+        app:title="Set sleep timer"
+        app:fragment="io.r_a_d.radio2.preferences.SleepFragment"
+        />
+
+    <Preference
         app:icon="@drawable/ic_customize"
         app:key="CustomizeFragment"
         app:title="Customize app behavior"

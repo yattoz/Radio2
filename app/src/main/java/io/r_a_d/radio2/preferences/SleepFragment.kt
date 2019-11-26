@@ -14,7 +14,7 @@ class SleepFragment : PreferenceFragmentCompat() {
         val durationBeforeSleep = findPreference<EditTextPreference>("sleepDuration")
         val isSleeping = findPreference<SwitchPreferenceCompat>("isSleeping")
 
-        isSleeping?.setOnPreferenceChangeListener { preference, newValue ->
+        isSleeping?.setOnPreferenceChangeListener { _, newValue ->
             if (!(newValue as Boolean))
                 RadioSleeper.instance.cancelAlarm(context!!)
             else
@@ -23,15 +23,14 @@ class SleepFragment : PreferenceFragmentCompat() {
             true
         }
 
-        durationBeforeSleep?.summary = PreferenceManager.getDefaultSharedPreferences(context).getString("sleepDuration", "15")
 
         durationBeforeSleep?.setOnBindEditTextListener {
             it.inputType = InputType.TYPE_CLASS_NUMBER
         }
 
-        durationBeforeSleep?.setOnPreferenceChangeListener {preference, newValue ->
-            preference.summary = newValue as String
-            val time = Integer.parseInt(newValue)
+        durationBeforeSleep?.summaryProvider = EditTextPreference.SimpleSummaryProvider.getInstance()
+        durationBeforeSleep?.setOnPreferenceChangeListener {_, newValue ->
+            val time = Integer.parseInt(newValue as String)
             if (time > 0)
             {
                 RadioSleeper.instance.setSleep(context!!, isForce = true, forceDuration = time.toLong())

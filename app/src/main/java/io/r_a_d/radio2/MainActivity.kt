@@ -96,16 +96,13 @@ class MainActivity : BaseActivity() {
                 startActivity(i)
                 true
             }
-            /*
-            R.id.action_bug_submit -> {
-                val url = getString(R.string.github_url_new_issue)
-                val i = Intent(Intent.ACTION_VIEW)
-                i.data = Uri.parse(url)
+            R.id.action_alarm -> {
+                val i = Intent(this, ParametersActivity::class.java)
+                i.putExtra("action", "alarm") // TODO change value with Actions.something
                 startActivity(i)
                 true
             }
 
-             */
             else -> super.onOptionsItemSelected(item)
         }
     }

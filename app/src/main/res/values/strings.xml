@@ -56,7 +56,7 @@
     <string name="r_a_dio_icon">r/a/dio icon</string>
     <string name="split_layout">Split Now Playing screen in 2 blocks when device is horizontal</string>
     <string name="not_split_layout">Keep the same layout when horizontal as in vertical</string>
-    <string name="action_sleep">Sleep</string>
+    <string name="action_sleep">Sleep timer</string>
     <string name="github_url_wiki_irc_for_favorites">https://github.com/yattoz/Radio2/wiki/Help:-using-favorites-with-IRC</string>
     <string name="dont_fetch_on_background">Disable</string>
     <string name="restart_the_app">You need to restart the app to apply the changes for this setting.</string>
@@ -64,5 +64,6 @@
         By disabling this, you won\'t see the song get updated in the app nor in the notification when the playback is stopped, but you may save some battery.
         \n\nYou need to restart the app to apply the changes for this setting.
     </string>
+    <string name="action_alarm">Alarm</string>
 
 </resources>
