@@ -6,7 +6,7 @@ import android.content.Context
 import android.content.Intent
 import android.util.Log
 import androidx.core.app.AlarmManagerCompat
-import io.r_a_d.radio2.streamerNotificationService.BootBroadcastReceiver
+import io.r_a_d.radio2.BootBroadcastReceiver
 import androidx.preference.PreferenceManager
 import io.r_a_d.radio2.*
 import java.util.*

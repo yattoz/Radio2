@@ -7,7 +7,7 @@ import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.media.session.PlaybackStateCompat
 import androidx.core.app.NotificationCompat
 import io.r_a_d.radio2.playerstore.PlayerStore
-import io.r_a_d.radio2.streamerNotificationService.BootBroadcastReceiver
+import io.r_a_d.radio2.BootBroadcastReceiver
 
 class NowPlayingNotification(
     notificationChannelId: String,
@@ -91,9 +91,9 @@ class NowPlayingNotification(
                 val snoozeString = preferenceStore.getString("snoozeDuration", "10") ?: "10"
                 val snoozeMinutes = if (snoozeString == "Disable snooze") 0  else Integer.parseInt(snoozeString)
 
-                val snoozeIntent = Intent(c, BootBroadcastReceiver::class.java)
-                snoozeIntent.putExtra("action", "io.r_a_d.radio2.${Actions.NOTIFY.name}")
-                val pendingSnoozeIntent = PendingIntent.getBroadcast(c, 2, snoozeIntent, PendingIntent.FLAG_UPDATE_CURRENT)
+                val snoozeIntent = Intent(c, RadioService::class.java)
+                snoozeIntent.putExtra("action", Actions.SNOOZE.name)
+                val pendingSnoozeIntent = PendingIntent.getService(c, 5, snoozeIntent, PendingIntent.FLAG_UPDATE_CURRENT)
                 val snoozeAction = NotificationCompat.Action.Builder(R.drawable.ic_alarm, "Snooze ($snoozeMinutes min.)", pendingSnoozeIntent ).build()
                 if (snoozeMinutes > 0)
                     builder.addAction(snoozeAction)

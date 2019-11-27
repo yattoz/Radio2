@@ -35,7 +35,7 @@
             android:enabled="true"
             android:exported="true"/>
 
-        <receiver android:name=".streamerNotificationService.BootBroadcastReceiver"
+        <receiver android:name=".BootBroadcastReceiver"
             android:directBootAware="true"
             tools:targetApi="n">
             <intent-filter>

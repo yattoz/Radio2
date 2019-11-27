@@ -36,6 +36,7 @@ import androidx.preference.PreferenceManager
 import com.google.android.exoplayer2.*
 import com.google.android.exoplayer2.metadata.icy.*
 import com.google.android.exoplayer2.trackselection.DefaultTrackSelector
+import io.r_a_d.radio2.alarm.RadioAlarm
 import io.r_a_d.radio2.alarm.RadioSleeper
 import io.r_a_d.radio2.playerstore.PlayerStore
 import java.util.*
@@ -254,6 +255,7 @@ class RadioService : MediaBrowserServiceCompat() {
                 }
             }
             Actions.CANCEL_FADE_OUT.name -> { handler.removeCallbacks(lowerVolumeRunnable) }
+            Actions.SNOOZE.name -> { RadioAlarm.instance.snooze(this) }
         }
         Log.d(tag, radioTag + "intent received : " + intent.getStringExtra("action"))
         super.onStartCommand(intent, flags, startId)

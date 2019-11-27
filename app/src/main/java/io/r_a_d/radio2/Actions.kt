@@ -10,7 +10,8 @@ enum class Actions
     NOTIFY,
     PLAY_OR_FALLBACK,
     FADE_OUT,
-    CANCEL_FADE_OUT
+    CANCEL_FADE_OUT,
+    SNOOZE
 }
 
 enum class ActionOnError {
