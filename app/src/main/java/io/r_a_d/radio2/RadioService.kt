@@ -101,7 +101,7 @@ class RadioService : MediaBrowserServiceCompat() {
     }
 
     // ##################################################
-    // ############## LIFECYCLE CALLBACKS ###############
+    // ################### OBSERVERS ####################
     // ##################################################
 
     private val titleObserver: Observer<String> = Observer {
@@ -144,6 +144,10 @@ class RadioService : MediaBrowserServiceCompat() {
         PlayerStore.instance.initApi()
         nowPlayingNotification.update(this) // should update the streamer icon
     }
+
+    // ##################################################
+    // ############## LIFECYCLE CALLBACKS ###############
+    // ##################################################
 
     override fun onLoadChildren(
         parentId: String,

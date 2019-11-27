@@ -1,14 +1,12 @@
 package io.r_a_d.radio2.playerstore
 
 import android.content.Context
-import android.content.SharedPreferences
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.support.v4.media.session.PlaybackStateCompat
 import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import androidx.preference.PreferenceManager
 import io.r_a_d.radio2.*
 import org.json.JSONObject
 import java.io.IOException
@@ -16,7 +14,7 @@ import java.io.InputStream
 import java.net.URL
 
 
-class PlayerStore : ViewModel() {
+class PlayerStore {
 
     val isPlaying: MutableLiveData<Boolean> = MutableLiveData()
     val isServiceStarted: MutableLiveData<Boolean> = MutableLiveData()
@@ -51,11 +49,9 @@ class PlayerStore : ViewModel() {
         listenersCount.value = 0
     }
 
-    fun initPicture(c: Context) {
-        streamerPicture.value = BitmapFactory.decodeResource(c.resources,
-            R.drawable.actionbar_logo
-        )
-    }
+    // ##################################################
+    // ################# API FUNCTIONS ##################
+    // ##################################################
 
     private fun updateApi(resMain: JSONObject, isCompensatingLatency : Boolean = false) {
         // If we're not in PLAYING state, update title / artist metadata. If we're playing, the ICY will take care of that.
@@ -83,7 +79,7 @@ class PlayerStore : ViewModel() {
         {
             val streamerPictureUrl =
                 "${urlToScrape}/dj-image/${resMain.getJSONObject("dj").getString("djimage")}"
-            fetchImage(streamerPictureUrl)
+            fetchPicture(streamerPictureUrl)
             streamerName.value = newStreamer
         }
         val listeners = resMain.getInt("listeners")
@@ -145,6 +141,48 @@ class PlayerStore : ViewModel() {
         Async(scrape, post)
     }
 
+    fun fetchApi(isCompensatingLatency: Boolean = false) {
+        val post: (parameter: Any?) -> Unit = {
+            val result = JSONObject(it as String)
+            if (!result.isNull("main"))
+            {
+                val res = result.getJSONObject("main")
+                updateApi(res, isCompensatingLatency)
+            }
+        }
+        Async(scrape, post)
+    }
+
+    // ##################################################
+    // ############## QUEUE / LP FUNCTIONS ##############
+    // ##################################################
+
+    fun updateLp() {
+        // note : lp must never be empty. There should always be some songs "last played".
+        // if not, then the function has been called before initialization. No need to do anything.
+        if (lp.isNotEmpty()){
+            val n = Song()
+            n.copy(currentSongBackup)
+            lp.add(0, n)
+            currentSongBackup.copy(currentSong)
+            isLpUpdated.value = true
+            Log.d(tag, playerStoreTag +  lp.toString())
+        }
+    }
+
+    fun updateQueue() {
+        if (queue.isNotEmpty()) {
+            queue.remove(queue.first())
+            Log.d(tag, playerStoreTag + queue.toString())
+            fetchLastRequest()
+            isQueueUpdated.value = true
+        } else if (isInitialized) {
+            fetchLastRequest()
+        } else {
+            Log.d(tag, playerStoreTag +  "queue is empty!")
+        }
+    }
+
     private fun fetchLastRequest()
     {
         val sleepScrape: (Any?) -> String = {
@@ -198,7 +236,7 @@ class PlayerStore : ViewModel() {
             val result = JSONObject(it as String)
             /*  The goal is to pass the result to a function that will process it (postFun).
                 The magic trick is, under circumstances, the last queue song might not have been updated yet when we fetch it.
-                So if this is detected ==> if (t.title.value == queue.last().title.value && t.artist.value == queue.last().artist.value )
+                So if this is detected ==> if (t == queue.last() )
                 Then the function re-schedule an Async(sleepScrape, post).
                 To do that, the "post" must be defined BEFORE the function, but the function must be defined BEFORE the "post" value.
                 So I declare "post" as lateinit var, define the function, then define the "post" that calls the function. IT SHOULD WORK.
@@ -207,32 +245,6 @@ class PlayerStore : ViewModel() {
         }
 
         Async(sleepScrape, post)
-    }
-
-    fun updateLp() {
-        // note : lp must never be empty. There should always be some songs "last played".
-        // if not, then the function has been called before initialization. No need to do anything.
-        if (lp.isNotEmpty()){
-            val n = Song()
-            n.copy(currentSongBackup)
-            lp.add(0, n)
-            currentSongBackup.copy(currentSong)
-            isLpUpdated.value = true
-            Log.d(tag, playerStoreTag +  lp.toString())
-        }
-    }
-
-    fun updateQueue() {
-        if (queue.isNotEmpty()) {
-            queue.remove(queue.first())
-            Log.d(tag, playerStoreTag + queue.toString())
-            fetchLastRequest()
-            isQueueUpdated.value = true
-        } else if (isInitialized) {
-            fetchLastRequest()
-        } else {
-            Log.d(tag, playerStoreTag +  "queue is empty!")
-        }
     }
 
     private fun extractSong(songJSON: JSONObject) : Song {
@@ -244,19 +256,11 @@ class PlayerStore : ViewModel() {
         return song
     }
 
-    fun fetchApi(isCompensatingLatency: Boolean = false) {
-        val post: (parameter: Any?) -> Unit = {
-            val result = JSONObject(it as String)
-            if (!result.isNull("main"))
-            {
-                val res = result.getJSONObject("main")
-                updateApi(res, isCompensatingLatency)
-            }
-        }
-        Async(scrape, post)
-    }
+    // ##################################################
+    // ############## PICTURE FUNCTIONS #################
+    // ##################################################
 
-    private fun fetchImage(fileUrl: String)
+    private fun fetchPicture(fileUrl: String)
     {
         val scrape: (Any?) -> Bitmap? = {
             var k: InputStream? = null
@@ -280,6 +284,12 @@ class PlayerStore : ViewModel() {
             streamerPicture.postValue(it as Bitmap?)
         }
         Async(scrape, post)
+    }
+
+    fun initPicture(c: Context) {
+        streamerPicture.value = BitmapFactory.decodeResource(c.resources,
+            R.drawable.actionbar_logo
+        )
     }
 
     private val playerStoreTag = "====PlayerStore===="
