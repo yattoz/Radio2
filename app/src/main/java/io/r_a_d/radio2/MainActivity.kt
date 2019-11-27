@@ -131,16 +131,7 @@ class MainActivity : BaseActivity() {
         colorRedList = (ResourcesCompat.getColorStateList(resources, R.color.button_red, null))
         colorGreenListCompat = (ResourcesCompat.getColorStateList(resources, R.color.button_green_compat, null))
 
-        // timers
-        // the clockTicker is used to update the UI. It's OK if it dies when the app loses focus.
-        // It should be possible to make this to alleviate the CPU charge. Not that a ticker is heavy on resources, but still.
-        clockTicker.schedule(
-            Tick(),
-            500,
-            500
-        )
-
-        // PlayerStore.instance.fetchApi() // unneeded, the service will call the initApi on defining the streamerName Observer
+        PlayerStore.instance.initApi() // the service will call the initApi on defining the streamerName Observer too, but it's better to initialize the API as soon as the user opens the activity.
 
         // Post-UI Launch
         if (savedInstanceState?.getBoolean("isInitialized") == true && PlayerStore.instance.isInitialized)
@@ -157,6 +148,16 @@ class MainActivity : BaseActivity() {
             // initialize some API data
             PlayerStore.instance.initPicture(this)
             PlayerStore.instance.streamerName.value = "" // initializing the streamer name will trigger an initApi from the observer in the Service.
+
+            // timers
+            // the clockTicker is used to update the UI. It's OK if it dies when the app loses focus.
+            // the timer is declared after access to PlayerStore so that PlayerStore is already initialized:
+            // Otherwise it makes the PlayerStore call its init{} block from a background thread --> crash
+            clockTicker.schedule(
+                Tick(),
+                0,
+                500
+            )
 
             // initialize the favorites
             Requestor.instance.initFavorites()

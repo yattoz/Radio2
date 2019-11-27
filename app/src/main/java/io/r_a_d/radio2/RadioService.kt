@@ -212,7 +212,7 @@ class RadioService : MediaBrowserServiceCompat() {
         val periodString = PreferenceManager.getDefaultSharedPreferences(this).getString("fetchPeriod", "10") ?: "10"
         val period: Long = Integer.parseInt(periodString).toLong()
         if (period > 0)
-            apiTicker.schedule(ApiFetchTick(), 2 * 1000, period * 1000)
+            apiTicker.schedule(ApiFetchTick(), 0, period * 1000)
 
         PlayerStore.instance.isServiceStarted.value = true
         Log.d(tag, radioTag + "created")
@@ -248,6 +248,8 @@ class RadioService : MediaBrowserServiceCompat() {
                     // I couldn't find how to send multiple times the same PendingIntent using AlarmManager, so I relied on Handler instead.
                     // I think there's no guarantee of exact time with the Handler, especially when the device is in deep sleep,
                     // But when I force-set the Deep Sleep mode with ADB, it worked fine, so I'll leave it as this.
+                    // BUT! SOMETIMES IT DIDN'T WORK AND I DON'T KNOW WHY.
+                    // I hope that moving the handler in the RadioService would solve the issue and trigger it correctly.
                     handler.postDelayed(lowerVolumeRunnable, (i * 2 * 1000).toLong())
                 }
             }

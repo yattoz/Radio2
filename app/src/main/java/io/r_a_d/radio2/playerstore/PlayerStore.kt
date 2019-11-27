@@ -112,14 +112,14 @@ class PlayerStore : ViewModel() {
                 updateApi(resMain)
                 currentSongBackup.copy(currentSong)
                 queue.clear()
-                if (resMain.has("queue") && resMain.getBoolean("requesting"))
+                if (resMain.has("queue") && resMain.getBoolean("isafkstream"))
                 {
                     val queueJSON =
                         resMain.getJSONArray("queue")
                     for (i in 0 until queueJSON.length())
                     {
                         val t = extractSong(queueJSON[i] as JSONObject)
-                        if (t.startTime.value != currentSong.startTime.value) // if the API is too slow and didn't remove the first song from queue...
+                        if (t != currentSong) // if the API is too slow and didn't remove the first song from queue...
                             queue.add(queue.size, t)
                     }
                 }
@@ -181,7 +181,7 @@ class PlayerStore : ViewModel() {
                     val queueJSON =
                         resMain.getJSONArray("queue")
                     val t = extractSong(queueJSON[4] as JSONObject)
-                    if (t.title.value == queue.last().title.value && t.artist.value == queue.last().artist.value )
+                    if (t == queue.last())
                     {
                         Log.d(tag, playerStoreTag +  "Song already in there: $t")
                         Async(sleepScrape, post)

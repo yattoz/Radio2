@@ -42,6 +42,12 @@ class Song(artistTitle: String = "", _id : Int = 0, _isRequestable : Boolean = f
         }
     }
 
+    override fun equals(other: Any?) : Boolean
+    {
+        val song: Song = other as Song
+        return this.title.value == song.title.value && this.artist.value == song.artist.value
+    }
+
     fun copy(song: Song) {
         this.title.value = song.title.value
         this.artist.value = song.artist.value
