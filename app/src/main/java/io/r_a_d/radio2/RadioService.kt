@@ -347,6 +347,12 @@ class RadioService : MediaBrowserServiceCompat() {
 
     private fun setupMediaPlayer(){
 
+        val minBufferMillis = 15 * 1000 // Default value
+        val maxBufferMillis = 50 * 1000 // Default value
+        val bufferForPlayback = 4 * 1000 // Default is 2.5s.
+        // Increasing it makes it more robust to short connection loss, at the expense of latency when we press Play. 4s seems reasonable to me.
+        val bufferForPlaybackAfterRebuffer = 7 * 1000 // Default is 5s.
+
         val loadControl = DefaultLoadControl.Builder().apply {
             setBufferDurationsMs(minBufferMillis, maxBufferMillis, bufferForPlayback, bufferForPlaybackAfterRebuffer)
         }.createDefaultLoadControl()
