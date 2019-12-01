@@ -19,12 +19,26 @@ R/a/dio is a webradio that was founded 7+ years ago with the intention of bringi
 - Wake up with the sound of R/a/dio with the built-in Alarm Clock feature! Don't worry: if there is no network, it will play a default sound instead.
 - Never miss a stream with the Streamer Notification Service! (**Warning: this feature polls the server regularly and consumes battery. It is MUCH MORE RECOMMENDED to register to Hanyuu-sama's updates on Twitter and use the Twitter app. But if for some reason you don't (or can't) use the Twitter App, this should get you covered.**)
 - Supports lastFM, LibreFM and Listenbrainz scrobblers with [Pano Scrobbler](https://play.google.com/store/apps/details?id=com.arn.scrobble)
+- **[v1.1]** Snooze the alarm! You can set up the snooze duration you want, or avoid being tempted and disable snooze altogether. When ringing, a special notification design will display bigger buttons with text instead of icons.
+- **[v1.1]** Sleep with the sound of R/a/dio! You can set up a timer to stop the app after any amount of minutes. When the timer approaches, the sound will gradually fade out.
 
 As always, thanks for listening!
 
-Gato-goto choo-choo!
 
 # Releases
 
-## Release 1.0
+## Release 1.1
+
 Incoming! The date will be announced when it reaches the Play Store.
+
+Changes: 
+- Alarm snooze
+- Sleep timer
+- Special notification design for alarm
+- Better handling of queue, avoid duplicates
+- Added pull-to-refresh on favorites
+- Added link to help on how to use favorites in IRC
+- Added settings to control API fetch frequency when playback is stopped
+
+## Release 1.0
+- will probably stay undisclosed, as the release will surely be based on what I call 1.1
