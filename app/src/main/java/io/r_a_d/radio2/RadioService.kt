@@ -433,7 +433,7 @@ class RadioService : MediaBrowserServiceCompat() {
     // this function is playing the stream if available, or a default sound if there's a problem.
     private fun beginPlayingOrFallback()
     {
-        setVolume(100) // we set the max volume for exoPlayer to be sure it rings correctly.
+        PlayerStore.instance.volume.value = 100 // we set the max volume for exoPlayer to be sure it rings correctly.
         beginPlaying(isRinging = true, isFallback = false)
         val wait: (Any?) -> Any = {
             /*

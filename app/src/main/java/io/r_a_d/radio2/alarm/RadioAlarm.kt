@@ -95,7 +95,7 @@ class RadioAlarm {
     fun snooze(c: Context)
     {
         val snoozeString = preferenceStore.getString("snoozeDuration", "10") ?: "10"
-        val snoozeMinutes = if (snoozeString == "Disable snooze") 0  else Integer.parseInt(snoozeString)
+        val snoozeMinutes = if (snoozeString == c.getString(R.string.disable)) 0  else Integer.parseInt(snoozeString)
         if (snoozeMinutes > 0)
         {
             val alarmManager = c.getSystemService(Context.ALARM_SERVICE) as AlarmManager

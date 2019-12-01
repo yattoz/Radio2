@@ -89,7 +89,7 @@ class NowPlayingNotification(
 
             if (isRinging) {
                 val snoozeString = preferenceStore.getString("snoozeDuration", "10") ?: "10"
-                val snoozeMinutes = if (snoozeString == "Disable snooze") 0  else Integer.parseInt(snoozeString)
+                val snoozeMinutes = if (snoozeString == c.getString(R.string.disable)) 0  else Integer.parseInt(snoozeString)
 
                 val snoozeIntent = Intent(c, RadioService::class.java)
                 snoozeIntent.putExtra("action", Actions.SNOOZE.name)
