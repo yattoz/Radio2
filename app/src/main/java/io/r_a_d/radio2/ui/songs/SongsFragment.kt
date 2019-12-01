@@ -10,6 +10,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentPagerAdapter
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
+import androidx.viewpager.widget.ViewPager
 import com.google.android.material.snackbar.BaseTransientBottomBar
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.tabs.TabLayout
@@ -23,9 +24,10 @@ import io.r_a_d.radio2.ui.songs.request.Requestor
 
 class SongsFragment : Fragment() {
 
-    private lateinit var songsViewModel: SongsViewModel
     private lateinit var adapter : SongsPagerAdapter
     private lateinit var snackBar : Snackbar
+    private lateinit var root: View
+    private lateinit var viewPager: ViewPager
 
 
     private val snackBarTextObserver: Observer<String?> = Observer {
@@ -34,7 +36,7 @@ class SongsFragment : Fragment() {
             val snackBarLength = if (preferenceStore.getBoolean("snackbarPersistent", true))
                 Snackbar.LENGTH_INDEFINITE
                 else Snackbar.LENGTH_LONG
-            snackBar = Snackbar.make(songsViewModel.viewPager, "", snackBarLength)
+            snackBar = Snackbar.make(viewPager, "", snackBarLength)
 
             if (snackBarLength == Snackbar.LENGTH_INDEFINITE)
             snackBar.setAction("OK") {
@@ -64,32 +66,24 @@ class SongsFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        songsViewModel =
-                ViewModelProviders.of(this).get(SongsViewModel::class.java)
 
-        // We keep reinitializing the fragment  because we use a pager and it crashes if we rotate the screen (it cannot re-create the content with addFragment visibly)
-        //if (!songsViewModel.isInitialized)
-        //{
-            // Add Fragments to adapter one by one
-            songsViewModel.root = inflater.inflate(R.layout.fragment_songs, container, false)
-            songsViewModel.viewPager = songsViewModel.root.findViewById(R.id.tabPager)
-            adapter = SongsPagerAdapter(childFragmentManager, FragmentPagerAdapter.BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT)
-            adapter.addFragment(LastPlayedFragment.newInstance(), "last played")
-            adapter.addFragment(QueueFragment.newInstance(), "queue")
-            adapter.addFragment(RequestFragment.newInstance(), "request")
-            adapter.addFragment(FavoritesFragment.newInstance(), "Favorites")
+        root = inflater.inflate(R.layout.fragment_songs, container, false)
+        viewPager = root.findViewById(R.id.tabPager)
+        adapter = SongsPagerAdapter(childFragmentManager, FragmentPagerAdapter.BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT)
+        adapter.addFragment(LastPlayedFragment.newInstance(), "last played")
+        adapter.addFragment(QueueFragment.newInstance(), "queue")
+        adapter.addFragment(RequestFragment.newInstance(), "request")
+        adapter.addFragment(FavoritesFragment.newInstance(), "Favorites")
 
-            songsViewModel.viewPager.adapter = adapter
+        viewPager.adapter = adapter
 
-            val tabLayout : TabLayout = songsViewModel.root.findViewById(R.id.tabLayout)
-            tabLayout.setupWithViewPager(songsViewModel.viewPager)
-            songsViewModel.isInitialized = true
-            Log.d(tag, "SongFragment view created")
-        //}
+        val tabLayout : TabLayout = root.findViewById(R.id.tabLayout)
+        tabLayout.setupWithViewPager(viewPager)
+        Log.d(tag, "SongFragment view created")
 
         Requestor.instance.snackBarText.observeForever(snackBarTextObserver)
 
-        return songsViewModel.root
+        return root
     }
 
     override fun onDestroyView() {

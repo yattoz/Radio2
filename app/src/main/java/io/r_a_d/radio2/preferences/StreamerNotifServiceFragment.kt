@@ -33,11 +33,7 @@ class StreamerNotifServiceFragment : PreferenceFragmentCompat() {
                 builder1.setNegativeButton(
                     "No"
                 ) { dialog, _ ->
-                    // we force-reset the switch (that's why I use commit() )
-                    val preferences = PreferenceManager.getDefaultSharedPreferences(context!!)
-                    val editor = preferences.edit()
-                    editor.putBoolean("newStreamerNotification", false)
-                    editor.commit()
+
                     stopStreamerMonitor(context!!)
                     (streamerNotification as SwitchPreferenceCompat).isChecked = false
                     dialog.cancel()

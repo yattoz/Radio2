@@ -120,16 +120,10 @@ class FavoritesFragment : Fragment()  {
         }
         raFButton.visibility = View.VISIBLE
 
-        Requestor.instance.isFavoritesUpdated.observeForever(favoritesSongObserver)
-
-
+        Requestor.instance.isFavoritesUpdated.observe(viewLifecycleOwner, favoritesSongObserver)
         return root
     }
 
-    override fun onDestroyView() {
-        Requestor.instance.isFavoritesUpdated.removeObserver(favoritesSongObserver)
-        super.onDestroyView()
-    }
 
     companion object {
         @JvmStatic

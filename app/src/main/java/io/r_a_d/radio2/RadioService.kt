@@ -1,7 +1,5 @@
 package io.r_a_d.radio2
 
-import android.app.AlarmManager
-import android.app.PendingIntent
 import android.app.Service
 import android.content.BroadcastReceiver
 import android.content.Context
@@ -24,10 +22,8 @@ import android.support.v4.media.MediaMetadataCompat
 import android.telephony.PhoneStateListener
 import android.telephony.TelephonyManager
 import android.view.KeyEvent
-import androidx.core.app.AlarmManagerCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.content.edit
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
 import androidx.media.AudioAttributesCompat
 import androidx.media.AudioFocusRequestCompat
@@ -42,7 +38,6 @@ import io.r_a_d.radio2.playerstore.PlayerStore
 import java.util.*
 import kotlin.math.exp
 import kotlin.math.ln
-import kotlin.math.pow
 import kotlin.system.exitProcess
 
 
@@ -299,7 +294,7 @@ class RadioService : MediaBrowserServiceCompat() {
             this.putBoolean("isSleeping", false)
             this.commit()
         }
-        RadioSleeper.instance.cancelAlarm(this)
+        RadioSleeper.instance.cancelSleep(this)
 
         apiTicker.cancel() // stops the timer.
         Log.d(tag, radioTag + "destroyed")

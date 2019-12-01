@@ -48,9 +48,5 @@ class ChatFragment : Fragment() {
         return chatViewModel.root
     }
 
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
-    }
-
 
 }

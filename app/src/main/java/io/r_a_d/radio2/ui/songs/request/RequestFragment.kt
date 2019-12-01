@@ -22,7 +22,7 @@ class RequestFragment : Fragment() {
 
     private val listener : SearchView.OnQueryTextListener = object : SearchView.OnQueryTextListener{
         override fun onQueryTextSubmit(query: String?): Boolean {
-            if (query == null)
+            if (query == null || query.isEmpty())
                 Requestor.instance.snackBarText.value = "Field is empty, no search possible."
             else
                 Requestor.instance.search(query)
@@ -70,13 +70,8 @@ class RequestFragment : Fragment() {
             // specify an viewAdapter (see also next example)
             adapter = viewAdapter
         }
-        Requestor.instance.isRequestResultUpdated.observeForever(requestSongObserver)
+        Requestor.instance.isRequestResultUpdated.observe(viewLifecycleOwner, requestSongObserver)
         return root
-    }
-
-    override fun onDestroyView() {
-        Requestor.instance.isRequestResultUpdated.removeObserver(requestSongObserver)
-        super.onDestroyView()
     }
 
     companion object {

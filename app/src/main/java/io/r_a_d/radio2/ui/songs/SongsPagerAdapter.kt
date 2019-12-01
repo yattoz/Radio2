@@ -10,13 +10,6 @@ class SongsPagerAdapter(f: FragmentManager, t: Int) : FragmentPagerAdapter(f, t)
     private val fragmentList = ArrayList<Fragment>()
     private val fragmentTitleList = ArrayList<String>()
 
-    /*
-    fun ViewPagerAdapter(manager: FragmentManager): ??? {
-        super(manager)
-    }
-
-     */
-
     override fun getItem(position: Int): Fragment {
         return fragmentList[position]
     }

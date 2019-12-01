@@ -16,7 +16,7 @@ class SleepFragment : PreferenceFragmentCompat() {
 
         isSleeping?.setOnPreferenceChangeListener { _, newValue ->
             if (!(newValue as Boolean))
-                RadioSleeper.instance.cancelAlarm(context!!)
+                RadioSleeper.instance.cancelSleep(context!!)
             else
                 RadioSleeper.instance.setSleep(context!!, isForce = true)
 

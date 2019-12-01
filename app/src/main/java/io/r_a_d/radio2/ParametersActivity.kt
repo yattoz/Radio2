@@ -1,9 +1,7 @@
 package io.r_a_d.radio2
 
 import android.os.Bundle
-import io.r_a_d.radio2.preferences.AlarmFragment
-import io.r_a_d.radio2.preferences.MainPreferenceFragment
-import io.r_a_d.radio2.preferences.SleepFragment
+import io.r_a_d.radio2.preferences.*
 
 
 class ParametersActivity : BaseActivity() {
@@ -30,6 +28,8 @@ class ParametersActivity : BaseActivity() {
         val fragmentToLoad = when(extra) {
             "alarm" -> AlarmFragment()
             "sleep" -> SleepFragment()
+            "customize" -> CustomizeFragment()
+            "streamerNotificationService" -> StreamerNotifServiceFragment()
             else -> MainPreferenceFragment()
         }
 

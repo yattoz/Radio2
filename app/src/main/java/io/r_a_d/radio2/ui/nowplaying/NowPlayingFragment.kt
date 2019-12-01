@@ -27,15 +27,6 @@ import io.r_a_d.radio2.playerstore.Song
 
 class NowPlayingFragment : Fragment() {
 
-    /*
-    companion object {
-        fun newInstance() = NowPlayingFragment()
-    }
-
-     */
-
-    //private val nowPlayingFragmentTag = NowPlayingFragment::class.java.name
-
     private lateinit var root: View
     private lateinit var nowPlayingViewModel: NowPlayingViewModel
 

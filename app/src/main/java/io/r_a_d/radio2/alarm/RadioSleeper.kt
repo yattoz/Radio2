@@ -59,7 +59,7 @@ class RadioSleeper {
     }
 
 
-    fun cancelAlarm(c: Context)
+    fun cancelSleep(c: Context)
     {
         if (::sleepIntent.isInitialized)
         {
@@ -67,9 +67,7 @@ class RadioSleeper {
             alarmManager.cancel(sleepIntent)
             alarmManager.cancel(fadeOutIntent)
 
-            val cancelFadeOutIntent = Intent(c, RadioService::class.java).let { intent ->
-                intent.putExtra("action", Actions.CANCEL_FADE_OUT.name)
-            }
+            val cancelFadeOutIntent = Intent(c, RadioService::class.java).putExtra("action", Actions.CANCEL_FADE_OUT.name)
             c.startService(cancelFadeOutIntent)
 
             Log.d(tag, "cancelled sleep")
