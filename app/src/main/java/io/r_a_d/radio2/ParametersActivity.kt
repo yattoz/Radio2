@@ -26,10 +26,10 @@ class ParametersActivity : BaseActivity() {
         }
 
         val fragmentToLoad = when(extra) {
-            "alarm" -> AlarmFragment()
-            "sleep" -> SleepFragment()
-            "customize" -> CustomizeFragment()
-            "streamerNotificationService" -> StreamerNotifServiceFragment()
+            ActionOpenParam.ALARM.name -> AlarmFragment()
+            ActionOpenParam.SLEEP.name -> SleepFragment()
+            ActionOpenParam.CUSTOMIZE.name -> CustomizeFragment()
+            ActionOpenParam.STREAMER_NOTIFICATION_SERVICE.name -> StreamerNotifServiceFragment()
             else -> MainPreferenceFragment()
         }
 

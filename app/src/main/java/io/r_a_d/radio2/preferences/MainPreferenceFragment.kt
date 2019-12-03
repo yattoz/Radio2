@@ -3,13 +3,9 @@ package io.r_a_d.radio2.preferences
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
-import io.r_a_d.radio2.preferenceStore
-import io.r_a_d.radio2.ui.songs.request.Requestor
 import io.r_a_d.radio2.R
 import android.annotation.SuppressLint
 import androidx.preference.*
-import kotlinx.android.synthetic.main.activity_parameters.*
-
 
 class MainPreferenceFragment : PreferenceFragmentCompat() {
 
@@ -28,6 +24,4 @@ class MainPreferenceFragment : PreferenceFragmentCompat() {
         }
 
     }
-
-
 }

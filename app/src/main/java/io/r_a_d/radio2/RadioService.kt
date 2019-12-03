@@ -236,8 +236,8 @@ class RadioService : MediaBrowserServiceCompat() {
 
         when (intent.getStringExtra("action")) {
             Actions.PLAY.name -> beginPlaying()
-            Actions.STOP.name -> { isAlarmStopped = true; setVolume(PlayerStore.instance.volume.value); stopPlaying() } // setVolume is here to reset the volume to the user's preference when the alarm (that sets volume to 100) is dismissed
-            Actions.PAUSE.name -> { isAlarmStopped = true; setVolume(PlayerStore.instance.volume.value); pausePlaying() }
+            Actions.STOP.name -> { setVolume(PlayerStore.instance.volume.value); stopPlaying() } // setVolume is here to reset the volume to the user's preference when the alarm (that sets volume to 100) is dismissed
+            Actions.PAUSE.name -> { setVolume(PlayerStore.instance.volume.value); pausePlaying() }
             Actions.VOLUME.name -> setVolume(intent.getIntExtra("value", 100))
             Actions.KILL.name -> {stopForeground(true); stopSelf(); return Service.START_NOT_STICKY}
             Actions.NOTIFY.name -> nowPlayingNotification.update(this)
@@ -524,6 +524,7 @@ class RadioService : MediaBrowserServiceCompat() {
     // stop playing but keep the notification.
     fun stopPlaying()
     {
+        isAlarmStopped = true
         if (mediaSession.controller.playbackState.state == PlaybackStateCompat.STATE_STOPPED)
             return // nothing to do here
         PlayerStore.instance.playbackState.value = PlaybackStateCompat.STATE_STOPPED

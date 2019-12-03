@@ -33,6 +33,7 @@ class MainActivity : BaseActivity() {
 
     private val clockTicker: Timer = Timer()
     private var currentNavController: LiveData<NavController>? = null
+    private var isTimerStarted = false
 
     /**
      * Called on first creation and when restoring state.
@@ -92,13 +93,13 @@ class MainActivity : BaseActivity() {
             }
             R.id.action_sleep -> {
                 val i = Intent(this, ParametersActivity::class.java)
-                i.putExtra("action", "sleep") // TODO change value with Actions.something
+                i.putExtra("action", ActionOpenParam.SLEEP.name) // TODO change value with Actions.something
                 startActivity(i)
                 true
             }
             R.id.action_alarm -> {
                 val i = Intent(this, ParametersActivity::class.java)
-                i.putExtra("action", "alarm") // TODO change value with Actions.something
+                i.putExtra("action", ActionOpenParam.ALARM.name) // TODO change value with Actions.something
                 startActivity(i)
                 true
             }
@@ -134,7 +135,7 @@ class MainActivity : BaseActivity() {
         PlayerStore.instance.initApi() // the service will call the initApi on defining the streamerName Observer too, but it's better to initialize the API as soon as the user opens the activity.
 
         // Post-UI Launch
-        if (savedInstanceState?.getBoolean("isInitialized") == true && PlayerStore.instance.isInitialized)
+        if (PlayerStore.instance.isInitialized)
         {
             Log.d(tag, "skipped initialization")
         } else {
@@ -149,6 +150,12 @@ class MainActivity : BaseActivity() {
             PlayerStore.instance.initPicture(this)
             PlayerStore.instance.streamerName.value = "" // initializing the streamer name will trigger an initApi from the observer in the Service.
 
+            // initialize the favorites
+            Requestor.instance.initFavorites()
+        }
+
+        if (!isTimerStarted)
+        {
             // timers
             // the clockTicker is used to update the UI. It's OK if it dies when the app loses focus.
             // the timer is declared after access to PlayerStore so that PlayerStore is already initialized:
@@ -158,9 +165,7 @@ class MainActivity : BaseActivity() {
                 0,
                 500
             )
-
-            // initialize the favorites
-            Requestor.instance.initFavorites()
+            isTimerStarted = true
         }
 
         // initialize the UI
@@ -181,11 +186,6 @@ class MainActivity : BaseActivity() {
     override fun onDestroy() {
         clockTicker.cancel()
         super.onDestroy()
-    }
-
-    override fun onSaveInstanceState(outState: Bundle) {
-        outState.putBoolean("isInitialized", true)
-        super.onSaveInstanceState(outState)
     }
 
     // ####################################
