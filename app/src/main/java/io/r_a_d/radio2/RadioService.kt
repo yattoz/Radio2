@@ -5,6 +5,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.graphics.Bitmap
 import android.support.v4.media.MediaBrowserCompat
 import android.util.Log
 import androidx.media.MediaBrowserServiceCompat
@@ -66,9 +67,16 @@ class RadioService : MediaBrowserServiceCompat() {
                 // In the Intent state there's the value whether the headphones are plugged or not.
                 // This *should* work in any case...
                 when (intent.getIntExtra("state", -1)) {
-                0 -> Log.d(tag, radioTag + "Headset is unplugged")
-                1 -> { Log.d(tag, radioTag + "Headset is plugged"); headsetPluggedIn = true  }
-                else -> Log.d(tag, radioTag + "I have no idea what the headset state is")
+                0 -> {
+                    Log.d(tag, radioTag + "Headset is unplugged")
+                }
+                1 -> {
+                    Log.d(tag, radioTag + "Headset is plugged")
+                    headsetPluggedIn = true
+                }
+                else -> {
+                    Log.d(tag, radioTag + "I have no idea what the headset state is")
+                }
                 }
                 /*
                 val am = getSystemService(AUDIO_SERVICE) as AudioManager
@@ -140,6 +148,10 @@ class RadioService : MediaBrowserServiceCompat() {
         nowPlayingNotification.update(this) // should update the streamer icon
     }
 
+    private val streamerPictureObserver = Observer<Bitmap> {
+        nowPlayingNotification.update(this)
+    }
+
     // ##################################################
     // ############## LIFECYCLE CALLBACKS ###############
     // ##################################################
@@ -205,6 +217,7 @@ class RadioService : MediaBrowserServiceCompat() {
         PlayerStore.instance.volume.observeForever(volumeObserver)
         PlayerStore.instance.isPlaying.observeForever(isPlayingObserver)
         PlayerStore.instance.isMuted.observeForever(isMutedObserver)
+        PlayerStore.instance.streamerPicture.observeForever(streamerPictureObserver)
 
         startForeground(radioServiceId, nowPlayingNotification.notification)
 
@@ -281,6 +294,8 @@ class RadioService : MediaBrowserServiceCompat() {
         PlayerStore.instance.volume.removeObserver(volumeObserver)
         PlayerStore.instance.isPlaying.removeObserver(isPlayingObserver)
         PlayerStore.instance.isMuted.removeObserver(isMutedObserver)
+        PlayerStore.instance.streamerPicture.removeObserver(streamerPictureObserver)
+
 
         mediaSession.isActive = false
         mediaSession.setMediaButtonReceiver(null)
