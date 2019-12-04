@@ -34,6 +34,7 @@ class PlayerStore {
     private val urlToScrape = "https://r-a-d.io/api"
     var latencyCompensator : Long = 0
     var isInitialized: Boolean = false
+    var isStreamDown: Boolean = false
 
     init {
         playbackState.value = PlaybackStateCompat.STATE_STOPPED
@@ -55,7 +56,8 @@ class PlayerStore {
 
     private fun updateApi(resMain: JSONObject, isCompensatingLatency : Boolean = false) {
         // If we're not in PLAYING state, update title / artist metadata. If we're playing, the ICY will take care of that.
-        if (playbackState.value != PlaybackStateCompat.STATE_PLAYING || currentSong.title.value == "" || currentSong.title.value == noConnectionValue)
+        if (playbackState.value != PlaybackStateCompat.STATE_PLAYING || currentSong.title.value.isNullOrEmpty()
+            || currentSong.title.value == noConnectionValue)
             currentSong.setTitleArtist(resMain.getString("np"))
 
         // only update the value if the song has changed. This avoids to trigger observers when they shouldn't be triggered

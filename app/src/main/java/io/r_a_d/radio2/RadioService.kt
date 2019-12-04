@@ -112,7 +112,20 @@ class RadioService : MediaBrowserServiceCompat() {
         {
             Log.d(tag, radioTag + "SONG CHANGED AND PLAYING")
             // we activate latency compensation only if it's been at least 2 songs...
-            PlayerStore.instance.fetchApi(numberOfSongs >= 2)
+            when {
+                PlayerStore.instance.isStreamDown -> {
+                    // if we reach here, it means that the observer has been called by a new song and that the stream was down previously.
+                    // so the stream is now back to normal.
+                    PlayerStore.instance.isStreamDown = false
+                    PlayerStore.instance.initApi()
+                }
+                PlayerStore.instance.currentSong.title.value == getString(R.string.ed) -> {
+                    PlayerStore.instance.isStreamDown = true
+                }
+                else -> {
+                    PlayerStore.instance.fetchApi(numberOfSongs >= 2)
+                }
+            }
         }
         nowPlayingNotification.update(this)
     }

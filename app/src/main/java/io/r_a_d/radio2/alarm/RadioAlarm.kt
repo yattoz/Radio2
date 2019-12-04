@@ -42,7 +42,7 @@ class RadioAlarm {
             PendingIntent.getBroadcast(c, 0, intent, 0)
         }
         val showIntent = Intent(c, ParametersActivity::class.java).let { intent ->
-            intent.putExtra("action", "alarm")
+            intent.putExtra("action", ActionOpenParam.ALARM.name)
             PendingIntent.getActivity(c, 0, intent, 0)
         }
         val time = findNextAlarmTime(c, forceTime, forceDays)
@@ -55,9 +55,9 @@ class RadioAlarm {
         val calendar = Calendar.getInstance()
 
         val days = forceDays ?: PreferenceManager.getDefaultSharedPreferences(c).getStringSet("alarmDays", setOf())
-        val time = forceTime ?: PreferenceManager.getDefaultSharedPreferences(c).getInt("alarmTimeFromMidnight", 7*60)
+        val time = forceTime ?: PreferenceManager.getDefaultSharedPreferences(c).getInt("alarmTimeFromMidnight", 7*60) // default value is set to 07:00 AM
 
-        val hourOfDay = time / 60
+        val hourOfDay = time / 60 //time is in minutes
         val minute = time % 60
 
         val fullWeekOrdered = arrayListOf("Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday")
