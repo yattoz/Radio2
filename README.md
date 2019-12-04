@@ -4,7 +4,7 @@
 
 R/a/dio is a webradio that was founded 7+ years ago with the intention of bringing you a stream of (mostly) high quality anime music, and we keep that up to this day! You can always drop by and visit our website https://r-a-d.io for more information.
 
-![the gif](https://s5.gifyu.com/images/r-a-dio2.gif)
+![the gif](./demo.gif)
 
 ### Features
 
@@ -27,18 +27,24 @@ As always, thanks for listening!
 
 # Releases
 
-## Release 1.1
+## Release 1.1.0
 
-Incoming! The date will be announced when it reaches the Play Store.
+Incoming! The date will be announced when it reaches the Play Store. The version number may be different, probably a v2.0.0 considering it's a full rewrite of the previous app.
 
-Changes: 
+Features added: 
 - Alarm snooze
 - Sleep timer
 - Special notification design for alarm
-- Better handling of queue, avoid duplicates
 - Added pull-to-refresh on favorites
 - Added link to help on how to use favorites in IRC
 - Added settings to control API fetch frequency when playback is stopped
 
+Bug fixes:
+- Better handling of queue, avoid duplicates
+- Should handle correctly when the stream is down ("ed" playing)
+- Update the streamer picture in notification at startup
+- UI updates correctly when app is opened after alarm wake-up
+- Backup alarm sound is now correctly triggered only when necessary
+
 ## Release 1.0
-- will probably stay undisclosed, as the release will surely be based on what I call 1.1
+- will probably stay undisclosed, as the release will surely be based on what I call 1.1.0
