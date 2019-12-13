@@ -386,7 +386,9 @@ class RadioService : MediaBrowserServiceCompat() {
             setBufferDurationsMs(minBufferMillis, maxBufferMillis, bufferForPlayback, bufferForPlaybackAfterRebuffer)
         }.createDefaultLoadControl()
 
-        player = ExoPlayerFactory.newSimpleInstance(this, DefaultTrackSelector(), loadControl)
+        val playerBuilder = SimpleExoPlayer.Builder(this)
+        playerBuilder.setLoadControl(loadControl)
+        player = playerBuilder.build()
         player.addMetadataOutput {
             for (i in 0 until it.length()) {
                 val entry  = it.get(i)
@@ -552,9 +554,12 @@ class RadioService : MediaBrowserServiceCompat() {
     // stop playing but keep the notification.
     fun stopPlaying()
     {
-        isAlarmStopped = true
         if (mediaSession.controller.playbackState.state == PlaybackStateCompat.STATE_STOPPED)
             return // nothing to do here
+
+        if (PlayerStore.instance.playbackState.value == PlaybackStateCompat.STATE_PLAYING)
+            isAlarmStopped = true
+
         PlayerStore.instance.playbackState.value = PlaybackStateCompat.STATE_STOPPED
 
         // STOP THE PLAYBACK
