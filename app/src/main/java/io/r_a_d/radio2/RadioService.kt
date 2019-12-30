@@ -322,7 +322,7 @@ class RadioService : MediaBrowserServiceCompat() {
             this.putBoolean("isSleeping", false)
             this.commit()
         }
-        RadioSleeper.instance.cancelSleep(this)
+        RadioSleeper.instance.cancelSleep(this, isClosing = true)
 
         apiTicker.cancel() // stops the timer.
         Log.d(tag, radioTag + "destroyed")

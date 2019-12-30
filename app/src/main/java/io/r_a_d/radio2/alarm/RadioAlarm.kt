@@ -10,6 +10,7 @@ import io.r_a_d.radio2.BootBroadcastReceiver
 import androidx.preference.PreferenceManager
 import io.r_a_d.radio2.*
 import java.util.*
+import kotlin.collections.ArrayList
 
 class RadioAlarm {
 
@@ -18,29 +19,39 @@ class RadioAlarm {
             RadioAlarm()
         }
     }
-    lateinit var alarmIntent: PendingIntent
+
+    private lateinit var alarmIntent: PendingIntent
+    private lateinit var showIntent: PendingIntent
+
+    private fun defineIntents(c: Context)
+    {
+        alarmIntent = Intent(c, BootBroadcastReceiver::class.java).let { intent ->
+            intent.putExtra("action", "$tag.${Actions.PLAY_OR_FALLBACK.name}")
+            PendingIntent.getBroadcast(c, 0, intent, 0)
+        }
+        showIntent = Intent(c, ParametersActivity::class.java).let { intent ->
+            intent.putExtra("action", "alarm")
+            PendingIntent.getActivity(c, 0, intent, 0)
+        }
+    }
 
 
     fun cancelAlarm(c: Context)
     {
-        if (::alarmIntent.isInitialized)
-        {
-            val alarmManager = c.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-            alarmManager.cancel(alarmIntent)
-        }
+        defineIntents(c)
+        val alarmManager = c.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+        alarmManager.cancel(alarmIntent)
     }
 
     fun setNextAlarm(c: Context, isForce: Boolean = false, forceTime: Int? = null, forceDays: Set<String>? = null)
     {
+        defineIntents(c)
         // don't do anything if the preference is set to FALSE, of course.
         if (!PreferenceManager.getDefaultSharedPreferences(c).getBoolean("isWakingUp", false) && !isForce)
             return
 
         val alarmManager = c.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-        alarmIntent = Intent(c, BootBroadcastReceiver::class.java).let { intent ->
-            intent.putExtra("action", "io.r_a_d.radio2.${Actions.PLAY_OR_FALLBACK.name}")
-            PendingIntent.getBroadcast(c, 0, intent, 0)
-        }
+
         val showIntent = Intent(c, ParametersActivity::class.java).let { intent ->
             intent.putExtra("action", ActionOpenParam.ALARM.name)
             PendingIntent.getActivity(c, 0, intent, 0)
@@ -60,7 +71,7 @@ class RadioAlarm {
         val hourOfDay = time / 60 //time is in minutes
         val minute = time % 60
 
-        val fullWeekOrdered = arrayListOf("Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday")
+        val fullWeekOrdered = weekdaysSundayFirst //Sunday --> Saturday
         val selectedDays = arrayListOf<Int>()
         for (item in fullWeekOrdered)
         {
@@ -94,19 +105,12 @@ class RadioAlarm {
 
     fun snooze(c: Context)
     {
+        defineIntents(c)
         val snoozeString = preferenceStore.getString("snoozeDuration", "10") ?: "10"
         val snoozeMinutes = if (snoozeString == c.getString(R.string.disable)) 0  else Integer.parseInt(snoozeString)
         if (snoozeMinutes > 0)
         {
             val alarmManager = c.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-            alarmIntent = Intent(c, BootBroadcastReceiver::class.java).let { intent ->
-                intent.putExtra("action", "io.r_a_d.radio2.${Actions.PLAY_OR_FALLBACK.name}")
-                PendingIntent.getBroadcast(c, 0, intent, 0)
-            }
-            val showIntent = Intent(c, ParametersActivity::class.java).let { intent ->
-                intent.putExtra("action", "alarm")
-                PendingIntent.getActivity(c, 0, intent, 0)
-            }
 
             AlarmManagerCompat.setAlarmClock(alarmManager, Calendar.getInstance().timeInMillis + (snoozeMinutes * 60 * 1000), showIntent, alarmIntent)
 
