@@ -1,6 +1,7 @@
 package io.r_a_d.radio2
 
 import android.os.Bundle
+import android.view.MenuItem
 import io.r_a_d.radio2.preferences.*
 
 
@@ -38,5 +39,16 @@ class ParametersActivity : BaseActivity() {
             .beginTransaction()
             .replace(R.id.parameters_host_container, fragmentToLoad)
             .commit()
+    }
+
+    // Make the Up button function as back instead of always bringing us to the main activity
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId) {
+            android.R.id.home -> {
+                onBackPressed()
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
+        }
     }
 }
