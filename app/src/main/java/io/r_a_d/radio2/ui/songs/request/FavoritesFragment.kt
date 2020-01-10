@@ -1,11 +1,13 @@
 package io.r_a_d.radio2.ui.songs.request
 
+import android.content.Context
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.inputmethod.InputMethodManager
 import android.widget.SearchView
 import android.widget.TextView
 import androidx.appcompat.widget.AppCompatButton
@@ -50,7 +52,7 @@ class FavoritesFragment : Fragment()  {
 
         val listener : SearchView.OnQueryTextListener = object : SearchView.OnQueryTextListener{
             override fun onQueryTextSubmit(query: String?): Boolean {
-                // do nothing
+                hideKeyboard()
                 return true
             }
             override fun onQueryTextChange(newText: String?): Boolean {
@@ -113,6 +115,8 @@ class FavoritesFragment : Fragment()  {
         raFButton.isEnabled = true
         raFButton.isClickable = true
         raFButton.setOnClickListener {
+            hideKeyboard()
+            
             val s  = Requestor.instance.raF()
             Requestor.instance.snackBarText.value = ""
             Requestor.instance.addRequestMeta = "Request: ${s.artist.value} - ${s.title.value}\n"
@@ -122,6 +126,11 @@ class FavoritesFragment : Fragment()  {
 
         Requestor.instance.isFavoritesUpdated.observe(viewLifecycleOwner, favoritesSongObserver)
         return root
+    }
+
+    private fun hideKeyboard() {
+        val imm = context?.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        imm.hideSoftInputFromWindow(searchView.windowToken, 0)
     }
 
 

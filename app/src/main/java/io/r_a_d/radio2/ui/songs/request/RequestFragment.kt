@@ -1,10 +1,12 @@
 package io.r_a_d.radio2.ui.songs.request
 
+import android.content.Context
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.inputmethod.InputMethodManager
 import android.widget.SearchView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
@@ -22,10 +24,14 @@ class RequestFragment : Fragment() {
 
     private val listener : SearchView.OnQueryTextListener = object : SearchView.OnQueryTextListener{
         override fun onQueryTextSubmit(query: String?): Boolean {
-            if (query == null || query.isEmpty())
+            if (query == null || query.isEmpty()) {
                 Requestor.instance.snackBarText.value = "Field is empty, no search possible."
-            else
+            }
+            else {
                 Requestor.instance.search(query)
+                val imm = context?.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+                imm.hideSoftInputFromWindow(searchView.windowToken, 0)
+            }
             return true
         }
         override fun onQueryTextChange(newText: String?): Boolean {

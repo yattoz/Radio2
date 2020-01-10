@@ -14,7 +14,7 @@
     <string name="new_message_notification_title_template">New message: %1$s</string>
 
     <string name="MEDIA_ROOT_ID">radio_root_id</string>
-    <string name="STREAM_URL_RADIO">https://relay0.r-a-d.io/main.mp3</string>
+    <string name="STREAM_URL_RADIO">https://stream.r-a-d.io/main.mp3</string>
     <string name="STREAM_URL_TSUMUGI">http://shelter.mahoro-net.org:8000/tsumugi</string>
     <string name="STREAM_URL_RSTLSS">http://stream.radiosolution.fr/rstlss.mp3</string>
 
