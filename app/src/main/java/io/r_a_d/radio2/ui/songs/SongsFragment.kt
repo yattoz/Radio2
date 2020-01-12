@@ -33,7 +33,7 @@ class SongsFragment : Fragment() {
     private val snackBarTextObserver: Observer<String?> = Observer {
         if (Requestor.instance.snackBarText.value != "")
         {
-            val snackBarLength = if (preferenceStore.getBoolean("snackbarPersistent", true))
+            val snackBarLength = if (preferenceStore.getBoolean("snackbarPersistent", false))
                 Snackbar.LENGTH_INDEFINITE
                 else Snackbar.LENGTH_LONG
             snackBar = Snackbar.make(viewPager, "", snackBarLength)
