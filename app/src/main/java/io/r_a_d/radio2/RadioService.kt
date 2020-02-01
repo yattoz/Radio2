@@ -434,7 +434,7 @@ class RadioService : MediaBrowserServiceCompat() {
             .createMediaSource(Uri.parse(getString(R.string.STREAM_URL_RADIO)))
 
         fallbackMediaSource = ProgressiveMediaSource.Factory(dataSourceFactory)
-            .createMediaSource(Uri.parse("file:///android_asset/the_stream_is_down.mp3"))
+            .createMediaSource(Uri.parse("file:///android_asset/tear_rain_no_internet_connection.ogg"))
     }
 
     private fun createMediaSession() {
