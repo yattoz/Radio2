@@ -57,6 +57,7 @@ class FavoritesFragment : Fragment()  {
             }
             override fun onQueryTextChange(newText: String?): Boolean {
                 (viewAdapter as RequestSongAdapter).filter(newText ?: "")
+                viewAdapter.notifyDataSetChanged()
                 return true
             }
         }
