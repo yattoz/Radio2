@@ -21,6 +21,13 @@
         app:showSeekBarValue="true"
         />
 -->
+    <SwitchPreferenceCompat
+        app:key="autoStartOnPlug"
+        app:iconSpaceReserved="false"
+        app:title="Auto play when plugging headphones"
+        app:singleLineTitle="false"
+        app:defaultValue="false"
+        />
 
     <SwitchPreferenceCompat
         app:key="splitLayout"
