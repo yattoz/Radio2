@@ -1,9 +1,10 @@
 package io.r_a_d.radio2.ui.nowplaying
 
 import android.widget.SeekBar
-import androidx.lifecycle.MutableLiveData
+import androidx.core.content.edit
 import androidx.lifecycle.ViewModel
 import io.r_a_d.radio2.playerstore.PlayerStore
+import io.r_a_d.radio2.preferenceStore
 
 class NowPlayingViewModel: ViewModel() {
 
@@ -21,6 +22,10 @@ class NowPlayingViewModel: ViewModel() {
             override fun onProgressChanged(seekBar: SeekBar, progress: Int, fromUser: Boolean) {
                 // updated continuously as the user slides the thumb
                 PlayerStore.instance.volume.value = progress
+                preferenceStore.edit {
+                    putInt("volume", progress)
+                    commit()
+                }
             }
 
             override fun onStartTrackingTouch(seekBar: SeekBar) {

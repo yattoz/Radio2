@@ -9,7 +9,7 @@
         app:key="userName"
         app:title="User name for favorite songs"
         />
-
+<!--
     <SeekBarPreference
         app:key="volume"
         app:iconSpaceReserved="false"
@@ -20,6 +20,7 @@
         android:defaultValue="100"
         app:showSeekBarValue="true"
         />
+-->
 
     <SwitchPreferenceCompat
         app:key="splitLayout"
