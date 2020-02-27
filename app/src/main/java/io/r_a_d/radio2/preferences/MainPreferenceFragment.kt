@@ -11,9 +11,9 @@ import androidx.preference.*
 
 class MainPreferenceFragment : PreferenceFragmentCompat() {
 
-    override fun onAttach(context: Context) {
-        (activity as AppCompatActivity).supportActionBar?.title = context.getString(R.string.settings)
-        super.onAttach(context)
+    override fun onResume() {
+        (activity as AppCompatActivity).supportActionBar?.title = context!!.getString(R.string.settings)
+        super.onResume()
     }
 
     @SuppressLint("ApplySharedPref")
