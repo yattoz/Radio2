@@ -5,9 +5,16 @@ import android.net.Uri
 import android.os.Bundle
 import io.r_a_d.radio2.R
 import android.annotation.SuppressLint
+import android.content.Context
+import androidx.appcompat.app.AppCompatActivity
 import androidx.preference.*
 
 class MainPreferenceFragment : PreferenceFragmentCompat() {
+
+    override fun onAttach(context: Context) {
+        (activity as AppCompatActivity).supportActionBar?.title = context.getString(R.string.settings)
+        super.onAttach(context)
+    }
 
     @SuppressLint("ApplySharedPref")
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {

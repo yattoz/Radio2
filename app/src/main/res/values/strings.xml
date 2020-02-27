@@ -68,5 +68,10 @@
     <string name="sleep_fade_out_text">One minute before the end of the timer, the volume will gradually decrease.</string>
     <string name="disable">Disable</string>
     <string name="ed">ed</string>
+    <string name="alarm">Alarm</string>
+    <string name="settings">Settings</string>
+    <string name="customize">Customize app behavior</string>
+    <string name="sleep">Sleep timer</string>
+    <string name="streamerNotificationService">Streamer notification service</string>
 
 </resources>

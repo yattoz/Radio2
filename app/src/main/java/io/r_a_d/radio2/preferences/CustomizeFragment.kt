@@ -1,16 +1,24 @@
 package io.r_a_d.radio2.preferences
 
+import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import androidx.appcompat.app.AlertDialog
+import androidx.appcompat.app.AppCompatActivity
 import androidx.preference.*
 import io.r_a_d.radio2.R
 import io.r_a_d.radio2.preferenceStore
 import io.r_a_d.radio2.ui.songs.request.Requestor
 
 class CustomizeFragment : PreferenceFragmentCompat() {
+
+    override fun onAttach(context: Context) {
+        (activity as AppCompatActivity).supportActionBar?.title = context.getString(R.string.customize)
+        super.onAttach(context)
+    }
+
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         setPreferencesFromResource(R.xml.customize_preferences, rootKey)
 

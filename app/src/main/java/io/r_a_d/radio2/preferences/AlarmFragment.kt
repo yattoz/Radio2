@@ -1,8 +1,10 @@
 package io.r_a_d.radio2.preferences
 
 import android.app.TimePickerDialog
+import android.content.Context
 import android.os.Bundle
 import android.util.Log
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.edit
 import androidx.preference.*
 import io.r_a_d.radio2.R
@@ -10,6 +12,12 @@ import io.r_a_d.radio2.alarm.RadioAlarm
 import java.util.*
 
 class AlarmFragment : PreferenceFragmentCompat() {
+
+    override fun onAttach(context: Context) {
+        (activity as AppCompatActivity).supportActionBar?.title = context.getString(R.string.alarm)
+        super.onAttach(context)
+    }
+
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         setPreferencesFromResource(R.xml.alarm_preferences, rootKey)
 

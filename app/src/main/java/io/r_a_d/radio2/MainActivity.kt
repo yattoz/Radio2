@@ -93,13 +93,13 @@ class MainActivity : BaseActivity() {
             }
             R.id.action_sleep -> {
                 val i = Intent(this, ParametersActivity::class.java)
-                i.putExtra("action", ActionOpenParam.SLEEP.name) // TODO change value with Actions.something
+                i.putExtra("action", ActionOpenParam.SLEEP.name)
                 startActivity(i)
                 true
             }
             R.id.action_alarm -> {
                 val i = Intent(this, ParametersActivity::class.java)
-                i.putExtra("action", ActionOpenParam.ALARM.name) // TODO change value with Actions.something
+                i.putExtra("action", ActionOpenParam.ALARM.name)
                 startActivity(i)
                 true
             }

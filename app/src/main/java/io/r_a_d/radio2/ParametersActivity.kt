@@ -2,10 +2,11 @@ package io.r_a_d.radio2
 
 import android.os.Bundle
 import android.view.MenuItem
+import androidx.appcompat.app.AppCompatActivity
 import io.r_a_d.radio2.preferences.*
 
 
-class ParametersActivity : BaseActivity() {
+class ParametersActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -15,10 +16,11 @@ class ParametersActivity : BaseActivity() {
         setContentView(R.layout.activity_parameters)
 
         // my_child_toolbar is defined in the layout file
-        setSupportActionBar(findViewById(R.id.toolbar))
+        setSupportActionBar(findViewById(R.id.parameters_toolbar))
 
         // Get a support ActionBar corresponding to this toolbar and enable the Up button
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        supportActionBar?.title = getString(R.string.settings)
 
         val extra = if (savedInstanceState == null) {
             intent.extras?.getString("action")
