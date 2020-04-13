@@ -63,7 +63,6 @@ class Requestor {
 
     fun initFavorites(userName : String? = preferenceStore.getString("userName", null)){
         Log.d(tag, "initializing favorites")
-        favoritesSongArray.clear()
         if (userName == null)
         {
             // Display is done by default in the XML.
@@ -77,6 +76,7 @@ class Requestor {
         }
         val postFavorites :  (Any?) -> Unit = {
             val res = it as JSONArray
+            favoritesSongArray.clear()
             for (i in 0 until (res).length())
             {
                 val item = res.getJSONObject(i)
