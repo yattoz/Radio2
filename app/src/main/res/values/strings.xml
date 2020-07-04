@@ -73,5 +73,6 @@
     <string name="customize">Customize app behavior</string>
     <string name="sleep">Sleep timer</string>
     <string name="streamerNotificationService">Streamer notification service</string>
+    <string name="thread_up">Thread up!</string>
 
 </resources>

@@ -35,6 +35,7 @@ class PlayerStore {
     var latencyCompensator : Long = 0
     var isInitialized: Boolean = false
     var isStreamDown: Boolean = false
+    var thread: MutableLiveData<String> = MutableLiveData()
 
     init {
         playbackState.value = PlaybackStateCompat.STATE_STOPPED
@@ -48,6 +49,7 @@ class PlayerStore {
         isMuted.value = false
         currentSong.title.value = noConnectionValue
         listenersCount.value = 0
+        thread.value = ""
     }
 
     // ##################################################
@@ -75,6 +77,7 @@ class PlayerStore {
         }
         currentSong.stopTime.value = resMain.getLong("end_time")*1000
         currentTime.value = (resMain.getLong("current"))*1000 - (latencyCompensator)
+        thread.value = resMain.getString("thread")
 
         val newStreamer = resMain.getJSONObject("dj").getString("djname")
         if (newStreamer != streamerName.value)

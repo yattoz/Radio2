@@ -1,6 +1,7 @@
 package io.r_a_d.radio2.ui.news
 
 import android.annotation.SuppressLint
+import android.text.method.LinkMovementMethod
 import android.widget.TextView
 import android.view.LayoutInflater
 import android.view.ViewGroup
@@ -46,6 +47,7 @@ class NewsAdapter(private val dataSet: ArrayList<News>
         val header = holder.itemView.findViewById<TextView>(R.id.news_header)
         title.text = dataSet[position].title
         text.text = HtmlCompat.fromHtml(dataSet[position].text, HtmlCompat.FROM_HTML_MODE_LEGACY)
+        text.movementMethod = LinkMovementMethod.getInstance()
         header.text = HtmlCompat.fromHtml(dataSet[position].header, HtmlCompat.FROM_HTML_MODE_LEGACY).replace(Regex("\n"), " ")
         author.text = "| ${dataSet[position].author}"
         TextViewCompat.setAutoSizeTextTypeWithDefaults(author, TextViewCompat.AUTO_SIZE_TEXT_TYPE_UNIFORM)

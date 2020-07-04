@@ -6,6 +6,7 @@ import android.content.Context
 import androidx.lifecycle.ViewModelProviders
 import android.os.Bundle
 import android.support.v4.media.session.PlaybackStateCompat
+import android.text.method.LinkMovementMethod
 import android.util.Log
 import android.util.TypedValue
 import androidx.fragment.app.Fragment
@@ -15,6 +16,7 @@ import android.view.ViewGroup
 import android.widget.*
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
+import androidx.core.text.HtmlCompat
 import androidx.core.widget.TextViewCompat
 import androidx.lifecycle.Observer
 import com.google.android.material.snackbar.BaseTransientBottomBar
@@ -155,6 +157,21 @@ class NowPlayingFragment : Fragment() {
             } else {
                 sleepInfoText.visibility = View.GONE
             }
+        })
+
+        PlayerStore.instance.thread.observe(viewLifecycleOwner, Observer {
+            val t : TextView= root.findViewById(R.id.thread)
+            val link = PlayerStore.instance.thread.value!!
+            val textLink = if (link.isEmpty())
+            {
+                t.visibility = View.GONE
+                ""
+            } else {
+                t.visibility = View.VISIBLE
+                "<a href=\"$link\">Thread up!</a>"
+            }
+            t.text = HtmlCompat.fromHtml(textLink, HtmlCompat.FROM_HTML_MODE_LEGACY)
+            t.movementMethod = LinkMovementMethod.getInstance()
         })
 
 

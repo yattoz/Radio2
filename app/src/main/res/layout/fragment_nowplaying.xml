@@ -183,7 +183,8 @@
                     android:layout_marginTop="8dp"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
+                    app:layout_constraintTop_toTopOf="parent"
+                    tools:ignore="RtlCompat" />
 
 
                 <TextView
@@ -296,7 +297,7 @@
             android:layout_gravity="fill_horizontal"
             android:progress="70"
             android:progressDrawable="@drawable/progress_bar_progress"
-            app:layout_constraintBottom_toTopOf="@id/play_pause"
+            app:layout_constraintTop_toTopOf="@id/playButtonGuideline"
             tools:layout_editor_absoluteX="0dp" />
 
         <TextView
@@ -336,6 +337,17 @@
             android:orientation="horizontal"
             app:layout_constraintGuide_percent="0.5" />
 
+        <TextView
+            android:id="@+id/thread"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="@string/thread_up"
+            android:textSize="20sp"
+            android:textAlignment="center"
+            app:layout_constraintTop_toBottomOf="@id/progressBar"
+            app:layout_constraintStart_toEndOf="@id/currentTime"
+            app:layout_constraintEnd_toStartOf="@id/endTime"
+            android:gravity="center_horizontal" />
 
         <ImageButton
             android:id="@+id/play_pause"
@@ -353,10 +365,12 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/endTime"
             app:layout_constraintStart_toEndOf="@+id/currentTime"
-            app:layout_constraintTop_toTopOf="@id/playButtonGuideline"
+            app:layout_constraintTop_toBottomOf="@id/thread"
             app:srcCompat="@drawable/ic_play"
             tools:ignore="HardcodedText"
             tools:targetApi="m" />
+
+
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
