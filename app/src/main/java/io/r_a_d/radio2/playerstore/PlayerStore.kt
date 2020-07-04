@@ -49,7 +49,7 @@ class PlayerStore {
         isMuted.value = false
         currentSong.title.value = noConnectionValue
         listenersCount.value = 0
-        thread.value = ""
+        thread.value = "none"
     }
 
     // ##################################################

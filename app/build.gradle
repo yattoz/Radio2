@@ -16,7 +16,7 @@ configurations.all {
 }
 
 android {
-    compileSdkVersion 29
+    compileSdkVersion 30
     buildToolsVersion "29.0.2"
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
@@ -28,9 +28,9 @@ android {
     defaultConfig {
         applicationId "io.r_a_d.radio2"
         minSdkVersion 16
-        targetSdkVersion 29
-        versionCode 13
-        versionName "2.0.0 RC2"
+        targetSdkVersion 30
+        versionCode 15
+        versionName "2.0.0 RC3"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
     }
@@ -67,16 +67,17 @@ dependencies {
     implementation "androidx.media:media:1.1.0"
     implementation 'com.google.android.exoplayer:exoplayer:2.11.1'
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
-    implementation 'androidx.lifecycle:lifecycle-extensions:2.1.0'
-    implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.1.0'
+    implementation 'androidx.lifecycle:lifecycle-extensions:2.2.0'
+    implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.2.0'
 
     implementation 'androidx.recyclerview:recyclerview:1.1.0'
-    implementation 'androidx.preference:preference:1.1.0'
+    implementation 'androidx.preference:preference:1.1.1'
 
     // jsoup HTML parser library @ https://jsoup.org/
     // implementation 'org.jsoup:jsoup:1.12.1'
 
     def work_version = "2.2.0"
+    //noinspection GradleDependency
     implementation "androidx.work:work-runtime-ktx:$work_version"
 
 

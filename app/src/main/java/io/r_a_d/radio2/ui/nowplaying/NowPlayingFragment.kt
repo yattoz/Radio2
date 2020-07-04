@@ -162,7 +162,7 @@ class NowPlayingFragment : Fragment() {
         PlayerStore.instance.thread.observe(viewLifecycleOwner, Observer {
             val t : TextView= root.findViewById(R.id.thread)
             val link = PlayerStore.instance.thread.value!!
-            val textLink = if (link.isEmpty())
+            val textLink = if (link == "none")
             {
                 t.visibility = View.GONE
                 ""
@@ -204,7 +204,7 @@ class NowPlayingFragment : Fragment() {
 
         val setClipboardListener: View.OnLongClickListener = View.OnLongClickListener {
             val text = PlayerStore.instance.currentSong.artist.value + " - " + PlayerStore.instance.currentSong.title.value
-            val clipboard = context!!.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+            val clipboard = requireContext().getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
             val clip = android.content.ClipData.newPlainText("Copied Text", text)
             clipboard.setPrimaryClip(clip)
             val snackBarLength = if (preferenceStore.getBoolean("snackbarPersistent", true))

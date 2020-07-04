@@ -4,6 +4,7 @@ import android.os.Bundle
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import androidx.navigation.ui.setupActionBarWithNavController
 import android.content.Intent
+import android.os.PersistableBundle
 import android.util.Log
 import android.view.Menu
 import androidx.appcompat.widget.Toolbar
@@ -108,7 +109,10 @@ class MainActivity : BaseActivity() {
         }
     }
 
-    override fun onRestoreInstanceState(savedInstanceState: Bundle?) {
+    override fun onRestoreInstanceState(
+        savedInstanceState: Bundle?,
+        persistentState: PersistableBundle?
+    ) {
         super.onRestoreInstanceState(savedInstanceState ?: Bundle())
         // Now that BottomNavigationBar has restored its instance state
         // and its selectedItemId, we can proceed with setting up the
