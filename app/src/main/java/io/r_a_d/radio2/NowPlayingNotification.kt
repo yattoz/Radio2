@@ -1,5 +1,6 @@
 package io.r_a_d.radio2
 
+import android.annotation.SuppressLint
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
@@ -27,7 +28,7 @@ class NowPlayingNotification(
     // ###### NOW PLAYING NOTIFICATION ########
     // ########################################
 
-    lateinit var mediaStyle: androidx.media.app.NotificationCompat.DecoratedMediaCustomViewStyle
+    private lateinit var mediaStyle: androidx.media.app.NotificationCompat.DecoratedMediaCustomViewStyle
 
     fun create(c: Context, m: MediaSessionCompat) {
         super.create(c)
@@ -47,6 +48,7 @@ class NowPlayingNotification(
         update(c)
     }
 
+    @SuppressLint("RestrictedApi")
     fun update(c: Context, isUpdatingNotificationButton: Boolean = false, isRinging: Boolean = false) {
 
         if (isUpdatingNotificationButton)
