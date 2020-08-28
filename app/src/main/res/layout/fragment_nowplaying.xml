@@ -340,7 +340,7 @@
         <TextView
             android:id="@+id/thread"
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:layout_height="28dp"
             android:text="@string/thread_up"
             android:textSize="20sp"
             android:textAlignment="center"

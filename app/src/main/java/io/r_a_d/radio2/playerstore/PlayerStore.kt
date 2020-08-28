@@ -36,6 +36,7 @@ class PlayerStore {
     var isInitialized: Boolean = false
     var isStreamDown: Boolean = false
     var thread: MutableLiveData<String> = MutableLiveData()
+    var isAfkStream: Boolean = true
 
     init {
         playbackState.value = PlaybackStateCompat.STATE_STOPPED
@@ -88,6 +89,7 @@ class PlayerStore {
             streamerName.value = newStreamer
         }
         val listeners = resMain.getInt("listeners")
+        isAfkStream = resMain.getBoolean("isafkstream")
         listenersCount.value = listeners
         Log.d(tag, playerStoreTag +  "store updated")
     }

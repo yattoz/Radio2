@@ -27,13 +27,13 @@ class StreamerNotifServiceFragment : PreferenceFragmentCompat() {
         val streamerNotification = preferenceScreen.findPreference<Preference>("newStreamerNotification")
         streamerNotification?.setOnPreferenceChangeListener { _, newValue ->
             if ((newValue as Boolean)) {
-                val builder1 = AlertDialog.Builder(context!!)
+                val builder1 = AlertDialog.Builder(requireContext())
                 builder1.setMessage(R.string.warningStreamerNotif)
                 builder1.setCancelable(false)
                 builder1.setPositiveButton(
                     "Yes"
                 ) { dialog, _ ->
-                    startStreamerMonitor(context!!, force = true) // force enabled because the preference value is not yet set when running this callback.
+                    startStreamerMonitor(requireContext(), force = true) // force enabled because the preference value is not yet set when running this callback.
                     streamerPeriod?.isEnabled = true
                     dialog.cancel()
                 }
@@ -42,7 +42,7 @@ class StreamerNotifServiceFragment : PreferenceFragmentCompat() {
                     "No"
                 ) { dialog, _ ->
 
-                    stopStreamerMonitor(context!!)
+                    stopStreamerMonitor(requireContext())
                     (streamerNotification as SwitchPreferenceCompat).isChecked = false
                     dialog.cancel()
                 }
@@ -51,7 +51,7 @@ class StreamerNotifServiceFragment : PreferenceFragmentCompat() {
                 alert11.show()
             }
             else {
-                stopStreamerMonitor(context!!)
+                stopStreamerMonitor(requireContext())
                 streamerPeriod?.isEnabled = false
                 WorkerStore.instance.isServiceStarted = false
             }

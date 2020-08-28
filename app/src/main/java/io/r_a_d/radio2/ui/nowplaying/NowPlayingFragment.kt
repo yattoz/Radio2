@@ -54,12 +54,16 @@ class NowPlayingFragment : Fragment() {
         val songArtistNextText: TextView = root.findViewById(R.id.text_song_artist_next)
         val volumeIconImage : ImageView = root.findViewById(R.id.volume_icon)
         val listenersText : TextView = root.findViewById(R.id.listenersCount)
+        val threadText : TextView= root.findViewById(R.id.thread)
 
 
         TextViewCompat.setAutoSizeTextTypeUniformWithConfiguration(
             streamerNameText,8, 20, 2, TypedValue.COMPLEX_UNIT_SP)
         TextViewCompat.setAutoSizeTextTypeUniformWithConfiguration(
             listenersText,8, 16, 2, TypedValue.COMPLEX_UNIT_SP)
+        TextViewCompat.setAutoSizeTextTypeUniformWithConfiguration(
+            threadText,8, 32, 2, TypedValue.COMPLEX_UNIT_SP)
+
         /*
         TextViewCompat.setAutoSizeTextTypeUniformWithConfiguration(
             songTitleText,4, 24, 2, TypedValue.COMPLEX_UNIT_SP)
@@ -160,18 +164,20 @@ class NowPlayingFragment : Fragment() {
         })
 
         PlayerStore.instance.thread.observe(viewLifecycleOwner, Observer {
-            val t : TextView= root.findViewById(R.id.thread)
             val link = PlayerStore.instance.thread.value!!
-            val textLink = if (link == "none")
-            {
-                t.visibility = View.GONE
-                ""
-            } else {
-                t.visibility = View.VISIBLE
+
+            val textLink = if (link.contains("https://ocv.me/up/") ) {
+                threadText.visibility = View.VISIBLE
+                "<a href=\"https://ocv.me/up/\">Upload your request!</a>"
+            } else if (link.startsWith("http")&& !PlayerStore.instance.isAfkStream) {
+                threadText.visibility = View.VISIBLE
                 "<a href=\"$link\">Thread up!</a>"
+            } else {
+                threadText.visibility = View.GONE
+                ""
             }
-            t.text = HtmlCompat.fromHtml(textLink, HtmlCompat.FROM_HTML_MODE_LEGACY)
-            t.movementMethod = LinkMovementMethod.getInstance()
+            threadText.text = HtmlCompat.fromHtml(textLink, HtmlCompat.FROM_HTML_MODE_LEGACY)
+            threadText.movementMethod = LinkMovementMethod.getInstance()
         })
 
 
