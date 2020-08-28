@@ -110,8 +110,7 @@ class MainActivity : BaseActivity() {
     }
 
     override fun onRestoreInstanceState(
-        savedInstanceState: Bundle?,
-        persistentState: PersistableBundle?
+        savedInstanceState: Bundle
     ) {
         super.onRestoreInstanceState(savedInstanceState ?: Bundle())
         // Now that BottomNavigationBar has restored its instance state

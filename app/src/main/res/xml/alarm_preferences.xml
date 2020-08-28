@@ -39,4 +39,13 @@
         android:summary="%s"
         />
 
+    <Preference
+        app:iconSpaceReserved="true"
+        android:key="testAlarmVolume"
+        android:title="@string/test_alarm_volume"
+        android:summary="@string/test_alarm_volume_summary"
+        app:icon="@drawable/ic_volume_high"
+        app:fragment="io.r_a_d.radio2.preferences.AlarmAdjustVolumeFragment"
+        />
+
 </PreferenceScreen>
