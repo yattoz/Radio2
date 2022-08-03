@@ -23,7 +23,11 @@ fun startNextAlarmStreamer(c: Context){
     {
         val alarmIntent = Intent(c, StreamerMonitorService::class.java).let { intent ->
             intent.putExtra("action", Actions.NOTIFY.name)
-            PendingIntent.getService(c, 0, intent, 0)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                PendingIntent.getService(c, 0, intent, PendingIntent.FLAG_IMMUTABLE)
+            } else {
+                PendingIntent.getService(c, 0, intent, 0)
+            }
         }
 
         val alarmMgr = c.getSystemService(Context.ALARM_SERVICE) as AlarmManager

@@ -2,10 +2,13 @@ package io.r_a_d.radio2
 
 import android.annotation.SuppressLint
 import android.app.PendingIntent
+import android.app.PendingIntent.FLAG_UPDATE_CURRENT
 import android.content.Context
 import android.content.Intent
+import android.os.Build
 import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.media.session.PlaybackStateCompat
+import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
 import io.r_a_d.radio2.playerstore.PlayerStore
 import io.r_a_d.radio2.BootBroadcastReceiver
@@ -30,13 +33,14 @@ class NowPlayingNotification(
 
     private lateinit var mediaStyle: androidx.media.app.NotificationCompat.DecoratedMediaCustomViewStyle
 
+    @RequiresApi(Build.VERSION_CODES.M)
     fun create(c: Context, m: MediaSessionCompat) {
         super.create(c)
 
         // got it right
         val delIntent = Intent(c, RadioService::class.java)
         delIntent.putExtra("action", Actions.KILL.name)
-        val deleteIntent = PendingIntent.getService(c, 0, delIntent, PendingIntent.FLAG_NO_CREATE)
+        val deleteIntent = PendingIntent.getService(c, 0, delIntent, PendingIntent.FLAG_NO_CREATE + PendingIntent.FLAG_IMMUTABLE)
         builder.setDeleteIntent(deleteIntent)
 
         mediaStyle = androidx.media.app.NotificationCompat.DecoratedMediaCustomViewStyle().also {
@@ -48,6 +52,7 @@ class NowPlayingNotification(
         update(c)
     }
 
+    @RequiresApi(Build.VERSION_CODES.M)
     @SuppressLint("RestrictedApi")
     fun update(c: Context, isUpdatingNotificationButton: Boolean = false, isRinging: Boolean = false) {
 
@@ -71,21 +76,20 @@ class NowPlayingNotification(
 
         if (builder.mActions.isEmpty()) {
             val intent = Intent(c, RadioService::class.java)
-            val playPauseAction: NotificationCompat.Action
 
-            playPauseAction = if (PlayerStore.instance.playbackState.value == PlaybackStateCompat.STATE_PLAYING) {
+            val playPauseAction: NotificationCompat.Action = if (PlayerStore.instance.playbackState.value == PlaybackStateCompat.STATE_PLAYING) {
                 intent.putExtra("action", Actions.PAUSE.name)
-                val pendingButtonIntent = PendingIntent.getService(c, 1, intent, PendingIntent.FLAG_UPDATE_CURRENT)
+                val pendingButtonIntent = PendingIntent.getService(c, 1, intent, FLAG_UPDATE_CURRENT + PendingIntent.FLAG_IMMUTABLE)
                 NotificationCompat.Action.Builder(R.drawable.ic_pause, "Pause", pendingButtonIntent).build()
             } else {
                 intent.putExtra("action", Actions.PLAY.name)
-                val pendingButtonIntent = PendingIntent.getService(c, 1, intent, PendingIntent.FLAG_UPDATE_CURRENT)
+                val pendingButtonIntent = PendingIntent.getService(c, 1, intent, FLAG_UPDATE_CURRENT + PendingIntent.FLAG_IMMUTABLE)
                 NotificationCompat.Action.Builder(R.drawable.ic_play,"Play", pendingButtonIntent).build()
             }
             builder.addAction(playPauseAction)
             val intent2 = Intent(c, RadioService::class.java)
             intent2.putExtra("action", Actions.KILL.name)
-            val pendingButtonIntent = PendingIntent.getService(c, 2, intent2, PendingIntent.FLAG_UPDATE_CURRENT)
+            val pendingButtonIntent = PendingIntent.getService(c, 2, intent2, FLAG_UPDATE_CURRENT + PendingIntent.FLAG_IMMUTABLE)
             val stopAction = NotificationCompat.Action.Builder(R.drawable.ic_close,"Stop", pendingButtonIntent).build()
             builder.addAction(stopAction)
 
@@ -95,7 +99,7 @@ class NowPlayingNotification(
 
                 val snoozeIntent = Intent(c, RadioService::class.java)
                 snoozeIntent.putExtra("action", Actions.SNOOZE.name)
-                val pendingSnoozeIntent = PendingIntent.getService(c, 5, snoozeIntent, PendingIntent.FLAG_UPDATE_CURRENT)
+                val pendingSnoozeIntent = PendingIntent.getService(c, 5, snoozeIntent, FLAG_UPDATE_CURRENT  + PendingIntent.FLAG_IMMUTABLE)
                 val snoozeAction = NotificationCompat.Action.Builder(R.drawable.ic_alarm, "Snooze ($snoozeMinutes min.)", pendingSnoozeIntent ).build()
                 if (snoozeMinutes > 0)
                     builder.addAction(snoozeAction)

@@ -4,6 +4,7 @@ import android.os.Bundle
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import androidx.navigation.ui.setupActionBarWithNavController
 import android.content.Intent
+import android.os.Build
 import android.os.PersistableBundle
 import android.util.Log
 import android.view.Menu
@@ -16,6 +17,7 @@ import io.r_a_d.radio2.playerstore.PlayerStore
 
 import java.util.Timer
 import android.view.MenuItem
+import androidx.annotation.RequiresApi
 import androidx.preference.PreferenceManager
 import com.google.android.material.snackbar.Snackbar
 import io.r_a_d.radio2.alarm.RadioAlarm
@@ -119,6 +121,7 @@ class MainActivity : BaseActivity() {
         setupBottomNavigationBar()
     }
 
+    @RequiresApi(Build.VERSION_CODES.M)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
