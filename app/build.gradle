@@ -43,7 +43,7 @@ android {
         applicationId "io.r_a_d.radio2"
         minSdkVersion 19
         targetSdkVersion 34
-        versionCode 20240210
+        versionCode 24021001
         multiDexEnabled true
         versionName "2.1.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
