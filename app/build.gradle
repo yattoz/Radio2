@@ -44,6 +44,7 @@ android {
         minSdkVersion 19
         targetSdkVersion 34
         versionCode 20240210
+        multiDexEnabled true
         versionName "2.1.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
@@ -58,6 +59,10 @@ android {
 }
 
 dependencies {
+
+    def multidex_version = "2.0.1"
+    implementation "androidx.multidex:multidex:$multidex_version"
+
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     /*
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
