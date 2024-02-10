@@ -2,6 +2,7 @@ package io.r_a_d.radio2.streamerNotificationService
 
 import android.app.AlarmManager
 import android.app.PendingIntent
+import android.app.PendingIntent.FLAG_IMMUTABLE
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -23,22 +24,23 @@ fun startNextAlarmStreamer(c: Context){
     {
         val alarmIntent = Intent(c, StreamerMonitorService::class.java).let { intent ->
             intent.putExtra("action", Actions.NOTIFY.name)
-            PendingIntent.getService(c, 0, intent, 0)
+            PendingIntent.getService(c, 0, intent, FLAG_IMMUTABLE)
         }
 
         val alarmMgr = c.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-        when {
-            Build.VERSION.SDK_INT >= Build.VERSION_CODES.M -> alarmMgr.setExactAndAllowWhileIdle(
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
+        {
+            alarmMgr.setExactAndAllowWhileIdle(
+            AlarmManager.ELAPSED_REALTIME_WAKEUP,
+            SystemClock.elapsedRealtime() + WorkerStore.instance.tickerPeriod * 1000,
+            alarmIntent)
+        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            alarmMgr.setExact(
                 AlarmManager.ELAPSED_REALTIME_WAKEUP,
                 SystemClock.elapsedRealtime() + WorkerStore.instance.tickerPeriod * 1000,
-                alarmIntent
-            )
-            Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT -> alarmMgr.setExact(
-                AlarmManager.ELAPSED_REALTIME_WAKEUP,
-                SystemClock.elapsedRealtime() + WorkerStore.instance.tickerPeriod * 1000,
-                alarmIntent
-            )
-            else -> alarmMgr.set(
+                alarmIntent)
+        } else {
+                alarmMgr.set(
                 AlarmManager.ELAPSED_REALTIME_WAKEUP,
                 SystemClock.elapsedRealtime() + WorkerStore.instance.tickerPeriod * 1000,
                 alarmIntent

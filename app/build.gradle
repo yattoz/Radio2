@@ -4,7 +4,7 @@ apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
 apply plugin: 'kotlin-kapt'
 
-configurations.all {
+configurations.configureEach {
     resolutionStrategy.eachDependency { DependencyResolveDetails details ->
         def requested = details.requested
         if (requested.group == "androidx") {
@@ -16,21 +16,20 @@ configurations.all {
 }
 
 android {
-    compileSdkVersion 30
-    buildToolsVersion "29.0.2"
+    compileSdk 34
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility JavaVersion.VERSION_11
+        targetCompatibility JavaVersion.VERSION_11
     }
     kotlinOptions {
-        jvmTarget = "1.8"
+        jvmTarget = "11"
     }
     defaultConfig {
         applicationId "io.r_a_d.radio2"
-        minSdkVersion 16
-        targetSdkVersion 30
-        versionCode 16
-        versionName "2.0.0 RC4"
+        minSdkVersion 19
+        targetSdkVersion 34
+        versionCode 20240210
+        versionName "2.1.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
     }
@@ -64,8 +63,8 @@ dependencies {
 
      */
 
-    implementation "androidx.media:media:1.1.0"
-    implementation 'com.google.android.exoplayer:exoplayer:2.11.1'
+    implementation "androidx.media:media:1.5.0"
+    implementation 'com.google.android.exoplayer:exoplayer:2.12.2'
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
     implementation 'androidx.lifecycle:lifecycle-extensions:2.2.0'
     implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.2.0'
@@ -76,9 +75,7 @@ dependencies {
     // jsoup HTML parser library @ https://jsoup.org/
     // implementation 'org.jsoup:jsoup:1.12.1'
 
-    def work_version = "2.2.0"
-    //noinspection GradleDependency
-    implementation "androidx.work:work-runtime-ktx:$work_version"
+    implementation "androidx.work:work-runtime-ktx:2.8.0"
 
 
     // new implems

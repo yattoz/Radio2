@@ -2,6 +2,7 @@ package io.r_a_d.radio2.alarm
 
 import android.app.AlarmManager
 import android.app.PendingIntent
+import android.app.PendingIntent.FLAG_IMMUTABLE
 import android.content.Context
 import android.content.Intent
 import android.util.Log
@@ -34,11 +35,11 @@ class RadioSleeper {
     {
         sleepIntent = Intent(c, RadioService::class.java).let { intent ->
             intent.putExtra("action", Actions.KILL.name)
-            PendingIntent.getService(c, 99, intent, 0)
+            PendingIntent.getService(c, 99, intent, FLAG_IMMUTABLE)
         }
         fadeOutIntent = Intent(c, RadioService::class.java).let { intent ->
             intent.putExtra("action", Actions.FADE_OUT.name)
-            PendingIntent.getService(c, 98, intent, 0)
+            PendingIntent.getService(c, 98, intent, FLAG_IMMUTABLE)
         }
     }
 

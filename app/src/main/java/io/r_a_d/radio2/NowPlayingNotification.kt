@@ -36,7 +36,8 @@ class NowPlayingNotification(
         // got it right
         val delIntent = Intent(c, RadioService::class.java)
         delIntent.putExtra("action", Actions.KILL.name)
-        val deleteIntent = PendingIntent.getService(c, 0, delIntent, PendingIntent.FLAG_NO_CREATE)
+        val deleteIntent = PendingIntent.getService(c, 0, delIntent,
+            PendingIntent.FLAG_NO_CREATE or PendingIntent.FLAG_IMMUTABLE)
         builder.setDeleteIntent(deleteIntent)
 
         mediaStyle = androidx.media.app.NotificationCompat.DecoratedMediaCustomViewStyle().also {
@@ -71,21 +72,20 @@ class NowPlayingNotification(
 
         if (builder.mActions.isEmpty()) {
             val intent = Intent(c, RadioService::class.java)
-            val playPauseAction: NotificationCompat.Action
 
-            playPauseAction = if (PlayerStore.instance.playbackState.value == PlaybackStateCompat.STATE_PLAYING) {
+            val playPauseAction: NotificationCompat.Action = if (PlayerStore.instance.playbackState.value == PlaybackStateCompat.STATE_PLAYING) {
                 intent.putExtra("action", Actions.PAUSE.name)
-                val pendingButtonIntent = PendingIntent.getService(c, 1, intent, PendingIntent.FLAG_UPDATE_CURRENT)
+                val pendingButtonIntent = PendingIntent.getService(c, 1, intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
                 NotificationCompat.Action.Builder(R.drawable.ic_pause, "Pause", pendingButtonIntent).build()
             } else {
                 intent.putExtra("action", Actions.PLAY.name)
-                val pendingButtonIntent = PendingIntent.getService(c, 1, intent, PendingIntent.FLAG_UPDATE_CURRENT)
+                val pendingButtonIntent = PendingIntent.getService(c, 1, intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
                 NotificationCompat.Action.Builder(R.drawable.ic_play,"Play", pendingButtonIntent).build()
             }
             builder.addAction(playPauseAction)
             val intent2 = Intent(c, RadioService::class.java)
             intent2.putExtra("action", Actions.KILL.name)
-            val pendingButtonIntent = PendingIntent.getService(c, 2, intent2, PendingIntent.FLAG_UPDATE_CURRENT)
+            val pendingButtonIntent = PendingIntent.getService(c, 2, intent2, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
             val stopAction = NotificationCompat.Action.Builder(R.drawable.ic_close,"Stop", pendingButtonIntent).build()
             builder.addAction(stopAction)
 
@@ -95,7 +95,7 @@ class NowPlayingNotification(
 
                 val snoozeIntent = Intent(c, RadioService::class.java)
                 snoozeIntent.putExtra("action", Actions.SNOOZE.name)
-                val pendingSnoozeIntent = PendingIntent.getService(c, 5, snoozeIntent, PendingIntent.FLAG_UPDATE_CURRENT)
+                val pendingSnoozeIntent = PendingIntent.getService(c, 5, snoozeIntent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
                 val snoozeAction = NotificationCompat.Action.Builder(R.drawable.ic_alarm, "Snooze ($snoozeMinutes min.)", pendingSnoozeIntent ).build()
                 if (snoozeMinutes > 0)
                     builder.addAction(snoozeAction)

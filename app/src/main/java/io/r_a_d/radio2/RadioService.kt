@@ -1,10 +1,12 @@
 package io.r_a_d.radio2
 
+import android.annotation.SuppressLint
 import android.app.Service
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK
 import android.graphics.Bitmap
 import android.support.v4.media.MediaBrowserCompat
 import android.util.Log
@@ -186,6 +188,7 @@ class RadioService : MediaBrowserServiceCompat() {
         return BrowserRoot(getString(R.string.MEDIA_ROOT_ID), null)
     }
 
+    @SuppressLint("ForegroundServiceType")
     override fun onCreate() {
         super.onCreate()
 
@@ -193,7 +196,7 @@ class RadioService : MediaBrowserServiceCompat() {
 
         // Define managers
         telephonyManager = getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
-        telephonyManager?.listen(phoneStateListener, PhoneStateListener.LISTEN_CALL_STATE)
+        // telephonyManager?.listen(phoneStateListener, PhoneStateListener.LISTEN_CALL_STATE)
         audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
 
         //define the audioFocusRequest
@@ -232,7 +235,18 @@ class RadioService : MediaBrowserServiceCompat() {
         PlayerStore.instance.isMuted.observeForever(isMutedObserver)
         PlayerStore.instance.streamerPicture.observeForever(streamerPictureObserver)
 
-        startForeground(radioServiceId, nowPlayingNotification.notification)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+            startForeground(
+                radioServiceId,
+                nowPlayingNotification.notification,
+                FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK
+            )
+        } else {
+            startForeground(
+                radioServiceId,
+                nowPlayingNotification.notification
+            )
+        }
 
         // start ticker for when the player is stopped
         val periodString = PreferenceManager.getDefaultSharedPreferences(this).getString("fetchPeriod", "10") ?: "10"
@@ -340,6 +354,7 @@ class RadioService : MediaBrowserServiceCompat() {
     private lateinit var audioFocusRequest: AudioFocusRequestCompat
 
     private val phoneStateListener = object : PhoneStateListener() {
+        @Deprecated("Deprecated in Java")
         override fun onCallStateChanged(state: Int, incomingNumber: String) {
             super.onCallStateChanged(state, incomingNumber)
 
@@ -516,6 +531,10 @@ class RadioService : MediaBrowserServiceCompat() {
         if (result != AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
             return
         }
+        if (mediaSession.controller.playbackState.state == PlaybackStateCompat.STATE_PLAYING && !isRinging && isAlarmStopped)
+        {
+            return //nothing to do here
+        }
 
         PlayerStore.instance.playbackState.value = PlaybackStateCompat.STATE_PLAYING
 
@@ -531,6 +550,8 @@ class RadioService : MediaBrowserServiceCompat() {
             player.repeatMode = ExoPlayer.REPEAT_MODE_OFF
         }
 
+        // START PLAYBACK, LET'S ROCK
+        player.playWhenReady = true
         nowPlayingNotification.update(this, isUpdatingNotificationButton =  true, isRinging = isRinging)
 
         playbackStateBuilder.setState(
@@ -540,8 +561,7 @@ class RadioService : MediaBrowserServiceCompat() {
             SystemClock.elapsedRealtime()
         )
         mediaSession.setPlaybackState(playbackStateBuilder.build())
-        // START PLAYBACK, LET'S ROCK
-        player.playWhenReady = true
+
 
         Log.d(tag, radioTag + "begin playing")
     }

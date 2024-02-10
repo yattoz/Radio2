@@ -48,6 +48,7 @@ class Async(val handler: (Any?) -> Any?, val post: (Any?) -> Unit = {},
         Log.d(tag, "fallback for no network. Store reset : $storeReset")
     }
 
+    @Deprecated("Deprecated in Java")
     override fun doInBackground(vararg params: Any?): Any? {
         try {
             return handler(parameters)
@@ -58,6 +59,7 @@ class Async(val handler: (Any?) -> Any?, val post: (Any?) -> Unit = {},
         return null
     }
 
+    @Deprecated("Deprecated in Java")
     override fun onPostExecute(result: Any?) {
         try {
             post(result)

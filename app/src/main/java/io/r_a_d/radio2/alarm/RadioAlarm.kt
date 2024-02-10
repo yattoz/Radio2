@@ -2,10 +2,15 @@ package io.r_a_d.radio2.alarm
 
 import android.app.AlarmManager
 import android.app.PendingIntent
+import android.app.PendingIntent.FLAG_IMMUTABLE
 import android.content.Context
 import android.content.Intent
+import android.os.Build
+import android.provider.Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM
 import android.util.Log
 import androidx.core.app.AlarmManagerCompat
+import androidx.core.content.ContentProviderCompat.requireContext
+import androidx.core.content.ContextCompat
 import io.r_a_d.radio2.BootBroadcastReceiver
 import androidx.preference.PreferenceManager
 import io.r_a_d.radio2.*
@@ -27,11 +32,11 @@ class RadioAlarm {
     {
         alarmIntent = Intent(c, BootBroadcastReceiver::class.java).let { intent ->
             intent.putExtra("action", "$tag.${Actions.PLAY_OR_FALLBACK.name}")
-            PendingIntent.getBroadcast(c, 0, intent, 0)
+            PendingIntent.getBroadcast(c, 0, intent, FLAG_IMMUTABLE)
         }
         showIntent = Intent(c, ParametersActivity::class.java).let { intent ->
             intent.putExtra("action", "alarm")
-            PendingIntent.getActivity(c, 0, intent, 0)
+            PendingIntent.getActivity(c, 0, intent, FLAG_IMMUTABLE)
         }
     }
 
@@ -45,6 +50,16 @@ class RadioAlarm {
 
     fun setNextAlarm(c: Context, isForce: Boolean = false, forceTime: Int? = null, forceDays: Set<String>? = null)
     {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            val alarmManager = c.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+            if (!alarmManager.canScheduleExactAlarms()) {
+                Intent().also { intent ->
+                    intent.action = ACTION_REQUEST_SCHEDULE_EXACT_ALARM
+                    c.startActivity(intent)
+                }
+            }
+        }
+
         defineIntents(c)
         // don't do anything if the preference is set to FALSE, of course.
         if (!PreferenceManager.getDefaultSharedPreferences(c).getBoolean("isWakingUp", false) && !isForce)
@@ -54,7 +69,7 @@ class RadioAlarm {
 
         val showIntent = Intent(c, ParametersActivity::class.java).let { intent ->
             intent.putExtra("action", ActionOpenParam.ALARM.name)
-            PendingIntent.getActivity(c, 0, intent, 0)
+            PendingIntent.getActivity(c, 0, intent, FLAG_IMMUTABLE)
         }
         val time = findNextAlarmTime(c, forceTime, forceDays)
         if (time > 0)

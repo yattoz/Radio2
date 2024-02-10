@@ -58,7 +58,7 @@ abstract class BaseNotification(private val notificationChannelId: String,
         // thanks to the launchMode specified in the Manifest : android:launchMode="singleTop"
         val pendingIntent = PendingIntent.getActivity(
             c, 0,
-            notificationIntent, 0
+            notificationIntent, PendingIntent.FLAG_IMMUTABLE
         )
         var channelID = ""
 
