@@ -28,7 +28,7 @@ class NowPlayingNotification(
     // ###### NOW PLAYING NOTIFICATION ########
     // ########################################
 
-    private lateinit var mediaStyle: androidx.media.app.NotificationCompat.DecoratedMediaCustomViewStyle
+    private lateinit var mediaStyle: androidx.media.app.NotificationCompat.MediaStyle
 
     fun create(c: Context, m: MediaSessionCompat) {
         super.create(c)
@@ -40,17 +40,17 @@ class NowPlayingNotification(
             PendingIntent.FLAG_NO_CREATE or PendingIntent.FLAG_IMMUTABLE)
         builder.setDeleteIntent(deleteIntent)
 
-        mediaStyle = androidx.media.app.NotificationCompat.DecoratedMediaCustomViewStyle().also {
+        mediaStyle = androidx.media.app.NotificationCompat.MediaStyle().also {
             it.setMediaSession(m.sessionToken)
             it.setShowActionsInCompactView(0, 1) // index 0 = show actions 0 and 1 (show action #0 (play/pause))
             it.setCancelButtonIntent(deleteIntent)
         }
         builder.setStyle(mediaStyle)
-        update(c)
+        update(c, mediaSession = m)
     }
 
     @SuppressLint("RestrictedApi")
-    fun update(c: Context, isUpdatingNotificationButton: Boolean = false, isRinging: Boolean = false) {
+    fun update(c: Context, isUpdatingNotificationButton: Boolean = false, isRinging: Boolean = false, mediaSession: MediaSessionCompat) {
 
         if (isUpdatingNotificationButton)
             builder.mActions.clear()
@@ -101,7 +101,12 @@ class NowPlayingNotification(
                     builder.addAction(snoozeAction)
                 builder.setStyle(NotificationCompat.DecoratedCustomViewStyle())
             } else {
+
+                mediaStyle = androidx.media.app.NotificationCompat.MediaStyle().also {
+                    it.setMediaSession(mediaSession.sessionToken)
+                }
                 builder.setStyle(mediaStyle)
+
             }
         }
         builder.setLargeIcon(PlayerStore.instance.streamerPicture.value)

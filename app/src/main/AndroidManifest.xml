@@ -46,7 +46,8 @@
         <service android:name=".streamerNotificationService.StreamerMonitorService"
             android:enabled="true"
             android:exported="true"
-            android:foregroundServiceType="specialUse">
+            android:foregroundServiceType="specialUse"
+            android:permission="notification">
             <property android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE" android:value="NewStreamerPollingService"/>
         </service>
 
