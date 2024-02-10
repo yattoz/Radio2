@@ -4,6 +4,7 @@ import android.os.Bundle
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import androidx.navigation.ui.setupActionBarWithNavController
 import android.content.Intent
+import android.os.Build
 import android.os.PersistableBundle
 import android.util.Log
 import android.view.Menu
@@ -16,6 +17,7 @@ import io.r_a_d.radio2.playerstore.PlayerStore
 
 import java.util.Timer
 import android.view.MenuItem
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.preference.PreferenceManager
 import com.google.android.material.snackbar.Snackbar
 import io.r_a_d.radio2.alarm.RadioAlarm
@@ -203,6 +205,14 @@ class MainActivity : BaseActivity() {
             i.putExtra("value", v)
             Log.d(tag, "Sending intent ${a.name}")
             startService(i)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            val launcher = registerForActivityResult(
+                ActivityResultContracts.RequestPermission()
+            ) { isGranted: Boolean? ->
+                val notificationGranted = isGranted == true
+            }
+            launcher.launch(android.Manifest.permission.POST_NOTIFICATIONS)
+        }
     }
 
 
