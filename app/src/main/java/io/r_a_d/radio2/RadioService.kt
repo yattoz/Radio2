@@ -12,6 +12,7 @@ import android.support.v4.media.MediaBrowserCompat
 import android.util.Log
 import androidx.media.MediaBrowserServiceCompat
 import android.media.AudioManager
+import android.media.session.PlaybackState
 import android.os.*
 import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.media.session.PlaybackStateCompat
@@ -32,12 +33,20 @@ import androidx.media.AudioAttributesCompat
 import androidx.media.AudioFocusRequestCompat
 import androidx.media.AudioManagerCompat
 import androidx.preference.PreferenceManager
-import com.google.android.exoplayer2.*
-import com.google.android.exoplayer2.metadata.icy.*
+import com.google.android.exoplayer2.C
+import com.google.android.exoplayer2.DefaultLoadControl
+import com.google.android.exoplayer2.ExoPlayer
+import com.google.android.exoplayer2.MediaItem
+import com.google.android.exoplayer2.Player
+import com.google.android.exoplayer2.audio.AudioAttributes
+import com.google.android.exoplayer2.metadata.icy.IcyHeaders
+import com.google.android.exoplayer2.metadata.icy.IcyInfo
 import com.google.android.exoplayer2.trackselection.DefaultTrackSelector
 import io.r_a_d.radio2.alarm.RadioAlarm
 import io.r_a_d.radio2.alarm.RadioSleeper
 import io.r_a_d.radio2.playerstore.PlayerStore
+import java.lang.Boolean.FALSE
+import java.lang.Boolean.TRUE
 import java.util.*
 import kotlin.math.exp
 import kotlin.math.ln
@@ -142,7 +151,7 @@ class RadioService : MediaBrowserServiceCompat() {
         val d = (PlayerStore.instance.currentSong.stopTime.value ?: 0) - (PlayerStore.instance.currentSong.startTime.value ?: 0)
         val duration = d
 
-        Log.d(radioTag, "picture observer, duration: $duration, playbackpos = ${mediaSession.controller.playbackState.position}")
+        Log.d(radioTag, "picture observer, duration: $duration, playbackpos = ${mediaSession.controller.playbackState?.position}")
         metadataBuilder
             .putString(MediaMetadataCompat.METADATA_KEY_TITLE, PlayerStore.instance.currentSong.title.value)
             .putString(MediaMetadataCompat.METADATA_KEY_ARTIST, PlayerStore.instance.currentSong.artist.value)
@@ -421,7 +430,9 @@ class RadioService : MediaBrowserServiceCompat() {
     private lateinit var mediaSession : MediaSessionCompat
     private lateinit var playbackStateBuilder: PlaybackStateCompat.Builder
     private lateinit var metadataBuilder: MediaMetadataCompat.Builder
-    private lateinit var player: SimpleExoPlayer
+    private lateinit var player: ExoPlayer
+    private lateinit var streamMediaItem: MediaItem
+    private lateinit var fallbackMediaItem: MediaItem
     private lateinit var radioMediaSource: ProgressiveMediaSource
     private lateinit var fallbackMediaSource: ProgressiveMediaSource
 
@@ -435,11 +446,15 @@ class RadioService : MediaBrowserServiceCompat() {
 
         val loadControl = DefaultLoadControl.Builder().apply {
             setBufferDurationsMs(minBufferMillis, maxBufferMillis, bufferForPlayback, bufferForPlaybackAfterRebuffer)
-        }.createDefaultLoadControl()
+        }.build()
 
-        val playerBuilder = SimpleExoPlayer.Builder(this)
+        val playerBuilder = ExoPlayer.Builder(this)
         playerBuilder.setLoadControl(loadControl)
         player = playerBuilder.build()
+
+        /*
+        // TODO: re-enable this part, when you understand how to use the Listener instead of addMetadataOutput
+
         player.addMetadataOutput {
             for (i in 0 until it.length()) {
                 val entry  = it.get(i)
@@ -475,6 +490,7 @@ class RadioService : MediaBrowserServiceCompat() {
                 sendBroadcast(intent)
             }
         }
+         */
         // this listener allows to reset numberOfSongs if the connection is lost.
         player.addListener(exoPlayerEventListener)
 
@@ -485,16 +501,16 @@ class RadioService : MediaBrowserServiceCompat() {
         )
         // This is the MediaSource representing the media to be played.
         radioMediaSource = ProgressiveMediaSource.Factory(dataSourceFactory)
-            .createMediaSource(Uri.parse(getString(R.string.STREAM_URL_RADIO)))
+            .createMediaSource(MediaItem.fromUri(getString(R.string.STREAM_URL_RADIO)))
 
         fallbackMediaSource = ProgressiveMediaSource.Factory(dataSourceFactory)
-            .createMediaSource(Uri.parse("file:///android_asset/tear_rain_no_internet_connection.ogg"))
+            .createMediaSource(MediaItem.fromUri("file:///android_asset/tear_rain_no_internet_connection.ogg"))
     }
 
     private fun createMediaSession() {
         mediaSession = MediaSessionCompat(this, "RadioMediaSession")
         // Deprecated flags
-        // mediaSession.setFlags(MediaSessionCompat.FLAG_HANDLES_TRANSPORT_CONTROLS and MediaSessionCompat.FLAG_HANDLES_MEDIA_BUTTONS)
+        // mediaSession.setFlags(MediaSession.FLAG_HANDLES_TRANSPORT_CONTROLS and MediaSession.FLAG_HANDLES_MEDIA_BUTTONS)
         mediaSession.isActive = true
         mediaSession.setCallback(mediaSessionCallback)
         playbackStateBuilder = PlaybackStateCompat.Builder()
@@ -549,21 +565,23 @@ class RadioService : MediaBrowserServiceCompat() {
             audioAttributes.setUsage(AudioAttributesCompat.USAGE_ALARM)
             audioFocusRequestBuilder.setAudioAttributes(audioAttributes.build())
             audioFocusRequest = audioFocusRequestBuilder.build()
-            player.audioAttributes = com.google.android.exoplayer2.audio.AudioAttributes
+            val audioAttributes2 = AudioAttributes
                 .Builder()
                 .setContentType(C.CONTENT_TYPE_MUSIC)
                 .setUsage(C.USAGE_ALARM)
                 .build()
+            player.setAudioAttributes(audioAttributes2, FALSE)
         } else {
             isAlarmStopped = true // if we're not ringing and it tries playing, it means the user opened the app somehow
             audioAttributes.setUsage(AudioAttributesCompat.USAGE_MEDIA)
             audioFocusRequestBuilder.setAudioAttributes(audioAttributes.build())
             audioFocusRequest = audioFocusRequestBuilder.build()
-            player.audioAttributes = com.google.android.exoplayer2.audio.AudioAttributes
+            val audioAttributes2 = AudioAttributes
                 .Builder()
                 .setContentType(C.CONTENT_TYPE_MUSIC)
                 .setUsage(C.USAGE_MEDIA)
                 .build()
+            player.setAudioAttributes(audioAttributes2, FALSE)
         }
         // the old requestAudioFocus is deprecated on API26+. Using AudioManagerCompat library for consistent code across versions
         val result = AudioManagerCompat.requestAudioFocus(audioManager, audioFocusRequest)
@@ -699,7 +717,7 @@ class RadioService : MediaBrowserServiceCompat() {
         }
     }
 
-    private val exoPlayerEventListener = object : Player.EventListener {
+    private val exoPlayerEventListener = object : Player.Listener {
         override fun onPlayerStateChanged(playWhenReady: Boolean, playbackState: Int) {
             super.onPlayerStateChanged(playWhenReady, playbackState)
             numberOfSongs = 0
@@ -719,7 +737,7 @@ class RadioService : MediaBrowserServiceCompat() {
                 Player.STATE_ENDED -> state = "Player.STATE_ENDED"
                 Player.STATE_READY -> state = "Player.STATE_READY"
             }
-            Log.d(tag, radioTag + "Player changed state: ${state}. numberOfSongs reset.")
+            Log.d(tag, radioTag + "Player changed state: ${state}. numberOfSongs reset. PlayWhenReady=${playWhenReady}")
         }
     }
 

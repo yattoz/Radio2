@@ -312,9 +312,9 @@ class NowPlayingFragment : Fragment() {
         val img = v.findViewById<ImageButton>(R.id.play_pause)
 
         if (PlayerStore.instance.playbackState.value == PlaybackStateCompat.STATE_STOPPED) {
-            img.setImageResource(R.drawable.exo_controls_play)
+            img.setImageResource(R.drawable.ic_play)
         } else {
-            img.setImageResource(R.drawable.exo_controls_pause)
+            img.setImageResource(R.drawable.ic_pause)
         }
     }
 }
