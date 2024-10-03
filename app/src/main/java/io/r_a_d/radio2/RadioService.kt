@@ -8,23 +8,15 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK
 import android.graphics.Bitmap
-import android.support.v4.media.MediaBrowserCompat
-import android.util.Log
-import androidx.media.MediaBrowserServiceCompat
 import android.media.AudioManager
-import android.media.session.PlaybackState
 import android.os.*
+import android.support.v4.media.MediaBrowserCompat
+import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.media.session.PlaybackStateCompat
-import androidx.media.session.MediaButtonReceiver
-import com.google.android.exoplayer2.source.ProgressiveMediaSource
-import com.google.android.exoplayer2.util.Util.getUserAgent
-import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory
-
-import android.net.Uri
-import android.support.v4.media.MediaMetadataCompat
 import android.telephony.PhoneStateListener
 import android.telephony.TelephonyManager
+import android.util.Log
 import android.view.KeyEvent
 import androidx.core.app.NotificationCompat
 import androidx.core.content.edit
@@ -32,21 +24,28 @@ import androidx.lifecycle.Observer
 import androidx.media.AudioAttributesCompat
 import androidx.media.AudioFocusRequestCompat
 import androidx.media.AudioManagerCompat
+import androidx.media.MediaBrowserServiceCompat
+import androidx.media.session.MediaButtonReceiver
 import androidx.preference.PreferenceManager
 import com.google.android.exoplayer2.C
 import com.google.android.exoplayer2.DefaultLoadControl
 import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.MediaItem
+import com.google.android.exoplayer2.MediaMetadata
 import com.google.android.exoplayer2.Player
+import com.google.android.exoplayer2.Tracks
 import com.google.android.exoplayer2.audio.AudioAttributes
+import com.google.android.exoplayer2.metadata.Metadata
 import com.google.android.exoplayer2.metadata.icy.IcyHeaders
 import com.google.android.exoplayer2.metadata.icy.IcyInfo
-import com.google.android.exoplayer2.trackselection.DefaultTrackSelector
+import com.google.android.exoplayer2.source.ProgressiveMediaSource
+import com.google.android.exoplayer2.source.TrackGroup
+import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory
+import com.google.android.exoplayer2.util.Util.getUserAgent
 import io.r_a_d.radio2.alarm.RadioAlarm
 import io.r_a_d.radio2.alarm.RadioSleeper
 import io.r_a_d.radio2.playerstore.PlayerStore
 import java.lang.Boolean.FALSE
-import java.lang.Boolean.TRUE
 import java.util.*
 import kotlin.math.exp
 import kotlin.math.ln
@@ -452,45 +451,6 @@ class RadioService : MediaBrowserServiceCompat() {
         playerBuilder.setLoadControl(loadControl)
         player = playerBuilder.build()
 
-        /*
-        // TODO: re-enable this part, when you understand how to use the Listener instead of addMetadataOutput
-
-        player.addMetadataOutput {
-            for (i in 0 until it.length()) {
-                val entry  = it.get(i)
-                if (entry is IcyHeaders) {
-                    Log.d(tag, radioTag + "onMetadata: IcyHeaders $entry")
-                }
-                if (entry is IcyInfo) {
-                    Log.d(tag, radioTag + "onMetadata: Title ----> ${entry.title}")
-                    // Note : Kotlin supports UTF-8 by default.
-                    numberOfSongs++
-                    val data = entry.title!!
-                    PlayerStore.instance.currentSong.setTitleArtist(data)
-                }
-                val d : Long = ((PlayerStore.instance.currentSong.stopTime.value?.minus(PlayerStore.instance.currentSong.startTime.value!!) ?: 0) / 1000)
-                val duration = if (d > 0) d - (PlayerStore.instance.latencyCompensator) else 0
-                metadataBuilder.putString(
-                    MediaMetadataCompat.METADATA_KEY_TITLE,
-                    PlayerStore.instance.currentSong.title.value
-                )
-                    .putString(MediaMetadataCompat.METADATA_KEY_ARTIST, PlayerStore.instance.currentSong.artist.value)
-                    .putLong(MediaMetadataCompat.METADATA_KEY_DURATION, duration)
-                    .putString(MediaMetadataCompat.METADATA_KEY_TITLE, PlayerStore.instance.currentSong.title.value)
-                    .putString(MediaMetadataCompat.METADATA_KEY_MEDIA_ID, "id" + Random().nextInt(999))
-                    .putBitmap(MediaMetadataCompat.METADATA_KEY_ALBUM_ART, PlayerStore.instance.streamerPicture.value)
-
-                mediaSession.setMetadata(metadataBuilder.build())
-
-                val intent = Intent("com.android.music.metachanged")
-                intent.putExtra("artist", PlayerStore.instance.currentSong.artist.value)
-                intent.putExtra("track", PlayerStore.instance.currentSong.title.value)
-                intent.putExtra("duration", duration)
-                intent.putExtra("position", 0)
-                sendBroadcast(intent)
-            }
-        }
-         */
         // this listener allows to reset numberOfSongs if the connection is lost.
         player.addListener(exoPlayerEventListener)
 
@@ -718,6 +678,51 @@ class RadioService : MediaBrowserServiceCompat() {
     }
 
     private val exoPlayerEventListener = object : Player.Listener {
+        // player.addMetadataOutput
+        override fun onMediaMetadataChanged(mediaMetadata: MediaMetadata) {
+            super.onMediaMetadataChanged(mediaMetadata)
+
+            // for (i in 0 until it.length()) {
+                // val entry  = it.get(i)
+                val entry =  mediaMetadata
+                numberOfSongs++
+                val data = entry.title
+            if (data != null)
+            {
+                PlayerStore.instance.currentSong.setTitleArtist(data.toString())
+                val d : Long = ((PlayerStore.instance.currentSong.stopTime.value?.minus(PlayerStore.instance.currentSong.startTime.value!!) ?: 0) / 1000)
+                val duration = if (d > 0) d - (PlayerStore.instance.latencyCompensator) else 0
+                metadataBuilder.putString(
+                    MediaMetadataCompat.METADATA_KEY_TITLE,
+                    PlayerStore.instance.currentSong.title.value
+                )
+                    .putString(MediaMetadataCompat.METADATA_KEY_ARTIST, PlayerStore.instance.currentSong.artist.value)
+                    .putLong(MediaMetadataCompat.METADATA_KEY_DURATION, duration)
+                    .putString(MediaMetadataCompat.METADATA_KEY_TITLE, PlayerStore.instance.currentSong.title.value)
+                    .putString(MediaMetadataCompat.METADATA_KEY_MEDIA_ID, "id" + Random().nextInt(999))
+                    .putBitmap(MediaMetadataCompat.METADATA_KEY_ALBUM_ART, PlayerStore.instance.streamerPicture.value)
+
+                mediaSession.setMetadata(metadataBuilder.build())
+
+                val intent = Intent("com.android.music.metachanged")
+                intent.putExtra("artist", PlayerStore.instance.currentSong.artist.value)
+                intent.putExtra("track", PlayerStore.instance.currentSong.title.value)
+                intent.putExtra("duration", duration)
+                intent.putExtra("position", 0)
+                sendBroadcast(intent)
+            }
+
+        }
+
+        override fun onMetadata(metadata: Metadata) {
+            super.onMetadata(metadata)
+        }
+
+        override fun onTracksChanged(tracks: Tracks) {
+            super.onTracksChanged(tracks)
+        }
+
+        @Deprecated("Deprecated in Java")
         override fun onPlayerStateChanged(playWhenReady: Boolean, playbackState: Int) {
             super.onPlayerStateChanged(playWhenReady, playbackState)
             numberOfSongs = 0
