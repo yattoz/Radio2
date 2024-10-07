@@ -43,9 +43,9 @@ android {
         applicationId "io.r_a_d.radio2"
         minSdkVersion 22
         targetSdkVersion 35
-        versionCode 24100303
+        versionCode 24100701
         multiDexEnabled true
-        versionName "2.3.2"
+        versionName "2.3.3"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
     }
