@@ -5,9 +5,6 @@ apply plugin: 'kotlin-android-extensions'
 apply plugin: 'kotlin-kapt'
 
 
-def keystorePropertiesFile = rootProject.file("keystore.properties");
-def keystoreProperties = new Properties()
-keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
 
 configurations.configureEach {
     resolutionStrategy.eachDependency { DependencyResolveDetails details ->
@@ -24,6 +21,9 @@ android {
     namespace = "io.r_a_d.radio2"
     signingConfigs {
         production {
+            def keystorePropertiesFile = rootProject.file("keystore.properties")
+            def keystoreProperties = new Properties()
+            keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
             storeFile file(rootProject.projectDir.absolutePath + keystoreProperties['storeFile'])
             storePassword keystoreProperties['storePassword']
             keyAlias keystoreProperties['keyAlias']
