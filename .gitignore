@@ -1,6 +1,7 @@
 # Gradle files
 .gradle/
 gradle/*
+gradle*
 build/
 
 # vscode
