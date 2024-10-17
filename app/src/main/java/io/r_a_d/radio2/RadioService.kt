@@ -150,7 +150,7 @@ class RadioService : MediaBrowserServiceCompat() {
         val d = (PlayerStore.instance.currentSong.stopTime.value ?: 0) - (PlayerStore.instance.currentSong.startTime.value ?: 0)
         val duration = d
 
-        Log.d(radioTag, "picture observer, duration: $duration, playbackpos = ${mediaSession.controller.playbackState?.position}")
+        Log.d(tag, radioTag + "picture observer, duration: $duration, playbackpos = ${mediaSession.controller.playbackState?.position}")
         metadataBuilder
             .putString(MediaMetadataCompat.METADATA_KEY_TITLE, PlayerStore.instance.currentSong.title.value)
             .putString(MediaMetadataCompat.METADATA_KEY_ARTIST, PlayerStore.instance.currentSong.artist.value)
@@ -317,8 +317,10 @@ class RadioService : MediaBrowserServiceCompat() {
 
         if (MediaButtonReceiver.handleIntent(mediaSession, intent) != null)
             return super.onStartCommand(intent, flags, startId)
+        val action: String = intent.getStringExtra("action")!!
+        Log.d(tag, radioTag + "intent received : " + action)
 
-        when (intent.getStringExtra("action")) {
+        when (action) {
             Actions.PLAY.name -> beginPlaying()
             Actions.STOP.name -> { setVolume(PlayerStore.instance.volume.value); stopPlaying() } // setVolume is here to reset the volume to the user's preference when the alarm (that sets volume to 100) is dismissed
             Actions.PAUSE.name -> { setVolume(PlayerStore.instance.volume.value); pausePlaying() }
@@ -340,7 +342,6 @@ class RadioService : MediaBrowserServiceCompat() {
             Actions.CANCEL_FADE_OUT.name -> { handler.removeCallbacks(lowerVolumeRunnable) }
             Actions.SNOOZE.name -> { RadioAlarm.instance.snooze(this) }
         }
-        Log.d(tag, radioTag + "intent received : " + intent.getStringExtra("action"))
         super.onStartCommand(intent, flags, startId)
         // The service must be re-created if it is destroyed by the system. This allows the user to keep actions like Bluetooth and headphones plug available.
         return START_STICKY
@@ -439,9 +440,9 @@ class RadioService : MediaBrowserServiceCompat() {
 
         val minBufferMillis = 15 * 1000 // Default value
         val maxBufferMillis = 50 * 1000 // Default value
-        val bufferForPlayback = 4 * 1000 // Default is 2.5s.
+        val bufferForPlayback = 3 * 1000 // Default is 2.5s.
         // Increasing it makes it more robust to short connection loss, at the expense of latency when we press Play. 4s seems reasonable to me.
-        val bufferForPlaybackAfterRebuffer = 7 * 1000 // Default is 5s.
+        val bufferForPlaybackAfterRebuffer = 5 * 1000 // Default is 5s.
 
         val loadControl = DefaultLoadControl.Builder().apply {
             setBufferDurationsMs(minBufferMillis, maxBufferMillis, bufferForPlayback, bufferForPlaybackAfterRebuffer)
@@ -492,7 +493,7 @@ class RadioService : MediaBrowserServiceCompat() {
         beginPlaying(isRinging = true, isFallback = false)
         val wait: (Any?) -> Any = {
             /*
-            Here we lower the isAlarmStopped flag and we wait for 17s. (seems like 12 could be a bit too short since I increased the buffer!!)
+            Here we lower the isAlarmStopped flag and we wait for 17s. (seems like 12 could be a bit too short hence I increased the buffer!!)
             If the user stops the alarm (by calling an intent), the isAlarmStopped flag will be raised.
              */
             isAlarmStopped = false // reset the flag
@@ -501,6 +502,7 @@ class RadioService : MediaBrowserServiceCompat() {
             {
                 Thread.sleep(1000)
                 i++
+                Log.d(tag, radioTag + "Alarm mode: sleeping ${i} seconds...")
             }
         }
         val post: (Any?) -> Unit = {
@@ -516,6 +518,7 @@ class RadioService : MediaBrowserServiceCompat() {
     fun beginPlaying(isRinging: Boolean = false, isFallback: Boolean = false)
     {
         //define the audioFocusRequest
+        Log.d(tag, radioTag + " - Begin Playing")
         val audioFocusRequestBuilder = AudioFocusRequestCompat.Builder(AudioManagerCompat.AUDIOFOCUS_GAIN)
         audioFocusRequestBuilder.setOnAudioFocusChangeListener(focusChangeListener)
         val audioAttributes = AudioAttributesCompat.Builder()
@@ -527,7 +530,7 @@ class RadioService : MediaBrowserServiceCompat() {
             audioFocusRequest = audioFocusRequestBuilder.build()
             val audioAttributes2 = AudioAttributes
                 .Builder()
-                .setContentType(C.CONTENT_TYPE_MUSIC)
+                .setContentType(C.AUDIO_CONTENT_TYPE_MUSIC)
                 .setUsage(C.USAGE_ALARM)
                 .build()
             player.setAudioAttributes(audioAttributes2, FALSE)
@@ -538,22 +541,31 @@ class RadioService : MediaBrowserServiceCompat() {
             audioFocusRequest = audioFocusRequestBuilder.build()
             val audioAttributes2 = AudioAttributes
                 .Builder()
-                .setContentType(C.CONTENT_TYPE_MUSIC)
+                .setContentType(C.AUDIO_CONTENT_TYPE_MUSIC)
                 .setUsage(C.USAGE_MEDIA)
                 .build()
             player.setAudioAttributes(audioAttributes2, FALSE)
         }
+        Log.d(tag, "$radioTag - set attributes to player, isRingin = $isRinging")
+
         // the old requestAudioFocus is deprecated on API26+. Using AudioManagerCompat library for consistent code across versions
         val result = AudioManagerCompat.requestAudioFocus(audioManager, audioFocusRequest)
-        if (result != AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
+        if (result != AudioManager.AUDIOFOCUS_REQUEST_GRANTED && !isRinging) {
+            Log.d(tag,
+                "$radioTag - Audiofocus request has been granted (some other process required audio?). Stopping beingPlaying early."
+            )
             return
         }
         if (mediaSession.controller.playbackState.state == PlaybackStateCompat.STATE_PLAYING && !isRinging && isAlarmStopped)
         {
+            Log.d(tag,
+                "$radioTag - Radio is playing, isRingin = $isRinging and isAlarmStopped = $isAlarmStopped . Stopping beingPlaying early."
+            )
             return //nothing to do here
         }
 
         PlayerStore.instance.playbackState.value = PlaybackStateCompat.STATE_PLAYING
+        Log.d(tag, "$radioTag - Setting playback state to STATE_PLAYING.")
 
         // Reinitialize media player. Otherwise the playback doesn't resume when beginPlaying. Dunno why.
         // Prepare the player with the source.
@@ -561,14 +573,19 @@ class RadioService : MediaBrowserServiceCompat() {
         {
             player.prepare(fallbackMediaSource)
             player.repeatMode = ExoPlayer.REPEAT_MODE_ALL
+            Log.d(tag,
+                "$radioTag - no connection found: playing fallback audio, setting the play mode to repeat"
+            )
         }
         else {
             player.prepare(radioMediaSource)
             player.repeatMode = ExoPlayer.REPEAT_MODE_OFF
+
         }
 
         // START PLAYBACK, LET'S ROCK
         player.playWhenReady = true
+        Log.d(tag, "$radioTag Play when ready = true")
         nowPlayingNotification.update(this, isUpdatingNotificationButton =  true, isRinging = isRinging, mediaSession = mediaSession)
 
         playbackStateBuilder.setState(
