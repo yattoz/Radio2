@@ -5,6 +5,7 @@ import android.app.PendingIntent
 import android.app.PendingIntent.FLAG_IMMUTABLE
 import android.content.Context
 import android.content.Intent
+import android.content.Intent.FLAG_ACTIVITY_NEW_TASK
 import android.os.Build
 import android.provider.Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM
 import android.util.Log
@@ -55,6 +56,7 @@ class RadioAlarm {
             if (!alarmManager.canScheduleExactAlarms()) {
                 Intent().also { intent ->
                     intent.action = ACTION_REQUEST_SCHEDULE_EXACT_ALARM
+                    intent.flags = FLAG_ACTIVITY_NEW_TASK
                     c.startActivity(intent)
                 }
             }
