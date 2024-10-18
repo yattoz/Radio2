@@ -32,4 +32,8 @@
         app:showAsAction="never"/>
 
 
+    <item android:id="@+id/action_kill"
+        android:title="@string/action_kill"
+        app:showAsAction="never"/>
+
 </menu>

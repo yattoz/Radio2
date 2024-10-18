@@ -106,6 +106,12 @@ class MainActivity : BaseActivity() {
                 startActivity(i)
                 true
             }
+            R.id.action_kill -> {
+                val i = Intent(this, RadioService::class.java)
+                i.putExtra("action", Actions.KILL.name)
+                startService(i)
+                true
+            }
 
             else -> super.onOptionsItemSelected(item)
         }
