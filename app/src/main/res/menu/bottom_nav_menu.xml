@@ -16,9 +16,13 @@
         android:icon="@drawable/ic_newspaper"
         android:title="@string/title_news"/>
 
+    <!--
+    Chat is broken, removed. 
+
     <item
         android:id="@+id/navigation_chat"
         android:icon="@drawable/ic_chat_processing"
         android:title="@string/title_chat"/>
+        -->
 
 </menu>

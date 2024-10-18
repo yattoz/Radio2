@@ -45,8 +45,10 @@ class MainActivity : BaseActivity() {
         val bottomNavigationView = findViewById<BottomNavigationView>(R.id.bottom_nav)
 
         //val navGraphIds = listOf(R.navigation.home, R.navigation.list, R.navigation.form)
+
+        // R.navigation.navigation_chat is broken, removed.
         val navGraphIds = listOf(R.navigation.navigation_nowplaying, R.navigation.navigation_songs,
-            R.navigation.navigation_news, R.navigation.navigation_chat)
+            R.navigation.navigation_news)
 
         // Setup the bottom navigation view with a list of navigation graphs
         val controller = bottomNavigationView.setupWithNavController(
