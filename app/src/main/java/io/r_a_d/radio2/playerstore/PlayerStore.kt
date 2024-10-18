@@ -67,16 +67,6 @@ class PlayerStore {
         if (currentSong.startTime.value != resMain.getLong("start_time")*1000)
             currentSong.startTime.value = resMain.getLong("start_time")*1000
 
-        // I noticed that the server has a big (3 to 9 seconds !!) offset for current time.
-        // we can measure it when the player is playing, to compensate it and have our progress bar perfectly timed
-        // latencyCompensator is set to null when beginPlaying() (we can't measure it at the moment we start playing, since we're in the middle of a song),
-        // at this moment, we set it to 0. Then, next time the updateApi is called when we're playing, we measure the latency and we set out latencyComparator.
-        if(isCompensatingLatency)
-        {
-            latencyCompensator = resMain.getLong("current") * 1000 - (currentSong.startTime.value
-                ?: (resMain.getLong("current") * 1000))
-            Log.d(playerStoreTag, playerStoreTag +  "latency compensator set to ${(latencyCompensator).toFloat()/1000} s")
-        }
         currentSong.stopTime.value = resMain.getLong("end_time")*1000
         currentTime.value = (resMain.getLong("current"))*1000 - (latencyCompensator)
         thread.value = resMain.getString("thread")
@@ -266,7 +256,7 @@ class PlayerStore {
     private fun extractSong(songJSON: JSONObject) : Song {
         val song = Song()
         song.setTitleArtist(songJSON.getString("meta"))
-        song.startTime.value = songJSON.getLong("timestamp")
+        song.startTime.value = songJSON.getLong("timestamp") * 1000
         song.stopTime.value = song.startTime.value
         song.type.value = songJSON.getInt("type")
         return song

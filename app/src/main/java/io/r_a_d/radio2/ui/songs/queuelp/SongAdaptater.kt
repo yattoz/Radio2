@@ -1,17 +1,23 @@
 package io.r_a_d.radio2.ui.songs.queuelp
 
 import android.annotation.SuppressLint
-import android.graphics.Color
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.core.content.res.ResourcesCompat
 import androidx.recyclerview.widget.RecyclerView
 import io.r_a_d.radio2.R
 import io.r_a_d.radio2.colorBlue
 import io.r_a_d.radio2.colorWhited
 import io.r_a_d.radio2.playerstore.Song
+import io.r_a_d.radio2.tag
 import kotlinx.android.synthetic.main.song_view.view.*
+import java.text.DateFormat
+import java.text.SimpleDateFormat
+import java.time.Instant
+import java.time.LocalTime
+import java.util.Date
+import java.util.Locale
 import kotlin.collections.ArrayList
 
 class SongAdaptater(private val dataSet: ArrayList<Song>
@@ -43,7 +49,16 @@ class SongAdaptater(private val dataSet: ArrayList<Song>
     // Replace the contents of a view (invoked by the layout manager)
     @SuppressLint("SetTextI18n")
     override fun onBindViewHolder(holder: MyViewHolder, position: Int) {
+        val hourPlayedTimestamp: Long = dataSet[position].startTime.value!!
+        Log.d(tag,"$hourPlayedTimestamp")
+        val date = Date(hourPlayedTimestamp)
+        Log.d(tag,"$date")
+        val dateFormatter = DateFormat.getTimeInstance(DateFormat.SHORT, Locale.getDefault())
+
+        val hourString: String = dateFormatter.format(date)
+
         holder.itemView.item.text = "${dataSet[position].artist.value} - ${dataSet[position].title.value}"
+        holder.itemView.itemTime.text = hourString
         if (dataSet[position].type.value == 1)
             holder.itemView.item.setTextColor(colorBlue)
         else
