@@ -31,6 +31,7 @@ class PlayerStore {
     val isLpUpdated: MutableLiveData<Boolean> = MutableLiveData()
     val isMuted : MutableLiveData<Boolean> = MutableLiveData()
     val listenersCount: MutableLiveData<Int> = MutableLiveData()
+    var tags: ArrayList<String> = ArrayList()
     private val urlToScrape = "https://r-a-d.io/api"
     var latencyCompensator : Long = 0
     var isInitialized: Boolean = false
@@ -82,7 +83,15 @@ class PlayerStore {
         val listeners = resMain.getInt("listeners")
         isAfkStream = resMain.getBoolean("isafkstream")
         listenersCount.value = listeners
-        Log.d(playerStoreTag, "store updated")
+        val tagsJsonArr = resMain.getJSONArray("tags")
+        tags.clear()
+        for (tagIndex in 0 until tagsJsonArr.length())
+        {
+
+            tags += tagsJsonArr.getString(tagIndex)
+        }
+        Log.d(tag, playerStoreTag + "tags: " + tags);
+        Log.d(tag, playerStoreTag +  "store updated")
     }
 
     private val scrape : (Any?) -> String =
