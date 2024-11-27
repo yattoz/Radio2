@@ -182,7 +182,11 @@ class MainActivity : BaseActivity() {
         }
 
         // initialize the UI
-        setTheme(R.style.AppTheme)
+        if (BuildConfig.BUILD_TYPE == "debug" ) {
+            setTheme(R.style.AppThemeDebug)
+        } else {
+            setTheme(R.style.AppTheme)
+        }
         setContentView(R.layout.activity_main)
         attachKeyboardListeners()
 
@@ -190,6 +194,7 @@ class MainActivity : BaseActivity() {
 
         // before setting up the bottom bar, we must declare the top bar that will be used by the bottom bar to display titles.
         setSupportActionBar(toolbar)
+
 
         if (savedInstanceState == null) {
             setupBottomNavigationBar()

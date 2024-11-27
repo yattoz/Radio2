@@ -1,6 +1,16 @@
 <resources>
 
     <!-- Base application theme. -->
+    <style name="AppThemeDebug" parent="AppTheme">
+        <!-- Customize your theme here. -->
+        <item name="colorPrimary">@color/debugColorPrimary</item>
+        <item name="colorPrimaryDark">@color/debugColorPrimaryDark</item>
+        <item name="colorAccent">@color/colorAccent</item>
+        <item name="icon">@drawable/actionbar_logo</item>
+        <item name="android:textColorHighlight">@color/rblue</item>
+        <item name="android:colorBackground">@color/debugColorPrimaryDark</item>
+    </style>
+
     <style name="AppTheme" parent="Theme.AppCompat.NoActionBar">
         <!-- Customize your theme here. -->
         <item name="colorPrimary">@color/colorPrimary</item>

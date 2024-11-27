@@ -18,6 +18,11 @@
     <color name="reqButtonNormal">#5d7b5d</color>
     <color name="reqButtonDisabled">#a15755</color>
 
+
+    <color name="debugColorBackground">#1111BE</color>
+    <color name="debugColorPrimary">#1111BE</color>
+    <color name="debugColorPrimaryDark">#202061</color>
+
     <color name="seek_bar_background">#585858</color>
     <color name="seek_bar_progress">#DF4C3A</color>
     <color name="seek_bar_secondary_progress">#3A7AAF</color>
