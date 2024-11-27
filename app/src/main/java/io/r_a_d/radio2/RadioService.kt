@@ -133,15 +133,15 @@ class RadioService : MediaBrowserServiceCompat() {
                     PlayerStore.instance.isStreamDown = true
                 }
                 else -> {
-                    PlayerStore.instance.fetchApi(numberOfSongs >= 2)
+                    PlayerStore.instance.fetchApi(isIcyChanged = true)
                 }
             }
         }  else {
             if (PlayerStore.instance.currentSong != PlayerStore.instance.currentSongBackup
                 && it != noConnectionValue)
             {
-                PlayerStore.instance.updateLp()
-                PlayerStore.instance.fetchApi()
+                // PlayerStore.instance.updateLp()
+                PlayerStore.instance.fetchApi(isIcyChanged = true)
                 Log.d(tag, "updated queue/lp while player not playing\ncurrent=${PlayerStore.instance.currentSong}\nbackup=${PlayerStore.instance.currentSongBackup}")
             }
 
@@ -179,16 +179,17 @@ class RadioService : MediaBrowserServiceCompat() {
             stopPlaying()
     }
 
+    /*
     private val startTimeObserver = Observer<Long> {
         // We're listening to startTime to determine if we have to update Queue and Lp.
         // this is because startTime is set by the API and never by the ICY, so both cases are covered (playing and stopped)
         // should be OK even when a new streamer comes in.
         if (it != PlayerStore.instance.currentSongBackup.startTime.value) // we have a new song
         {
-            PlayerStore.instance.updateLp()
-            PlayerStore.instance.updateQueue()
+            PlayerStore.instance.fetchApi()
         }
     }
+    */
 
     private val streamerObserver = Observer<String> {
         PlayerStore.instance.initApi()
@@ -273,7 +274,7 @@ class RadioService : MediaBrowserServiceCompat() {
 
         PlayerStore.instance.streamerName.observeForever(streamerObserver)
         PlayerStore.instance.currentSong.title.observeForever(titleObserver)
-        PlayerStore.instance.currentSong.startTime.observeForever(startTimeObserver)
+        // PlayerStore.instance.currentSong.startTime.observeForever(startTimeObserver)
         PlayerStore.instance.volume.observeForever(volumeObserver)
         PlayerStore.instance.isPlaying.observeForever(isPlayingObserver)
         PlayerStore.instance.isMuted.observeForever(isMutedObserver)
@@ -362,7 +363,7 @@ class RadioService : MediaBrowserServiceCompat() {
         player.release()
         unregisterReceiver(receiver)
         PlayerStore.instance.currentSong.title.removeObserver(titleObserver)
-        PlayerStore.instance.currentSong.startTime.removeObserver(startTimeObserver)
+        // PlayerStore.instance.currentSong.startTime.removeObserver(startTimeObserver)
         PlayerStore.instance.volume.removeObserver(volumeObserver)
         PlayerStore.instance.isPlaying.removeObserver(isPlayingObserver)
         PlayerStore.instance.isMuted.removeObserver(isMutedObserver)
@@ -708,7 +709,7 @@ class RadioService : MediaBrowserServiceCompat() {
             {
                 PlayerStore.instance.currentSong.setTitleArtist(data.toString())
                 val d : Long = ((PlayerStore.instance.currentSong.stopTime.value?.minus(PlayerStore.instance.currentSong.startTime.value!!) ?: 0) / 1000)
-                val duration = if (d > 0) d - (PlayerStore.instance.latencyCompensator) else 0
+                val duration = if (d > 0) d else 0
                 metadataBuilder.putString(
                     MediaMetadataCompat.METADATA_KEY_TITLE,
                     PlayerStore.instance.currentSong.title.value

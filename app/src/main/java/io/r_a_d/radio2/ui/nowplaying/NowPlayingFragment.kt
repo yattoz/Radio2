@@ -32,6 +32,12 @@ class NowPlayingFragment : Fragment() {
     private lateinit var root: View
     private lateinit var nowPlayingViewModel: NowPlayingViewModel
 
+    var tagsVisibility: Int = View.GONE
+
+    fun tagsVisibilityToggle() {
+        tagsVisibility = if (tagsVisibility == View.VISIBLE) View.GONE else View.VISIBLE
+    }
+
     @SuppressLint("SetTextI18n")
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -54,7 +60,8 @@ class NowPlayingFragment : Fragment() {
         val songArtistNextText: TextView = root.findViewById(R.id.text_song_artist_next)
         val volumeIconImage : ImageView = root.findViewById(R.id.volume_icon)
         val listenersText : TextView = root.findViewById(R.id.listenersCount)
-        val threadText : TextView= root.findViewById(R.id.thread)
+        val threadText : TextView = root.findViewById(R.id.thread)
+        val songTagsText : TextView = root.findViewById(R.id.text_song_tags)
 
 
         TextViewCompat.setAutoSizeTextTypeUniformWithConfiguration(
@@ -71,12 +78,19 @@ class NowPlayingFragment : Fragment() {
             songArtistText,4, 24, 2, TypedValue.COMPLEX_UNIT_SP)
          */
 
+
+
         PlayerStore.instance.currentSong.title.observe(viewLifecycleOwner, Observer {
-                songTitleText.text = it
+            songTitleText.text = it
         })
 
         PlayerStore.instance.currentSong.artist.observe(viewLifecycleOwner, Observer {
-                songArtistText.text = it
+            songArtistText.text = it
+        })
+
+        PlayerStore.instance.lastUpdated.observe(viewLifecycleOwner, Observer {
+            val s = PlayerStore.instance.tags.fold("", { first, element -> "$first $element" })
+            songTagsText.text = "tags: ${s.substring(1, s.length)}"
         })
 
         PlayerStore.instance.playbackState.observe(viewLifecycleOwner, Observer {
@@ -234,6 +248,19 @@ class NowPlayingFragment : Fragment() {
 
         songTitleText.setOnLongClickListener(setClipboardListener)
         songArtistText.setOnLongClickListener(setClipboardListener)
+
+        val showTagsListener: View.OnClickListener = View.OnClickListener {
+            tagsVisibilityToggle()
+            songTagsText.visibility = tagsVisibility
+        }
+
+        // We initialize the visibility to GONE. Every time the Fragment gets active again,
+        // the visibility is reset. Not ideal, but good enough.
+        tagsVisibility = View.GONE
+
+        songArtistText.setOnClickListener(showTagsListener)
+        songTitleText.setOnClickListener(showTagsListener)
+        songTagsText.setOnClickListener(showTagsListener)
 
         if (preferenceStore.getBoolean("splitLayout", true))
             root.addOnLayoutChangeListener(splitLayoutListener)

@@ -256,6 +256,19 @@
                 app:layout_constraintBottom_toTopOf="@id/progressBar">
 
                 <TextView
+                    android:id="@+id/text_song_tags"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="bottom|center_horizontal"
+                    android:text=""
+                    android:textAlignment="center"
+                    android:textColor="@color/whited3"
+                    android:textSize="16sp"
+                    android:visibility="gone"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toStartOf="parent" />
+
+                <TextView
                     android:id="@+id/text_song_title"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -264,7 +277,7 @@
                     android:textAlignment="center"
                     android:textColor="@color/whited"
                     android:textSize="20sp"
-                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintBottom_toTopOf="@+id/text_song_tags"
                     app:layout_constraintStart_toStartOf="parent" />
 
                 <TextView
@@ -321,11 +334,6 @@
             android:textAlignment="textStart"
             app:layout_constraintStart_toStartOf="@id/progressBar"
             app:layout_constraintTop_toBottomOf="@id/progressBar" />
-
-
-
-
-
 
         <!--         style="?android:attr/progressBarStyleHorizontal" -->
         <!--         android:theme="@style/App" -->
