@@ -1,6 +1,6 @@
 ![icon](https://r-a-d.io/assets/logo_image_small.png)![logo](https://r-a-d.io/assets/logotitle_2.png)
 
-# R/a/dio, the brand-new Android app!
+# R/a/dio, the ndroid app!
 
 
 [![](_README_assets/GetItOnGooglePlay_Badge_Web_color_English.png)
