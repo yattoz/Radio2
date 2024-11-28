@@ -41,9 +41,8 @@ class RequestSongAdapter(private val dataSet: ArrayList<Song>
                 return
             }
 
-            if (position == itemCount - 1)
+            if (position == itemCount - 1 && Requestor.instance.isLoadMoreVisible)
             {
-                binding.loadMoreButton.text = "Load more results"
                 binding.loadMoreButton.setOnClickListener{
                     Requestor.instance.loadMore()
                 }

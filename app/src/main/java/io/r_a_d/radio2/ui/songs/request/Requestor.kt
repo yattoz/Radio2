@@ -41,7 +41,7 @@ class Requestor {
     private val requestUrl = "https://r-a-d.io/request/%1\$d"
     private val searchUrl = "https://r-a-d.io/api/search/%1s?page=%2\$d"
     private val favoritesUrl = "https://r-a-d.io/faves/%1s?dl=true"
-    private val songThresholdStep = 50 // note: the API returns results by blocks of 20?
+    private val songThresholdStep = 50
     private var songThreshold = songThresholdStep
     private var localQuery = ""
 
