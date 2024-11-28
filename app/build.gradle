@@ -1,7 +1,6 @@
 apply plugin: 'com.android.application'
 
 apply plugin: 'kotlin-android'
-apply plugin: 'kotlin-android-extensions'
 apply plugin: 'kotlin-kapt'
 
 
@@ -33,11 +32,11 @@ android {
 
     compileSdk 35
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_17
-        targetCompatibility JavaVersion.VERSION_17
+        sourceCompatibility JavaVersion.VERSION_18
+        targetCompatibility JavaVersion.VERSION_18
     }
     kotlinOptions {
-        jvmTarget = "17"
+        jvmTarget = "18"
     }
     defaultConfig {
         applicationId "io.r_a_d.radio2"
@@ -51,6 +50,7 @@ android {
     }
     buildFeatures {
         buildConfig true
+        viewBinding true
     }
     buildTypes {
         release {

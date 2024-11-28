@@ -10,6 +10,7 @@ import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import io.r_a_d.radio2.R
+import io.r_a_d.radio2.databinding.FragmentLastPlayedBinding
 import io.r_a_d.radio2.playerstore.PlayerStore
 
 class LastPlayedFragment : Fragment() {
@@ -19,6 +20,7 @@ class LastPlayedFragment : Fragment() {
     private lateinit var recyclerView: RecyclerView
     private lateinit var viewAdapter: RecyclerView.Adapter<*>
     private lateinit var viewManager: RecyclerView.LayoutManager
+    private lateinit var binding: FragmentLastPlayedBinding
 
 
     private val queueObserver = Observer<Boolean> {
@@ -31,12 +33,12 @@ class LastPlayedFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         // Inflate the layout for this fragment
-        val root = inflater.inflate(R.layout.fragment_last_played, container, false)
+        binding = FragmentLastPlayedBinding.inflate(inflater, container, false)
 
         viewManager = LinearLayoutManager(context)
         viewAdapter = SongAdaptater(PlayerStore.instance.lp)
 
-        recyclerView = root.findViewById<RecyclerView>(R.id.queue_lp_recycler).apply {
+        recyclerView = binding.queueLpRecycler.apply {
             // use this setting to improve performance if you know that changes
             // in content do not change the layout size of the RecyclerView
             setHasFixedSize(false)
@@ -50,7 +52,7 @@ class LastPlayedFragment : Fragment() {
 
         PlayerStore.instance.isLpUpdated.observeForever(queueObserver)
 
-        return root
+        return binding.root
     }
 
     override fun onDestroyView() {

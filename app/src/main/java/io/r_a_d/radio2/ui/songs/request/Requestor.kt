@@ -6,7 +6,6 @@ import io.r_a_d.radio2.ActionOnError
 import io.r_a_d.radio2.Async
 import io.r_a_d.radio2.playerstore.Song
 import io.r_a_d.radio2.preferenceStore
-import io.r_a_d.radio2.tag
 import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
@@ -34,13 +33,15 @@ import kotlin.random.Random
  * Converted to Kotlin and adapted by Yattoz on 05 Nov. 2019
  */
 
+const val requestorTag = "requestorTag"
+
 class Requestor {
     var addRequestMeta: String = ""
     private val cookieManager: CookieManager = CookieManager()
     private val requestUrl = "https://r-a-d.io/request/%1\$d"
     private val searchUrl = "https://r-a-d.io/api/search/%1s?page=%2\$d"
     private val favoritesUrl = "https://r-a-d.io/faves/%1s?dl=true"
-    private val songThresholdStep = 50
+    private val songThresholdStep = 50 // note: the API returns results by blocks of 20?
     private var songThreshold = songThresholdStep
     private var localQuery = ""
 
@@ -62,11 +63,11 @@ class Requestor {
     }
 
     fun initFavorites(userName : String? = preferenceStore.getString("userName", null)){
-        Log.d(tag, "initializing favorites")
+        Log.d(requestorTag, "initializing favorites")
         if (userName == null)
         {
             // Display is done by default in the XML.
-            Log.d(tag, "no user name set for favorites")
+            Log.d(requestorTag, "no user name set for favorites")
             isFavoritesUpdated.value = true
             return
         }
@@ -90,10 +91,10 @@ class Requestor {
                 val lastPlayed : Int? = if (item.isNull("lastplayed")) null else item.getInt("lastplayed")
                 val requestCount : Int? = if (item.isNull("requestcount")) null else item.getInt("requestcount")
                 val isRequestable = (coolDown(lastPlayed, lastRequested, requestCount) < 0)
-                //Log.d(tag, "val : $id")
+                //Log.d(requestorTag, "val : $id")
                 favoritesSongArray.add(Song(artistTitle, id ?: 0, isRequestable))
             }
-            Log.d(tag, "favorites : $favoritesSongArray")
+            Log.d(requestorTag, "favorites : $favoritesSongArray")
             isFavoritesUpdated.value = true
         }
         Async(scrapeFavorites, postFavorites, ActionOnError.NOTIFY)
@@ -101,6 +102,7 @@ class Requestor {
 
     fun search(query: String)
     {
+        Log.d(requestorTag, "Searching for request: $query")
         responseArray.clear()
         requestSongArray.clear()
         localQuery = query

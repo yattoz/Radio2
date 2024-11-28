@@ -9,7 +9,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import io.r_a_d.radio2.R
+import io.r_a_d.radio2.databinding.FragmentLastPlayedBinding
 import io.r_a_d.radio2.playerstore.PlayerStore
 import io.r_a_d.radio2.playerstore.Song
 
@@ -20,7 +20,7 @@ class QueueFragment : Fragment()
     private lateinit var recyclerView: RecyclerView
     private lateinit var viewAdapter: RecyclerView.Adapter<*>
     private lateinit var viewManager: RecyclerView.LayoutManager
-
+    private lateinit var binding: FragmentLastPlayedBinding
 
     private val queueObserver = Observer<Boolean> {
         Log.d(tag, lastPlayedFragmentTag + "queue changed")
@@ -28,11 +28,12 @@ class QueueFragment : Fragment()
     }
 
     override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
+        inflater: LayoutInflater,
+        container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
         // Inflate the layout for this fragment
-        val root = inflater.inflate(R.layout.fragment_last_played, container, false)
+        binding = FragmentLastPlayedBinding.inflate(inflater, container, false)
 
         viewManager = LinearLayoutManager(context)
         viewAdapter = SongAdaptater(
@@ -42,7 +43,7 @@ class QueueFragment : Fragment()
                 PlayerStore.instance.queue
         )
 
-        recyclerView = root.findViewById<RecyclerView>(R.id.queue_lp_recycler).apply {
+        recyclerView = binding.queueLpRecycler.apply {
             // use this setting to improve performance if you know that changes
             // in content do not change the layout size of the RecyclerView
             setHasFixedSize(true)
@@ -56,7 +57,7 @@ class QueueFragment : Fragment()
 
         PlayerStore.instance.isQueueUpdated.observeForever(queueObserver)
 
-        return root
+        return  binding.root
     }
 
     override fun onDestroyView() {

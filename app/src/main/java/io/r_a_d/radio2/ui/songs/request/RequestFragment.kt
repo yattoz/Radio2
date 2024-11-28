@@ -12,8 +12,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-import io.r_a_d.radio2.R
+import io.r_a_d.radio2.databinding.FragmentRequestBinding
 
 class RequestFragment : Fragment() {
 
@@ -21,6 +20,7 @@ class RequestFragment : Fragment() {
     private lateinit var viewAdapter: RecyclerView.Adapter<*>
     private lateinit var viewManager: RecyclerView.LayoutManager
     private lateinit var searchView: SearchView
+    private lateinit var binding: FragmentRequestBinding
 
     private val listener : SearchView.OnQueryTextListener = object : SearchView.OnQueryTextListener{
         override fun onQueryTextSubmit(query: String?): Boolean {
@@ -50,22 +50,23 @@ class RequestFragment : Fragment() {
     }
 
     override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
+        inflater: LayoutInflater,
+        container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
         // Inflate the layout for this fragment
-        val root = inflater.inflate(R.layout.fragment_request, container, false)
+        binding = FragmentRequestBinding.inflate(inflater, container, false)
 
-        val recyclerSwipe = root.findViewById(R.id.recyclerSwipe) as SwipeRefreshLayout
+        val recyclerSwipe = binding.recyclerSwipe
         recyclerSwipe.isEnabled = false // don't need to pull-to-refresh for Request
 
-        searchView = root.findViewById(R.id.searchBox)
+        searchView = binding.searchBox
         searchView.setOnQueryTextListener(listener)
 
         viewManager = LinearLayoutManager(context)
         viewAdapter = RequestSongAdapter(Requestor.instance.requestSongArray)
 
-        recyclerView = root.findViewById<RecyclerView>(R.id.request_recycler).apply {
+        recyclerView = binding.requestRecycler.apply {
             // use this setting to improve performance if you know that changes
             // in content do not change the layout size of the RecyclerView
             setHasFixedSize(true)
@@ -77,7 +78,7 @@ class RequestFragment : Fragment() {
             adapter = viewAdapter
         }
         Requestor.instance.isRequestResultUpdated.observe(viewLifecycleOwner, requestSongObserver)
-        return root
+        return binding.root
     }
 
     companion object {
