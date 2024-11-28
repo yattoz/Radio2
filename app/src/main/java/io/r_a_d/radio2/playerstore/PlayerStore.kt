@@ -245,18 +245,14 @@ class PlayerStore {
         } else if (resMain.has("queue") && queue.isNotEmpty()) {
             val queueJSON =
                 resMain.getJSONArray("queue")
-            val t = extractSong(queueJSON[queueJSON.length() - 1] as JSONObject)
-            if (t == queue.last())
-            {
-                Log.e(playerStoreTag, "Song already in there: $t")
-                // We shouldn't reach there, since this should only be called when
-                // the API has something new to offer.
-                assert(false)
-            } else {
-                queue.removeAt(0)
-                queue.add(queue.size, t)
-                Log.d(playerStoreTag, "added last queue song: $t")
-                isQueueUpdated.value = true
+            for (i in 0 until queueJSON.length()) {
+                val song = extractSong(queueJSON[(queueJSON.length() - 1) - i] as JSONObject)
+                if (!queue.contains(song)) {
+                    queue.removeAt(0)
+                    queue.add(queue.size, song)
+                    Log.d(playerStoreTag, "added last queue song: $song")
+                    isQueueUpdated.value = true
+                }
             }
         }
     }
