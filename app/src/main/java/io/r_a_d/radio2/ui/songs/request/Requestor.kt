@@ -136,7 +136,7 @@ class Requestor {
                 else
                     finishSearch()
             }
-
+            Log.d(requestorTag, "$responseArray")
         }
         Async(scrape, post, ActionOnError.NOTIFY)
     }

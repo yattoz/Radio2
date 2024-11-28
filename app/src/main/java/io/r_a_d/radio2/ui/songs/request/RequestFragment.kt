@@ -24,14 +24,14 @@ class RequestFragment : Fragment() {
 
     private val listener : SearchView.OnQueryTextListener = object : SearchView.OnQueryTextListener{
         override fun onQueryTextSubmit(query: String?): Boolean {
+            Log.d(tag, "query submitted")
             if (query == null || query.isEmpty()) {
                 Requestor.instance.snackBarText.value = "Field is empty, no search possible."
             }
             else {
                 Requestor.instance.search(query)
-                val imm = context?.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-                imm.hideSoftInputFromWindow(searchView.windowToken, 0)
             }
+            searchView.clearFocus();
             return true
         }
         override fun onQueryTextChange(newText: String?): Boolean {
