@@ -59,10 +59,14 @@ class SongAdaptater(private val dataSet: ArrayList<Song>
 
         holder.itemView.item.text = "${dataSet[position].artist.value} - ${dataSet[position].title.value}"
         holder.itemView.itemTime.text = hourString
-        if (dataSet[position].type.value == 1)
+        if (dataSet[position].type.value == 1) {
             holder.itemView.item.setTextColor(colorBlue)
-        else
+            holder.itemView.itemTime.setTextColor(colorBlue)
+        }
+        else {
             holder.itemView.item.setTextColor(colorWhited)
+            holder.itemView.itemTime.setTextColor(colorWhited)
+        }
     }
 
     // Return the size of your dataset (invoked by the layout manager)

@@ -13,7 +13,8 @@ import io.r_a_d.radio2.R
 import io.r_a_d.radio2.playerstore.PlayerStore
 import io.r_a_d.radio2.playerstore.Song
 
-class QueueFragment : Fragment(){
+class QueueFragment : Fragment()
+{
     private val lastPlayedFragmentTag = this::class.java.name
 
     private lateinit var recyclerView: RecyclerView
