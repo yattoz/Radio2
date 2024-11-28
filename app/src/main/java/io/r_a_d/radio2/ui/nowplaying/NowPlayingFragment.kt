@@ -19,7 +19,6 @@ import androidx.constraintlayout.widget.ConstraintSet
 import androidx.core.text.HtmlCompat
 import androidx.core.widget.TextViewCompat
 import androidx.lifecycle.Observer
-import com.google.android.exoplayer2.Player
 import com.google.android.material.snackbar.BaseTransientBottomBar
 import com.google.android.material.snackbar.Snackbar
 import io.r_a_d.radio2.*
