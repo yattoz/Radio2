@@ -1,29 +1,29 @@
 package io.r_a_d.radio2
 
-import android.os.Bundle
-import com.google.android.material.bottomnavigation.BottomNavigationView
-import androidx.navigation.ui.setupActionBarWithNavController
+import android.content.DialogInterface
 import android.content.Intent
+import android.content.pm.PackageManager.NameNotFoundException
 import android.os.Build
-import android.os.PersistableBundle
+import android.os.Bundle
 import android.util.Log
 import android.view.Menu
+import android.view.MenuItem
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.widget.Toolbar
 import androidx.core.content.res.ResourcesCompat
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
 import androidx.navigation.NavController
-import io.r_a_d.radio2.playerstore.PlayerStore
-
-import java.util.Timer
-import android.view.MenuItem
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.preference.PreferenceManager
+import androidx.navigation.ui.setupActionBarWithNavController
+import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.snackbar.Snackbar
 import io.r_a_d.radio2.alarm.RadioAlarm
+import io.r_a_d.radio2.playerstore.PlayerStore
 import io.r_a_d.radio2.streamerNotificationService.WorkerStore
 import io.r_a_d.radio2.streamerNotificationService.startStreamerMonitor
 import io.r_a_d.radio2.ui.songs.request.Requestor
+import java.util.Timer
 
 
 /* Log to file import
@@ -31,6 +31,8 @@ import android.os.Environment
 import java.io.File
 import java.io.IOException
 */
+
+const val MainActivityTag = "MainActivity"
 
 class MainActivity : BaseActivity() {
 
@@ -199,6 +201,53 @@ class MainActivity : BaseActivity() {
         if (savedInstanceState == null) {
             setupBottomNavigationBar()
         } // Else, need to wait for onRestoreInstanceState
+
+        val previousVersion =
+            preferenceStore.getString(getString(R.string.preferencestorelastversionchangelogshown), "")
+
+        val thisVersion  = try {
+            packageManager.getPackageInfo(
+                packageName,
+                0
+            ).versionName
+        } catch (e: NameNotFoundException) {
+            Log.e(MainActivityTag
+                , "could not get version name from manifest!")
+            e.printStackTrace()
+            ""
+        }
+
+        Log.d(MainActivityTag, "This version: $thisVersion, previous changelog shown: $previousVersion")
+
+        if (previousVersion == thisVersion) {
+            Log.d(MainActivityTag, "Already shown changelog. Skipping Alert.")
+        } else {
+
+            val alert = AlertDialog.Builder(this).also {
+                it.setIcon(R.drawable.lollipop_logo)
+                it.setTitle(getString(R.string.new_in_version, thisVersion))
+                it.setMessage("CHANGELOG")
+                it.setCancelable(false)
+                it.setPositiveButton("OK", DialogInterface.OnClickListener { dialog, which ->
+                    preferenceStore.edit().putString(
+                        getString(R.string.preferencestorelastversionchangelogshown),
+                        thisVersion
+                    ).apply()
+                    dialog.dismiss()
+                })
+                it.setOnDismissListener {
+                    val alert = AlertDialog.Builder(this)
+                        .setMessage("You can read again the changelog in the Settings (top-right three dots buttons).")
+                        .setCancelable(false)
+                        .setPositiveButton(
+                            "OK",
+                            DialogInterface.OnClickListener { dialog, which -> dialog.dismiss() })
+                        .create().show()
+                }
+            }
+            alert.create()
+            alert.show()
+        }
     }
 
     override fun onDestroy() {

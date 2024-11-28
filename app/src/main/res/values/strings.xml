@@ -82,5 +82,7 @@
     <string name="alarmVolumeSeekBar">Adjust alarm volume</string>
     <string name="setupAlarmClockVolume">Set up alarm volume</string>
     <string name="alarm_volume">Alarm volume</string>
+    <string name="new_in_version">New in version %1$s</string>
+    <string name="preferencestorelastversionchangelogshown">lastVersionChangelogShown</string>
 
 </resources>
