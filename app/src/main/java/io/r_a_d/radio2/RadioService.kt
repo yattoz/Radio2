@@ -141,7 +141,7 @@ class RadioService : MediaBrowserServiceCompat() {
                 && it != noConnectionValue)
             {
                 // PlayerStore.instance.updateLp()
-                PlayerStore.instance.fetchApi(isIcyChanged = true)
+                PlayerStore.instance.fetchApi(isIcyChanged = false)
                 Log.d(tag, "updated queue/lp while player not playing\ncurrent=${PlayerStore.instance.currentSong}\nbackup=${PlayerStore.instance.currentSongBackup}")
             }
 

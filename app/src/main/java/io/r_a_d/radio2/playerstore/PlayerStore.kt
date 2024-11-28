@@ -42,6 +42,9 @@ class PlayerStore {
     var thread: MutableLiveData<String> = MutableLiveData()
     var isAfkStream: Boolean = true
 
+    val maxApiFetchRetry = 4;
+    var curApiFetchRetry = 0;
+
     init {
         playbackState.value = PlaybackStateCompat.STATE_STOPPED
         isPlaying.value = false
@@ -95,36 +98,70 @@ class PlayerStore {
             tags += tagsJsonArr.getString(tagIndex)
         }
 
-        /* Update Queue. We'll rewrite the whole queue list.
-        strategy:
-        - If the queue fetched is newer:
-            + overwrite queue
-            + use fetched Last Played to merge with stored Lp
-        - else if the queue fetched isn't newer, and the current song has not been updated:
-            + pass (nothing to do)
-        - else if the queue fetched isn't newer, and the current song has been updated:
-            + re-launch the fetch in 3 seconds.
-        */
-        if (isIcyChanged)
+        val isApiUpToDate = checkApiUpToDate(resMain)
+
+        if (isApiUpToDate)
+        {
+            Log.d(playerStoreTag, "First call to fetchApi, and the API has something new. Updating Queue/LP...")
+            updateQueueAndLp(resMain);
+        }
+        else if (isIcyChanged)
         {
             // ICY metadata changed from when playing the stream. We know we MUST get:
             // - always, a new list of Last Played. If not, query again the API later.
             // - if we got a new Last Played, and if no streamer is up, a new Queue
+            Log.d(playerStoreTag, "First call to fetchApi, and the API isn't updated yet. Scheduling call to fetch again...")
+            fetchApiUntilUpToDateAsync()
+        }
 
-        } else {
+
+        lastUpdated.value = System.currentTimeMillis()
+        Log.d(playerStoreTag, "PlayerStore updated")
+    }
+
+    private val scrape : (Any?) -> String =
+    {
+        URL(urlToScrape).readText()
+    }
+
+    private fun checkApiUpToDate(resMain: JSONObject): Boolean
+    {
+        val newLp = ArrayList<Song>()
+        if (resMain.has("lp"))
+        {
+            val queueJSON = resMain.getJSONArray("lp")
+            // get the new Last Played ArrayList
+            for (i in 0 until queueJSON.length()) {
+                val song = extractSong(queueJSON[i] as JSONObject)
+                if (!lp.contains(song))
+                    newLp.add(newLp.size, song)
+            }
+        }
+
+        // If we added all the songs from the getJSONArray into the NewLp ArrayList, it means that
+        // there's a song reported by the API that's not in the last played. The API is up-to-date,
+        // and we can use its contents to update our store.
+        val isApiUpToDate = newLp.size > 0
+        return isApiUpToDate
+    }
+
+    private fun updateQueueAndLp(resMain: JSONObject)
+    {
             // The API update must have been called from a timer. We may, or may not, get:
             // - maybe, a new list of Last Played,
             // - maybe, a new Queue
             if (resMain.has("lp"))
             {
-                val queueJSON = resMain.getJSONArray("lp")
-                // get the new Last Played ArrayList
                 val newLp = ArrayList<Song>()
-
-                for (i in 0 until queueJSON.length()) {
-                    val song = extractSong(queueJSON[i] as JSONObject)
-                    if (!lp.contains(song))
-                        newLp.add(newLp.size, song)
+                if (resMain.has("lp"))
+                {
+                    val queueJSON = resMain.getJSONArray("lp")
+                    // get the new Last Played ArrayList
+                    for (i in 0 until queueJSON.length()) {
+                        val song = extractSong(queueJSON[i] as JSONObject)
+                        if (!lp.contains(song))
+                            newLp.add(newLp.size, song)
+                    }
                 }
                 // Merge the Last Played from the API into the Last Played we have.
                 // union() guarantees that the order is preserved
@@ -143,34 +180,21 @@ class PlayerStore {
             } else if (resMain.has("queue") && queue.isNotEmpty()) {
                 val queueJSON =
                     resMain.getJSONArray("queue")
-                val t = extractSong(queueJSON[4] as JSONObject)
+                val t = extractSong(queueJSON[queueJSON.length() - 1] as JSONObject)
                 if (t == queue.last())
                 {
-                    Log.d(playerStoreTag, "Song already in there: $t")
-                    // Let's end it here. The API doesn't have anything new.
+                    Log.e(playerStoreTag, "Song already in there: $t")
+                    // We shouldn't reach there, since this should only be called when
+                    // the API has something new to offer.
+                    assert(false)
                 } else {
+                    queue.removeAt(0)
                     queue.add(queue.size, t)
                     Log.d(playerStoreTag, "added last queue song: $t")
                     isQueueUpdated.value = true
                 }
             }
-
         }
-        updateQueue()
-
-
-
-
-
-        lastUpdated.value = System.currentTimeMillis()
-        Log.d(tag, playerStoreTag + "tags: " + tags);
-        Log.d(tag, playerStoreTag + "store updated")
-    }
-
-    private val scrape : (Any?) -> String =
-    {
-        URL(urlToScrape).readText()
-    }
 
     /* initApi is called :
         - at startup
@@ -262,17 +286,29 @@ class PlayerStore {
         if (queue.isNotEmpty()) {
             queue.remove(queue.first())
             Log.d(playerStoreTag, playerStoreTag + queue.toString())
-            fetchLastRequest()
+            fetchApiUntilUpToDateAsync()
             isQueueUpdated.value = true
         } else if (isInitialized) {
-            fetchLastRequest()
+            fetchApiUntilUpToDateAsync()
         } else {
             Log.d(playerStoreTag, playerStoreTag +  "queue is empty!")
         }
     }
 
-    private fun fetchLastRequest()
+    private fun fetchApiUntilUpToDateAsync()
     {
+        // reaching here, we must update queue and Last played.
+        /*strategy:
+        - If the queue fetched is newer:
+            + overwrite queue
+            + use fetched Last Played to merge with stored Lp
+        - else if the queue fetched isn't newer, and the current song has not been updated:
+            + pass (nothing to do)
+        - else if the queue fetched isn't newer, and the current song has been updated:
+            + re-launch the fetch in 3 seconds.
+        */
+
+
         val sleepScrape: (Any?) -> String = {
             val sleepTime: Long = 3000
             Thread.sleep(sleepTime)
@@ -285,42 +321,31 @@ class PlayerStore {
         {
             if (result.has("main")) {
                 val resMain = result.getJSONObject("main")
-                if ((resMain.has("isafkstream") && !resMain.getBoolean("isafkstream")) &&
-                    queue.isNotEmpty())
+                val isUpToDate = checkApiUpToDate(resMain)
+                if (isUpToDate)
                 {
-                    queue.clear() //we're not requesting anything anymore.
-                    isQueueUpdated.value = true
-                } else if (resMain.has("isafkstream") && resMain.getBoolean("isafkstream") &&
-                    queue.isEmpty())
+                    Log.d(playerStoreTag, "Re-fetching API successful. Update Queue and Lp...")
+                    updateQueueAndLp(resMain)
+                } else
                 {
-                    initApi()
-                } else if (resMain.has("queue") && queue.isNotEmpty()) {
-                    val queueJSON =
-                        resMain.getJSONArray("queue")
-                    val t = extractSong(queueJSON[4] as JSONObject)
-                    if (t == queue.last())
-                    {
-                        Log.d(playerStoreTag, "Song already in there: $t")
-                        Async(sleepScrape, post)
-                    } else {
-                        queue.add(queue.size, t)
-                        Log.d(playerStoreTag, "added last queue song: $t")
-                        isQueueUpdated.value = true
-                    }
+                    Log.d(playerStoreTag, "Re-fetching API unsuccessful. Scheduling new call in 3 seconds...")
+                    Async(sleepScrape, post)
                 }
             }
+            return
         }
 
         post = {
-            val result = JSONObject(it as String)
-            /*  The goal is to pass the result to a function that will process it (postFun).
-                The magic trick is, under circumstances, the last queue song might not have been updated yet when we fetch it.
-                So if this is detected ==> if (t == queue.last() )
-                Then the function re-schedule an Async(sleepScrape, post).
-                To do that, the "post" must be defined BEFORE the function, but the function must be defined BEFORE the "post" value.
-                So I declare "post" as lateinit var, define the function, then define the "post" that calls the function. IT SHOULD WORK.
-             */
-            postFun(result)
+            curApiFetchRetry++
+            if (curApiFetchRetry > maxApiFetchRetry)
+            {
+                Log.w(playerStoreTag, "Retried API fetch $maxApiFetchRetry times, still no news. Aborting")
+                curApiFetchRetry = 0
+                // assert(false)
+            } else {
+                val result = JSONObject(it as String)
+                postFun(result)
+            }
         }
 
         Async(sleepScrape, post)
