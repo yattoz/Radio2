@@ -81,6 +81,11 @@ class RequestFragment : Fragment() {
         return binding.root
     }
 
+    override fun onPause() {
+        super.onPause()
+        searchView.clearFocus() // hides soft keyboard too.
+    }
+
     companion object {
         @JvmStatic
         fun newInstance() = RequestFragment()
