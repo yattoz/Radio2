@@ -158,14 +158,13 @@ class PlayerStore {
                     val queueJSON = resMain.getJSONArray("lp")
                     // get the new Last Played ArrayList
                     for (i in 0 until queueJSON.length()) {
-                        val song = extractSong(queueJSON[i] as JSONObject)
+                        val song = extractSong(queueJSON[(queueJSON.length() - 1) - i] as JSONObject)
                         if (!lp.contains(song))
-                            newLp.add(newLp.size, song)
+                            lp.add(0, song)
                     }
                 }
-                // Merge the Last Played from the API into the Last Played we have.
-                // union() guarantees that the order is preserved
-                lp = lp.reversed().union(newLp.reversed()).reversed() as ArrayList<Song>
+                Log.d(playerStoreTag, "$lp")
+                isLpUpdated.value = true
             }
 
             if ((resMain.has("isafkstream") && !resMain.getBoolean("isafkstream")) &&
