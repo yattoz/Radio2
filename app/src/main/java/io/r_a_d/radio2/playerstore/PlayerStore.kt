@@ -325,6 +325,7 @@ class PlayerStore {
                 if (isUpToDate)
                 {
                     Log.d(playerStoreTag, "Re-fetching API successful. Update Queue and Lp...")
+                    curApiFetchRetry = 0
                     updateQueueAndLp(resMain)
                 } else
                 {
