@@ -12,15 +12,6 @@ import androidx.recyclerview.widget.RecyclerView
 import io.r_a_d.radio2.R
 import io.r_a_d.radio2.playerstore.PlayerStore
 
-/**
- * A simple [Fragment] subclass.
- * Activities that contain this fragment must implement the
- * [LastPlayedFragment.OnFragmentInteractionListener] interface
- * to handle interaction events.
- * Use the [LastPlayedFragment.newInstance] factory method to
- * create an instance of this fragment.
- */
-
 class LastPlayedFragment : Fragment() {
 
     private val lastPlayedFragmentTag = this::class.java.name
@@ -31,7 +22,7 @@ class LastPlayedFragment : Fragment() {
 
 
     private val queueObserver = Observer<Boolean> {
-        Log.d(tag, lastPlayedFragmentTag + "queue changed")
+        Log.d(tag, lastPlayedFragmentTag + "lp changed")
         viewAdapter.notifyDataSetChanged()
     }
 
@@ -48,7 +39,7 @@ class LastPlayedFragment : Fragment() {
         recyclerView = root.findViewById<RecyclerView>(R.id.queue_lp_recycler).apply {
             // use this setting to improve performance if you know that changes
             // in content do not change the layout size of the RecyclerView
-            setHasFixedSize(true)
+            setHasFixedSize(false)
 
             // use a linear layout manager
             layoutManager = viewManager

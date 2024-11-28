@@ -145,56 +145,6 @@ class PlayerStore {
         return isApiUpToDate
     }
 
-    private fun updateQueueAndLp(resMain: JSONObject)
-    {
-            // The API update must have been called from a timer. We may, or may not, get:
-            // - maybe, a new list of Last Played,
-            // - maybe, a new Queue
-            if (resMain.has("lp"))
-            {
-                val newLp = ArrayList<Song>()
-                if (resMain.has("lp"))
-                {
-                    val queueJSON = resMain.getJSONArray("lp")
-                    // get the new Last Played ArrayList
-                    for (i in 0 until queueJSON.length()) {
-                        val song = extractSong(queueJSON[(queueJSON.length() - 1) - i] as JSONObject)
-                        if (!lp.contains(song))
-                            lp.add(0, song)
-                    }
-                }
-                Log.d(playerStoreTag, "$lp")
-                isLpUpdated.value = true
-            }
-
-            if ((resMain.has("isafkstream") && !resMain.getBoolean("isafkstream")) &&
-                queue.isNotEmpty())
-            {
-                queue.clear() //we're not requesting anything anymore.
-                isQueueUpdated.value = true
-            } else if (resMain.has("isafkstream") && resMain.getBoolean("isafkstream") &&
-                queue.isEmpty())
-            {
-                initApi()
-            } else if (resMain.has("queue") && queue.isNotEmpty()) {
-                val queueJSON =
-                    resMain.getJSONArray("queue")
-                val t = extractSong(queueJSON[queueJSON.length() - 1] as JSONObject)
-                if (t == queue.last())
-                {
-                    Log.e(playerStoreTag, "Song already in there: $t")
-                    // We shouldn't reach there, since this should only be called when
-                    // the API has something new to offer.
-                    assert(false)
-                } else {
-                    queue.removeAt(0)
-                    queue.add(queue.size, t)
-                    Log.d(playerStoreTag, "added last queue song: $t")
-                    isQueueUpdated.value = true
-                }
-            }
-        }
-
     /* initApi is called :
         - at startup
         - when a streamer changes.
@@ -260,37 +210,54 @@ class PlayerStore {
     // ############## QUEUE / LP FUNCTIONS ##############
     // ##################################################
 
-    private fun updateLp() {
-        // note : lp must never be empty. There should always be some songs "last played".
-        // if not, then the function has been called before initialization. No need to do anything.
-        if (lp.isNotEmpty()) {
-            if (lp[0] != currentSongBackup)
-            {
-                val n = Song()
-                n.copy(currentSongBackup)
-                lp.add(0, n)
-                isLpUpdated.value = true
-                Log.d(playerStoreTag, "added last played ${lp[0]}")
-                Log.d(playerStoreTag, lp.toString())
-            }
-            else {
-                Log.d(playerStoreTag, "trying to add $currentSongBackup while it already exists. Skipping")
-            }
-        } else {
-            Log.d(playerStoreTag, "last played array is empty (this isn't normal unless it's prior to initialization)")
-        }
-    }
 
-    private fun updateQueue() {
-        if (queue.isNotEmpty()) {
-            queue.remove(queue.first())
-            Log.d(playerStoreTag, playerStoreTag + queue.toString())
-            fetchApiUntilUpToDateAsync()
+    private fun updateQueueAndLp(resMain: JSONObject)
+    {
+        // The API update must have been called from a timer. We may, or may not, get:
+        // - maybe, a new list of Last Played,
+        // - maybe, a new Queue
+        if (resMain.has("lp"))
+        {
+            val newLp = ArrayList<Song>()
+            if (resMain.has("lp"))
+            {
+                val queueJSON = resMain.getJSONArray("lp")
+                // get the new Last Played ArrayList
+                for (i in 0 until queueJSON.length()) {
+                    val song = extractSong(queueJSON[(queueJSON.length() - 1) - i] as JSONObject)
+                    if (!lp.contains(song))
+                        lp.add(0, song)
+                }
+            }
+            Log.d(playerStoreTag, "$lp")
+            isLpUpdated.value = true
+        }
+
+        if ((resMain.has("isafkstream") && !resMain.getBoolean("isafkstream")) &&
+            queue.isNotEmpty())
+        {
+            queue.clear() //we're not requesting anything anymore.
             isQueueUpdated.value = true
-        } else if (isInitialized) {
-            fetchApiUntilUpToDateAsync()
-        } else {
-            Log.d(playerStoreTag, playerStoreTag +  "queue is empty!")
+        } else if (resMain.has("isafkstream") && resMain.getBoolean("isafkstream") &&
+            queue.isEmpty())
+        {
+            initApi()
+        } else if (resMain.has("queue") && queue.isNotEmpty()) {
+            val queueJSON =
+                resMain.getJSONArray("queue")
+            val t = extractSong(queueJSON[queueJSON.length() - 1] as JSONObject)
+            if (t == queue.last())
+            {
+                Log.e(playerStoreTag, "Song already in there: $t")
+                // We shouldn't reach there, since this should only be called when
+                // the API has something new to offer.
+                assert(false)
+            } else {
+                queue.removeAt(0)
+                queue.add(queue.size, t)
+                Log.d(playerStoreTag, "added last queue song: $t")
+                isQueueUpdated.value = true
+            }
         }
     }
 
