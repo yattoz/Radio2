@@ -19,6 +19,7 @@ import androidx.constraintlayout.widget.ConstraintSet
 import androidx.core.text.HtmlCompat
 import androidx.core.widget.TextViewCompat
 import androidx.lifecycle.Observer
+import com.google.android.exoplayer2.Player
 import com.google.android.material.snackbar.BaseTransientBottomBar
 import com.google.android.material.snackbar.Snackbar
 import io.r_a_d.radio2.*
@@ -89,8 +90,13 @@ class NowPlayingFragment : Fragment() {
         })
 
         PlayerStore.instance.lastUpdated.observe(viewLifecycleOwner, Observer {
-            val s = PlayerStore.instance.tags.fold("", { first, element -> "$first $element" })
-            songTagsText.text = "tags: ${s.substring(1, s.length)}"
+            if (!PlayerStore.instance.isAfkStream)
+            {
+                songTagsText.text = "tags can't be displayed while a dj is on!"
+            } else {
+                val s = PlayerStore.instance.tags.fold("", { first, element -> "$first $element" })
+                songTagsText.text = "tags: ${if (s.isNotEmpty()) s.substring(1, s.length) else s}"
+            }
         })
 
         PlayerStore.instance.playbackState.observe(viewLifecycleOwner, Observer {
