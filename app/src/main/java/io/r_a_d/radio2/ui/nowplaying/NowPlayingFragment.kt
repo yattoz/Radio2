@@ -3,7 +3,6 @@ package io.r_a_d.radio2.ui.nowplaying
 import android.annotation.SuppressLint
 import android.content.ClipboardManager
 import android.content.Context
-import androidx.lifecycle.ViewModelProviders
 import android.os.Bundle
 import android.support.v4.media.session.PlaybackStateCompat
 import android.text.method.LinkMovementMethod
@@ -14,7 +13,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
-import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.core.text.HtmlCompat
 import androidx.core.widget.TextViewCompat

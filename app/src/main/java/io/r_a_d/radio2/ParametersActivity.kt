@@ -1,5 +1,7 @@
 package io.r_a_d.radio2
 
+import android.app.Service.STOP_FOREGROUND_REMOVE
+import android.os.Build
 import android.os.Bundle
 import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
@@ -22,10 +24,13 @@ class ParametersActivity : AppCompatActivity() {
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         supportActionBar?.title = getString(R.string.settings)
 
-        val extra = if (savedInstanceState == null) {
+        val extra: String? = if (savedInstanceState == null) {
             intent.extras?.getString("action")
         } else {
-            savedInstanceState.getSerializable("action") as String
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU)
+                savedInstanceState.getSerializable("action", String::class.java)
+            else
+                savedInstanceState.getSerializable("action") as String
         }
 
         val fragmentToLoad = when(extra) {
