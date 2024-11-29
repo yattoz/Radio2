@@ -85,6 +85,7 @@ class PlayerStore {
             val streamerPictureUrl =
                 "${urlToScrape}/dj-image/${resMain.getJSONObject("dj").getString("djimage")}"
             fetchPicture(streamerPictureUrl)
+
             streamerName.value = newStreamer
         }
         val listeners = resMain.getInt("listeners")
@@ -329,6 +330,7 @@ class PlayerStore {
 
     private fun fetchPicture(fileUrl: String)
     {
+        // TODO: replace with glide and support gif...
         val scrape: (Any?) -> Bitmap? = {
             var k: InputStream? = null
             var pic: Bitmap? = null

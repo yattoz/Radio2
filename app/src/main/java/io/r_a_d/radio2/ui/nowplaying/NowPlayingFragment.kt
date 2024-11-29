@@ -18,6 +18,7 @@ import androidx.core.text.HtmlCompat
 import androidx.core.widget.TextViewCompat
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
+import com.bumptech.glide.Glide
 import com.google.android.material.snackbar.BaseTransientBottomBar
 import com.google.android.material.snackbar.Snackbar
 import io.r_a_d.radio2.*
@@ -178,16 +179,45 @@ class NowPlayingFragment : Fragment() {
 
             val textLink = if (link.contains("https://ocv.me/up/") ) {
                 threadText.visibility = View.VISIBLE
+                binding.upNext.visibility = View.GONE
+                binding.textSongTitleNext.visibility = View.GONE
+                binding.textSongArtistNext.visibility = View.GONE
                 "<a href=\"https://ocv.me/up/\">Upload your request!</a>"
-            } else if (link.startsWith("http")&& !PlayerStore.instance.isAfkStream) {
+            } else if (link != "none" && !PlayerStore.instance.isAfkStream) {
                 threadText.visibility = View.VISIBLE
-                "<a href=\"$link\">Thread up!</a>"
+                binding.upNext.visibility = View.GONE
+                binding.textSongTitleNext.visibility = View.GONE
+                binding.textSongArtistNext.visibility = View.GONE
+                var reslink = ""
+                if (link.contains("<img src"))
+                {
+
+                    val reg = Regex("https:\\S*")
+                    val res = reg.find(link)?.value
+                    val res2 = res?.substring(0, res.length - 1)
+                    val threadImage = binding.threadImage
+                    threadImage.visibility = View.VISIBLE
+                    threadText.visibility = View.GONE
+                    Log.d(tag, "Loading $res2 into threadImage via Glide...")
+                    Glide.with(this).load(res2).into(threadImage);
+                    reslink = "<a href=\"$res2\">$res2</a>" // unused
+                } else if (link.contains("https://")) {
+                    val reg = Regex("https:\\S*")
+                    val res = reg.find(link)?.value
+                    val res2 = res?.substring(0, res.length - 1)
+                    reslink = "<a href=\"$res2\">res2</a>"
+                }
+                reslink
             } else {
                 threadText.visibility = View.GONE
+                binding.upNext.visibility = View.VISIBLE
+                binding.textSongTitleNext.visibility = View.VISIBLE
+                binding.textSongArtistNext.visibility = View.VISIBLE
                 ""
             }
             threadText.text = HtmlCompat.fromHtml(textLink, HtmlCompat.FROM_HTML_MODE_LEGACY)
             threadText.movementMethod = LinkMovementMethod.getInstance()
+
         })
 
 

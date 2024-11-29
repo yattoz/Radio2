@@ -84,5 +84,6 @@
     <string name="alarm_volume">Alarm volume</string>
     <string name="new_in_version">New in version %1$s</string>
     <string name="preferencestorelastversionchangelogshown">lastVersionChangelogShown</string>
+    <string name="image_for_thread">Image for thread</string>
 
 </resources>
