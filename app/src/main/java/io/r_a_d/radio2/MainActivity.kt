@@ -12,6 +12,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.widget.Toolbar
 import androidx.core.content.res.ResourcesCompat
+import androidx.core.text.HtmlCompat
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
 import androidx.navigation.NavController
@@ -23,6 +24,10 @@ import io.r_a_d.radio2.playerstore.PlayerStore
 import io.r_a_d.radio2.streamerNotificationService.WorkerStore
 import io.r_a_d.radio2.streamerNotificationService.startStreamerMonitor
 import io.r_a_d.radio2.ui.songs.request.Requestor
+import java.io.BufferedReader
+import java.io.IOException
+import java.io.InputStream
+import java.io.InputStreamReader
 import java.util.Timer
 
 
@@ -224,13 +229,43 @@ class MainActivity : BaseActivity() {
         if (previousVersion == thisVersion) {
             Log.d(MainActivityTag, "Already shown changelog. Skipping Alert.")
         } else {
+            // Get the AssetManager instance
+            val assetManager = assets
+
+            // Declare an InputStream and a BufferedReader for reading the file
+            var inputStream: InputStream? = null
+            var bufferedReader: BufferedReader? = null
+
+            // Declare a StringBuilder for storing the file contents
+            val stringBuilder = StringBuilder()
+            try {
+                // Open the file from the assets folder
+                inputStream = assetManager.open("changelogs/$thisVersion.html")
+                // Create a BufferedReader for reading the file line by line
+                bufferedReader = BufferedReader(InputStreamReader(inputStream))
+                // Read each line and append it to the StringBuilder
+                var line: String?
+                while ((bufferedReader.readLine().also { line = it }) != null) {
+                    stringBuilder.append(line).append("\n")
+                }
+                // Close the BufferedReader and the InputStream
+                bufferedReader.close()
+                inputStream.close()
+                // Get the TextView for displaying the file contents
+                // Set the text of the TextView to the file contents
+            } catch (e: IOException) {
+                // Handle the exception
+                e.printStackTrace()
+            }
 
             val alert = AlertDialog.Builder(this).also {
                 it.setIcon(R.drawable.lollipop_logo)
                 it.setTitle(getString(R.string.new_in_version, thisVersion))
-                it.setMessage("CHANGELOG")
+                val changelog = stringBuilder.toString()
+                val html = HtmlCompat.fromHtml(changelog, HtmlCompat.FROM_HTML_SEPARATOR_LINE_BREAK_PARAGRAPH)
+                it.setMessage(html)
                 it.setCancelable(false)
-                it.setPositiveButton("OK", DialogInterface.OnClickListener { dialog, which ->
+                it.setPositiveButton("OK", DialogInterface.OnClickListener { dialog, _ ->
                     preferenceStore.edit().putString(
                         getString(R.string.preferencestorelastversionchangelogshown),
                         thisVersion
