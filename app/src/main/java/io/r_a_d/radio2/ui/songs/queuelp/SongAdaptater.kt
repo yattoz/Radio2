@@ -3,6 +3,7 @@ package io.r_a_d.radio2.ui.songs.queuelp
 import android.annotation.SuppressLint
 import android.util.Log
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import io.r_a_d.radio2.colorBlue
@@ -46,6 +47,8 @@ class SongAdaptater(private val dataSet: ArrayList<Song>
                 binding.item.setTextColor(colorWhited)
                 binding.itemTime.setTextColor(colorWhited)
             }
+            // if dataSet.size = 1, it means we display "No Queue".
+            binding.itemTime.visibility = if (dataSet.size == 1) View.GONE else View.VISIBLE
         }
     }
 
