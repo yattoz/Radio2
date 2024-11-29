@@ -187,12 +187,6 @@ deps.android_gradle_plugin = "com.android.tools.build:gradle:$versions.android_g
 deps.robolectric = "org.robolectric:robolectric:$versions.robolectric"
 ext.deps = deps
 
-def build_versions = [:]
-build_versions.min_sdk = 14
-build_versions.target_sdk = 28
-build_versions.build_tools = "28.0.3"
-ext.build_versions = build_versions
-
 def work = [:]
 work.runtime = "androidx.work:work-runtime:$versions.work"
 work.testing = "androidx.work:work-testing:$versions.work"
