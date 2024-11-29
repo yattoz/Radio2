@@ -19,19 +19,20 @@ import androidx.constraintlayout.widget.ConstraintSet
 import androidx.core.text.HtmlCompat
 import androidx.core.widget.TextViewCompat
 import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProvider
 import com.google.android.material.snackbar.BaseTransientBottomBar
 import com.google.android.material.snackbar.Snackbar
 import io.r_a_d.radio2.*
 import io.r_a_d.radio2.alarm.RadioSleeper
+import io.r_a_d.radio2.databinding.FragmentNowplayingBinding
 import io.r_a_d.radio2.playerstore.PlayerStore
 import io.r_a_d.radio2.playerstore.Song
 
 
 class NowPlayingFragment : Fragment() {
 
-    private lateinit var root: View
     private lateinit var nowPlayingViewModel: NowPlayingViewModel
-
+    private lateinit var binding: FragmentNowplayingBinding
     var tagsVisibility: Int = View.GONE
 
     fun tagsVisibilityToggle() {
@@ -45,23 +46,23 @@ class NowPlayingFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
 
-        nowPlayingViewModel = ViewModelProviders.of(this).get(NowPlayingViewModel::class.java)
-        root = inflater.inflate(R.layout.fragment_nowplaying, container, false)
+        nowPlayingViewModel = ViewModelProvider(this)[NowPlayingViewModel::class.java]
+        binding = FragmentNowplayingBinding.inflate(inflater, container, false)
 
         // View bindings to the ViewModel
-        val songTitleText: TextView = root.findViewById(R.id.text_song_title)
-        val songArtistText: TextView = root.findViewById(R.id.text_song_artist)
-        val seekBarVolume: SeekBar = root.findViewById(R.id.seek_bar_volume)
-        val volumeText: TextView = root.findViewById(R.id.volume_text)
-        val progressBar: ProgressBar = root.findViewById(R.id.progressBar)
-        val streamerPictureImageView: ImageView = root.findViewById(R.id.streamerPicture)
-        val streamerNameText : TextView = root.findViewById(R.id.streamerName)
-        val songTitleNextText: TextView = root.findViewById(R.id.text_song_title_next)
-        val songArtistNextText: TextView = root.findViewById(R.id.text_song_artist_next)
-        val volumeIconImage : ImageView = root.findViewById(R.id.volume_icon)
-        val listenersText : TextView = root.findViewById(R.id.listenersCount)
-        val threadText : TextView = root.findViewById(R.id.thread)
-        val songTagsText : TextView = root.findViewById(R.id.text_song_tags)
+        val songTitleText: TextView = binding.textSongTitle
+        val songArtistText: TextView = binding.textSongArtist
+        val seekBarVolume: SeekBar = binding.seekBarVolume
+        val volumeText: TextView = binding.volumeText
+        val progressBar: ProgressBar = binding.progressBar
+        val streamerPictureImageView: ImageView = binding.streamerPicture
+        val streamerNameText : TextView = binding.streamerName
+        val songTitleNextText: TextView = binding.textSongTitleNext
+        val songArtistNextText: TextView = binding.textSongArtistNext
+        val volumeIconImage : ImageView = binding.volumeIcon
+        val listenersText : TextView = binding.listenersCount
+        val threadText : TextView = binding.thread
+        val songTagsText : TextView = binding.textSongTags
 
 
         TextViewCompat.setAutoSizeTextTypeUniformWithConfiguration(
@@ -70,14 +71,6 @@ class NowPlayingFragment : Fragment() {
             listenersText,8, 16, 2, TypedValue.COMPLEX_UNIT_SP)
         TextViewCompat.setAutoSizeTextTypeUniformWithConfiguration(
             threadText,8, 32, 2, TypedValue.COMPLEX_UNIT_SP)
-
-        /*
-        TextViewCompat.setAutoSizeTextTypeUniformWithConfiguration(
-            songTitleText,4, 24, 2, TypedValue.COMPLEX_UNIT_SP)
-        TextViewCompat.setAutoSizeTextTypeUniformWithConfiguration(
-            songArtistText,4, 24, 2, TypedValue.COMPLEX_UNIT_SP)
-         */
-
 
 
         PlayerStore.instance.currentSong.title.observe(viewLifecycleOwner, Observer {
@@ -99,7 +92,7 @@ class NowPlayingFragment : Fragment() {
         })
 
         PlayerStore.instance.playbackState.observe(viewLifecycleOwner, Observer {
-            syncPlayPauseButtonImage(root)
+            syncPlayPauseButtonImage()
         })
 
         // trick : I can't observe the queue because it's an ArrayDeque that doesn't trigger any change...
@@ -158,19 +151,19 @@ class NowPlayingFragment : Fragment() {
         })
 
         PlayerStore.instance.currentSong.stopTime.observe(viewLifecycleOwner, Observer {
-            val t : TextView= root.findViewById(R.id.endTime)
+            val t : TextView= binding.endTime
             val minutes: String = ((PlayerStore.instance.currentSong.stopTime.value!! - PlayerStore.instance.currentSong.startTime.value!!)/60/1000).toString()
             val seconds: String = ((PlayerStore.instance.currentSong.stopTime.value!! - PlayerStore.instance.currentSong.startTime.value!!)/1000%60).toString()
             t.text = "$minutes:${if (seconds.toInt() < 10) "0" else ""}$seconds"
         })
 
         PlayerStore.instance.currentTime.observe(viewLifecycleOwner, Observer {
-            val t : TextView= root.findViewById(R.id.currentTime)
+            val t : TextView= binding.currentTime
             val minutes: String = ((PlayerStore.instance.currentTime.value!! - PlayerStore.instance.currentSong.startTime.value!!)/60/1000).toString()
             val seconds: String = ((PlayerStore.instance.currentTime.value!! - PlayerStore.instance.currentSong.startTime.value!!)/1000%60).toString()
             t.text = "$minutes:${if (seconds.toInt() < 10) "0" else ""}$seconds"
 
-            val sleepInfoText = root.findViewById<TextView>(R.id.sleepInfo)
+            val sleepInfoText = binding.sleepInfo
             val sleepAtMillis = RadioSleeper.instance.sleepAtMillis.value
             if (sleepAtMillis != null)
             {
@@ -208,12 +201,12 @@ class NowPlayingFragment : Fragment() {
 
 
 
-        syncPlayPauseButtonImage(root)
+        syncPlayPauseButtonImage()
 
         // initialize the value for isPlaying when displaying the fragment
         PlayerStore.instance.isPlaying.value = PlayerStore.instance.playbackState.value == PlaybackStateCompat.STATE_PLAYING
 
-        val button: ImageButton = root.findViewById(R.id.play_pause)
+        val button: ImageButton = binding.playPause
         button.setOnClickListener{
             PlayerStore.instance.isPlaying.value = PlayerStore.instance.playbackState.value == PlaybackStateCompat.STATE_STOPPED
         }
@@ -268,17 +261,17 @@ class NowPlayingFragment : Fragment() {
         songTagsText.setOnClickListener(showTagsListener)
 
         if (preferenceStore.getBoolean("splitLayout", true))
-            root.addOnLayoutChangeListener(splitLayoutListener)
+            binding.root.addOnLayoutChangeListener(splitLayoutListener)
 
-        return root
+        return binding.root
     }
 
     private val splitLayoutListener : View.OnLayoutChangeListener = View.OnLayoutChangeListener { _: View, _: Int, _: Int, _: Int, _: Int, _: Int, _: Int, _: Int, _: Int ->
 
         val isSplitLayout = preferenceStore.getBoolean("splitLayout", true)
 
-        val viewHeight = (root.rootView?.height ?: 1)
-        val viewWidth = (root.rootView?.width ?: 1)
+        val viewHeight = (binding.root.rootView?.height ?: 1)
+        val viewWidth = (binding.root.rootView?.width ?: 1)
 
         val newRatio = if (viewWidth > 0)
             (viewHeight*100)/viewWidth
@@ -296,14 +289,14 @@ class NowPlayingFragment : Fragment() {
     }
 
     private fun onOrientation() {
-        val viewHeight = (root.rootView?.height ?: 1)
-        val viewWidth = (root.rootView?.width ?: 1)
+        val viewHeight = (binding.root.rootView?.height ?: 1)
+        val viewWidth = (binding.root.rootView?.width ?: 1)
 
         val isSplitLayout = preferenceStore.getBoolean("splitLayout", true)
 
         // modify layout to adapt for portrait/landscape
         val isLandscape = viewHeight.toDouble()/viewWidth.toDouble() < 1
-        val parentLayout = root.findViewById<ConstraintLayout>(R.id.parentNowPlaying)
+        val parentLayout = binding.parentNowPlaying
         val constraintSet = ConstraintSet()
         constraintSet.clone(parentLayout)
 
@@ -339,9 +332,9 @@ class NowPlayingFragment : Fragment() {
         onOrientation()
     }
 
-    private fun syncPlayPauseButtonImage(v: View)
+    private fun syncPlayPauseButtonImage()
     {
-        val img = v.findViewById<ImageButton>(R.id.play_pause)
+        val img = binding.playPause
 
         if (PlayerStore.instance.playbackState.value == PlaybackStateCompat.STATE_STOPPED) {
             img.setImageResource(R.drawable.baseline_play_arrow_24)
