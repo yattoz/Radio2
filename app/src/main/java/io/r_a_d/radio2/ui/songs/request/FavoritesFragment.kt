@@ -17,6 +17,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import io.r_a_d.radio2.*
+import io.r_a_d.radio2.databinding.FragmentRequestBinding
 
 
 class FavoritesFragment : Fragment()  {
@@ -25,12 +26,12 @@ class FavoritesFragment : Fragment()  {
     private lateinit var viewAdapter: RecyclerView.Adapter<*>
     private lateinit var viewManager: RecyclerView.LayoutManager
     private lateinit var searchView: SearchView
-    private lateinit var root: View
     private lateinit var recyclerSwipe: SwipeRefreshLayout
+    private lateinit var binding: FragmentRequestBinding
 
     private val favoritesSongObserver : Observer<Boolean> = Observer {
         viewAdapter.notifyDataSetChanged()
-        createView(isCallback = true) // force-re-create the view, but do not call again the initFavorites (avoid callback loop)
+        createView(binding, isCallback = true) // force-re-create the view, but do not call again the initFavorites (avoid callback loop)
         recyclerSwipe.isRefreshing = false // disable refreshing animation. Needs to be done manually...
     }
 
@@ -40,19 +41,19 @@ class FavoritesFragment : Fragment()  {
         savedInstanceState: Bundle?
     ): View? {
         super.onCreateView(inflater, container, savedInstanceState)
-        root = inflater.inflate(R.layout.fragment_request, container, false)
+        binding = FragmentRequestBinding.inflate(inflater, container, false)
 
-        return createView()
+        return createView(binding)
     }
 
-    private fun createView(isCallback: Boolean = false) : View?
+    private fun createView(binding: FragmentRequestBinding, isCallback: Boolean = false) : View?
     {
 
         viewAdapter = RequestSongAdapter(Requestor.instance.favoritesSongArray)
 
         val listener : SearchView.OnQueryTextListener = object : SearchView.OnQueryTextListener{
             override fun onQueryTextSubmit(query: String?): Boolean {
-                hideKeyboard()
+                searchView.clearFocus()
                 return true
             }
             override fun onQueryTextChange(newText: String?): Boolean {
@@ -62,11 +63,11 @@ class FavoritesFragment : Fragment()  {
             }
         }
 
-        searchView = root.findViewById(R.id.searchBox)
+        searchView = binding.searchBox
         searchView.queryHint = "Search filter..."
         searchView.setOnQueryTextListener(listener)
         viewManager = LinearLayoutManager(context)
-        recyclerView = root.findViewById<RecyclerView>(R.id.request_recycler).apply {
+        recyclerView = binding.requestRecycler.apply {
             // use this setting to improve performance if you know that changes
             // in content do not change the layout size of the RecyclerView
             setHasFixedSize(true)
@@ -78,9 +79,9 @@ class FavoritesFragment : Fragment()  {
             adapter = viewAdapter
         }
 
-        val noUserNameText : TextView = root.findViewById(R.id.noUserNameText)
+        val noUserNameText : TextView = binding.noUserNameText
 
-        recyclerSwipe = root.findViewById(R.id.recyclerSwipe) as SwipeRefreshLayout
+        recyclerSwipe = binding.recyclerSwipe
         recyclerSwipe.setOnRefreshListener {
             val userName1 = preferenceStore.getString("userName", null)
             Log.d(tag,"userName = $userName1")
@@ -107,17 +108,16 @@ class FavoritesFragment : Fragment()  {
             recyclerSwipe.isRefreshing = false
         }
 
-        val raFButton : AppCompatButton = root.findViewById(R.id.ra_f_button)
+        val raFButton : AppCompatButton = binding.raFButton
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) // for API21+ Material Design makes ripples on the button.
-            raFButton.supportBackgroundTintList = colorGreenList
+            raFButton.backgroundTintList = colorGreenList
         else // But on API20- no Material Design support, so we add some more color when clicked
-            raFButton.supportBackgroundTintList = colorGreenListCompat
+            androidx.core.view.ViewCompat.setBackgroundTintList(raFButton, colorGreenListCompat)
         raFButton.isEnabled = true
         raFButton.isClickable = true
         raFButton.setOnClickListener {
-            hideKeyboard()
-            
+            searchView.clearFocus()
             val s  = Requestor.instance.raF()
             Requestor.instance.snackBarText.value = ""
             Requestor.instance.addRequestMeta = "Request: ${s.artist.value} - ${s.title.value}\n"
@@ -126,14 +126,13 @@ class FavoritesFragment : Fragment()  {
         raFButton.visibility = View.VISIBLE
 
         Requestor.instance.isFavoritesUpdated.observe(viewLifecycleOwner, favoritesSongObserver)
-        return root
+        return binding.root
     }
 
-    private fun hideKeyboard() {
-        val imm = context?.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-        imm.hideSoftInputFromWindow(searchView.windowToken, 0)
+    override fun onPause() {
+        super.onPause()
+        searchView.clearFocus() // hides soft keyboard too.
     }
-
 
     companion object {
         @JvmStatic

@@ -59,16 +59,17 @@ class RequestSongAdapter(private val dataSet: ArrayList<Song>
 
             if (dataSet[position].isRequestable) {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) // for API21+ Material Design makes ripples on the button.
-                    button.supportBackgroundTintList = colorGreenList
+                    button.backgroundTintList = colorGreenList
                 else // But on API20- no Material Design support, so we add some more color when clicked
-                    button.supportBackgroundTintList = colorGreenListCompat
+                    androidx. core. view. ViewCompat. setBackgroundTintList(button, colorGreenListCompat)
                 button.isEnabled = true
                 button.isClickable = true
                 button.setOnClickListener {
                     Requestor.instance.request(dataSet[position].id)
                 }
             } else {
-                button.supportBackgroundTintList = colorRedList
+                // button.backgroundTintList = colorRedList //< API21+ only
+                androidx.core.view.ViewCompat.setBackgroundTintList(button, colorRedList)
                 button.isEnabled = false
                 button.isClickable = false
             }
