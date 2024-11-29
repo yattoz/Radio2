@@ -16,9 +16,9 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
 import androidx.navigation.NavController
 import androidx.navigation.ui.setupActionBarWithNavController
-import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.snackbar.Snackbar
 import io.r_a_d.radio2.alarm.RadioAlarm
+import io.r_a_d.radio2.databinding.ActivityMainBinding
 import io.r_a_d.radio2.playerstore.PlayerStore
 import io.r_a_d.radio2.streamerNotificationService.WorkerStore
 import io.r_a_d.radio2.streamerNotificationService.startStreamerMonitor
@@ -39,12 +39,13 @@ class MainActivity : BaseActivity() {
     private val clockTicker: Timer = Timer()
     private var currentNavController: LiveData<NavController>? = null
     private var isTimerStarted = false
+    private lateinit var binding: ActivityMainBinding
 
     /**
      * Called on first creation and when restoring state.
      */
     private fun setupBottomNavigationBar() {
-        val bottomNavigationView = findViewById<BottomNavigationView>(R.id.bottom_nav)
+        val bottomNavigationView = binding.bottomNav
 
         //val navGraphIds = listOf(R.navigation.home, R.navigation.list, R.navigation.form)
 
@@ -89,7 +90,7 @@ class MainActivity : BaseActivity() {
                 PlayerStore.instance.lp.clear()
                 PlayerStore.instance.initApi()
                 Requestor.instance.initFavorites()
-                val s = Snackbar.make(findViewById(R.id.nav_host_container), "Refreshing data..." as CharSequence, Snackbar.LENGTH_LONG)
+                val s = Snackbar.make(binding.navHostContainer, "Refreshing data..." as CharSequence, Snackbar.LENGTH_LONG)
                 s.show()
                 true
             }
@@ -133,6 +134,7 @@ class MainActivity : BaseActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        binding = ActivityMainBinding.inflate(this.layoutInflater)
 
         WorkerStore.instance.init(this)
         startStreamerMonitor(this) // this checks the preferenceStore before actually starting a service, don't worry.
@@ -189,10 +191,10 @@ class MainActivity : BaseActivity() {
         } else {
             setTheme(R.style.AppTheme)
         }
-        setContentView(R.layout.activity_main)
+        setContentView(binding.root)
         attachKeyboardListeners()
 
-        val toolbar : Toolbar = findViewById(R.id.toolbar)
+        val toolbar : Toolbar = binding.toolbar
 
         // before setting up the bottom bar, we must declare the top bar that will be used by the bottom bar to display titles.
         setSupportActionBar(toolbar)

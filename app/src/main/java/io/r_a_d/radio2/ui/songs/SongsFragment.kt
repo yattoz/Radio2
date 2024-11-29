@@ -14,6 +14,7 @@ import com.google.android.material.snackbar.BaseTransientBottomBar
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.tabs.TabLayout
 import io.r_a_d.radio2.R
+import io.r_a_d.radio2.databinding.FragmentSongsBinding
 import io.r_a_d.radio2.preferenceStore
 import io.r_a_d.radio2.ui.songs.queuelp.LastPlayedFragment
 import io.r_a_d.radio2.ui.songs.queuelp.QueueFragment
@@ -25,8 +26,8 @@ class SongsFragment : Fragment() {
 
     private lateinit var adapter : SongsPagerAdapter
     private lateinit var snackBar : Snackbar
-    private lateinit var root: View
     private lateinit var viewPager: ViewPager
+    private lateinit var binding: FragmentSongsBinding
 
 
     private val snackBarTextObserver: Observer<String?> = Observer {
@@ -38,7 +39,7 @@ class SongsFragment : Fragment() {
             snackBar = Snackbar.make(viewPager, "", snackBarLength)
 
             if (snackBarLength == Snackbar.LENGTH_INDEFINITE)
-            snackBar.setAction("OK") {
+                snackBar.setAction("OK") {
                 snackBar.dismiss()
             }
 
@@ -47,8 +48,7 @@ class SongsFragment : Fragment() {
             }
 
             val snackBarView = snackBar.view
-            val textView =
-                snackBarView.findViewById(com.google.android.material.R.id.snackbar_text) as TextView
+            val textView: TextView = snackBarView.findViewById(com.google.android.material.R.id.snackbar_text)
             if (Requestor.instance.addRequestMeta != "")
                 textView.maxLines = 4
             else
@@ -66,8 +66,8 @@ class SongsFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
 
-        root = inflater.inflate(R.layout.fragment_songs, container, false)
-        viewPager = root.findViewById(R.id.tabPager)
+        binding = FragmentSongsBinding.inflate(inflater, container, false)
+        viewPager = binding.tabPager
         adapter = SongsPagerAdapter(childFragmentManager, FragmentPagerAdapter.BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT)
         adapter.addFragment(LastPlayedFragment.newInstance(), "last played")
         adapter.addFragment(QueueFragment.newInstance(), "queue")
@@ -76,13 +76,13 @@ class SongsFragment : Fragment() {
 
         viewPager.adapter = adapter
 
-        val tabLayout : TabLayout = root.findViewById(R.id.tabLayout)
+        val tabLayout : TabLayout = binding.tabLayout
         tabLayout.setupWithViewPager(viewPager)
         Log.d(tag, "SongFragment view created")
 
         Requestor.instance.snackBarText.observeForever(snackBarTextObserver)
 
-        return root
+        return binding.root
     }
 
     override fun onDestroyView() {
