@@ -2,16 +2,12 @@ package io.r_a_d.radio2.ui.news
 
 import android.annotation.SuppressLint
 import android.text.method.LinkMovementMethod
-import android.widget.TextView
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.text.HtmlCompat
 import androidx.core.widget.TextViewCompat
 import androidx.recyclerview.widget.RecyclerView
-import io.r_a_d.radio2.R
 import io.r_a_d.radio2.databinding.NewsViewBinding
-import io.r_a_d.radio2.playerstore.Song
 import kotlin.collections.ArrayList
 
 class NewsAdapter(private val dataSet: ArrayList<News>

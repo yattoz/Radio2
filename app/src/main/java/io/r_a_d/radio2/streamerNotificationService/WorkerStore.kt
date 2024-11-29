@@ -2,11 +2,8 @@ package io.r_a_d.radio2.streamerNotificationService
 
 import android.content.Context
 import android.util.Log
-import androidx.core.app.NotificationCompat
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.Observer
 import androidx.preference.PreferenceManager
-import io.r_a_d.radio2.R
 import io.r_a_d.radio2.tag
 
 class WorkerStore {

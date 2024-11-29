@@ -9,7 +9,6 @@ import android.view.ViewGroup
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import io.r_a_d.radio2.R
 import io.r_a_d.radio2.databinding.FragmentLastPlayedBinding
 import io.r_a_d.radio2.playerstore.PlayerStore
 

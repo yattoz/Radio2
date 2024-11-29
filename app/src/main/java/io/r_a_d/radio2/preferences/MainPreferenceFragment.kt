@@ -5,7 +5,6 @@ import android.net.Uri
 import android.os.Bundle
 import io.r_a_d.radio2.R
 import android.annotation.SuppressLint
-import android.content.Context
 import androidx.appcompat.app.AppCompatActivity
 import androidx.preference.*
 

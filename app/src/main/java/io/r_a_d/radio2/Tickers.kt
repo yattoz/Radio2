@@ -1,7 +1,6 @@
 package io.r_a_d.radio2
 
 import android.support.v4.media.session.PlaybackStateCompat
-import io.r_a_d.radio2.alarm.RadioSleeper
 import io.r_a_d.radio2.playerstore.PlayerStore
 import java.util.*
 

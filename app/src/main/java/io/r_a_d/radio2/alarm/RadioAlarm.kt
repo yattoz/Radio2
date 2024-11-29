@@ -10,13 +10,10 @@ import android.os.Build
 import android.provider.Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM
 import android.util.Log
 import androidx.core.app.AlarmManagerCompat
-import androidx.core.content.ContentProviderCompat.requireContext
-import androidx.core.content.ContextCompat
 import io.r_a_d.radio2.BootBroadcastReceiver
 import androidx.preference.PreferenceManager
 import io.r_a_d.radio2.*
 import java.util.*
-import kotlin.collections.ArrayList
 
 class RadioAlarm {
 

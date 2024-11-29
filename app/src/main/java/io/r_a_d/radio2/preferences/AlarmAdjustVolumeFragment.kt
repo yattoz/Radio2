@@ -5,15 +5,11 @@ import android.content.Intent
 import android.media.AudioManager
 import android.os.Bundle
 import android.view.KeyEvent
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
-import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.PreferenceManager
 import androidx.preference.SeekBarPreference
-import androidx.preference.SwitchPreferenceCompat
 import io.r_a_d.radio2.Actions
 import io.r_a_d.radio2.R
 import io.r_a_d.radio2.RadioService

@@ -6,7 +6,6 @@ import android.graphics.BitmapFactory
 import android.support.v4.media.session.PlaybackStateCompat
 import android.util.Log
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
 import io.r_a_d.radio2.*
 import org.json.JSONObject
 import java.io.IOException

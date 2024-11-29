@@ -13,7 +13,6 @@ import androidx.viewpager.widget.ViewPager
 import com.google.android.material.snackbar.BaseTransientBottomBar
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.tabs.TabLayout
-import io.r_a_d.radio2.R
 import io.r_a_d.radio2.databinding.FragmentSongsBinding
 import io.r_a_d.radio2.preferenceStore
 import io.r_a_d.radio2.ui.songs.queuelp.LastPlayedFragment

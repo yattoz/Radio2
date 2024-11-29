@@ -1,6 +1,5 @@
 package io.r_a_d.radio2
 
-import android.app.Service.STOP_FOREGROUND_REMOVE
 import android.os.Build
 import android.os.Bundle
 import android.view.MenuItem

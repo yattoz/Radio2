@@ -4,7 +4,6 @@ import androidx.lifecycle.MutableLiveData
 
 class Song(artistTitle: String = "", _id : Int = 0, _isRequestable : Boolean = false) {
 
-    // TODO : remove MutableLiveData, use a MutableLiveData Boolean on PlayerStore instead
     val title: MutableLiveData<String> = MutableLiveData()
     val artist: MutableLiveData<String> = MutableLiveData()
     val type: MutableLiveData<Int> = MutableLiveData()

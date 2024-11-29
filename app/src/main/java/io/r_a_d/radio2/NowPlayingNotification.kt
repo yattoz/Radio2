@@ -8,7 +8,6 @@ import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.media.session.PlaybackStateCompat
 import androidx.core.app.NotificationCompat
 import io.r_a_d.radio2.playerstore.PlayerStore
-import io.r_a_d.radio2.BootBroadcastReceiver
 
 class NowPlayingNotification(
     notificationChannelId: String,

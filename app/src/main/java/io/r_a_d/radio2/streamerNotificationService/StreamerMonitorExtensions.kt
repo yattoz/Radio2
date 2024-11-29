@@ -3,7 +3,6 @@ package io.r_a_d.radio2.streamerNotificationService
 import android.app.AlarmManager
 import android.app.PendingIntent
 import android.app.PendingIntent.FLAG_IMMUTABLE
-import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.os.Build
@@ -12,8 +11,6 @@ import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.preference.PreferenceManager
 import io.r_a_d.radio2.*
-import io.r_a_d.radio2.alarm.RadioAlarm
-import io.r_a_d.radio2.playerstore.PlayerStore
 import org.json.JSONObject
 import java.net.URL
 
