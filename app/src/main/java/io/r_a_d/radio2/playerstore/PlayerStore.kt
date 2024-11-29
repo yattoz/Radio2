@@ -246,7 +246,7 @@ class PlayerStore {
             val queueJSON =
                 resMain.getJSONArray("queue")
             for (i in 0 until queueJSON.length()) {
-                val song = extractSong(queueJSON[(queueJSON.length() - 1) - i] as JSONObject)
+                val song = extractSong(queueJSON[i] as JSONObject)
                 if (!queue.contains(song)) {
                     queue.removeAt(0)
                     queue.add(queue.size, song)
