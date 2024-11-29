@@ -17,11 +17,10 @@ class ParametersActivity : AppCompatActivity() {
         binding = ActivityParametersBinding.inflate(this.layoutInflater)
         // UI Launch
         setTheme(R.style.AppTheme_Parameters)
-        setContentView(R.layout.activity_parameters)
+
 
         // my_child_toolbar is defined in the layout file
         setSupportActionBar(binding.parametersToolbar)
-
         // Get a support ActionBar corresponding to this toolbar and enable the Up button
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         supportActionBar?.title = getString(R.string.settings)
@@ -48,6 +47,8 @@ class ParametersActivity : AppCompatActivity() {
             .beginTransaction()
             .replace(R.id.parameters_host_container, fragmentToLoad)
             .commit()
+
+        setContentView(binding.root)
     }
 
     // Make the Up button function as back instead of always bringing us to the main activity
