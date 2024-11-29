@@ -1,20 +1,10 @@
-apply plugin: 'com.android.application'
-
-apply plugin: 'kotlin-android'
-apply plugin: 'kotlin-kapt'
-
-
-
-configurations.configureEach {
-    resolutionStrategy.eachDependency { DependencyResolveDetails details ->
-        def requested = details.requested
-        if (requested.group == "androidx") {
-            if (!requested.name.startsWith("multidex")) {
-                details.useVersion "${targetSdk}.+"
-            }
-        }
-    }
+plugins {
+    alias(libs.plugins.android.application)
+    alias(libs.plugins.kotlin.android)
+    // Compose Plugin only available starting Kotlin 2.0+
+    // alias(libs.plugins.kotlin.compose)
 }
+
 
 android {
     namespace = "io.r_a_d.radio2"
@@ -66,82 +56,209 @@ android {
     }
 }
 
+configurations.configureEach {
+    resolutionStrategy.eachDependency { DependencyResolveDetails details ->
+        def requested = details.requested
+        if (requested.group == "androidx") {
+            if (!requested.name.startsWith("multidex")) {
+                details.useVersion "${targetSdk}.+"
+            }
+        }
+    }
+}
+
+
+//////////////////////////////////////////////////////////
+
+
+/**
+ * Shared file between builds so that they can all use the same dependencies and
+ * maven repositories.
+ **/
+ext.deps = [:]
+def versions = [:]
+versions.activity = '1.0.0-rc01'
+versions.android_gradle_plugin = '3.4.0'
+versions.apache_commons = "2.5"
+versions.appcompat = '1.1.0'
+versions.arch_core = '2.1.0'
+versions.atsl_core = "1.2.0"
+versions.atsl_junit = "1.1.1"
+versions.atsl_rules = "1.2.0"
+versions.atsl_runner = "1.2.0"
+versions.benchmark = "1.0.0-beta01"
+versions.constraint_layout = '2.0.0-beta3'
+versions.core_ktx = '1.1.0'
+versions.dagger = "2.16"
+versions.dexmaker = "2.2.0"
+versions.espresso = "3.2.0"
+versions.fragment = "1.2.0-alpha02"
+versions.glide = "4.8.0"
+versions.hamcrest = "1.3"
+versions.junit = "4.12"
+versions.kotlin = "1.3.50"
+versions.lifecycle = "2.2.0-alpha03"
+versions.mockito = "2.25.0"
+versions.mockito_all = "1.10.19"
+versions.mockito_android = "2.25.0"
+versions.mockwebserver = "3.8.1"
+versions.navigation = '2.2.0-rc01'
+versions.okhttp_logging_interceptor = "3.9.0"
+versions.paging = "2.1.0-rc01"
+versions.retrofit = "2.3.0"
+versions.robolectric = "4.2"
+versions.room = '2.2.1'
+versions.rx_android = "2.0.1"
+versions.rxjava2 = "2.1.3"
+versions.support = "1.0.0"
+versions.timber = "4.5.1"
+versions.work = "2.2.0"
+ext.versions = versions
+
+def deps = [:]
+deps.benchmark = "androidx.benchmark:benchmark-junit4:$versions.benchmark"
+deps.benchmark_gradle = "androidx.benchmark:benchmark-gradle-plugin:$versions.benchmark"
+
+def room = [:]
+room.runtime = "androidx.room:room-runtime:$versions.room"
+room.compiler = "androidx.room:room-compiler:$versions.room"
+room.rxjava2 = "androidx.room:room-rxjava2:$versions.room"
+room.testing = "androidx.room:room-testing:$versions.room"
+deps.room = room
+
+def lifecycle = [:]
+lifecycle.runtime = "androidx.lifecycle:lifecycle-runtime:$versions.lifecycle"
+lifecycle.java8 = "androidx.lifecycle:lifecycle-common-java8:$versions.lifecycle"
+lifecycle.compiler = "androidx.lifecycle:lifecycle-compiler:$versions.lifecycle"
+lifecycle.viewmodel_ktx = "androidx.lifecycle:lifecycle-viewmodel-ktx:$versions.lifecycle"
+lifecycle.livedata_ktx = "androidx.lifecycle:lifecycle-livedata-ktx:$versions.lifecycle"
+deps.lifecycle = lifecycle
+
+def activity = [:]
+activity.activity_ktx = "androidx.activity:activity-ktx:$versions.activity"
+deps.activity = activity
+
+
+def retrofit = [:]
+retrofit.runtime = "com.squareup.retrofit2:retrofit:$versions.retrofit"
+retrofit.gson = "com.squareup.retrofit2:converter-gson:$versions.retrofit"
+retrofit.mock = "com.squareup.retrofit2:retrofit-mock:$versions.retrofit"
+deps.retrofit = retrofit
+deps.okhttp_logging_interceptor = "com.squareup.okhttp3:logging-interceptor:${versions.okhttp_logging_interceptor}"
+
+def dagger = [:]
+dagger.runtime = "com.google.dagger:dagger:$versions.dagger"
+dagger.android = "com.google.dagger:dagger-android:$versions.dagger"
+dagger.android_support = "com.google.dagger:dagger-android-support:$versions.dagger"
+dagger.compiler = "com.google.dagger:dagger-compiler:$versions.dagger"
+dagger.android_support_compiler = "com.google.dagger:dagger-android-processor:$versions.dagger"
+deps.dagger = dagger
+
+def espresso = [:]
+espresso.core = "androidx.test.espresso:espresso-core:$versions.espresso"
+espresso.contrib = "androidx.test.espresso:espresso-contrib:$versions.espresso"
+espresso.intents = "androidx.test.espresso:espresso-intents:$versions.espresso"
+deps.espresso = espresso
+
+def atsl = [:]
+atsl.core = "androidx.test:core:$versions.atsl_core"
+atsl.ext_junit = "androidx.test.ext:junit:$versions.atsl_junit"
+atsl.runner = "androidx.test:runner:$versions.atsl_runner"
+atsl.rules = "androidx.test:rules:$versions.atsl_rules"
+deps.atsl = atsl
+
+def mockito = [:]
+mockito.core = "org.mockito:mockito-core:$versions.mockito"
+mockito.all = "org.mockito:mockito-all:$versions.mockito_all"
+mockito.android = "org.mockito:mockito-android:$versions.mockito_android"
+deps.mockito = mockito
+
+deps.paging_ktx = "androidx.paging:paging-runtime-ktx:$versions.paging"
+
+def glide = [:]
+glide.runtime = "com.github.bumptech.glide:glide:$versions.glide"
+glide.compiler = "com.github.bumptech.glide:compiler:$versions.glide"
+deps.glide = glide
+deps.dexmaker = "com.linkedin.dexmaker:dexmaker-mockito:$versions.dexmaker"
+deps.timber = "com.jakewharton.timber:timber:$versions.timber"
+deps.junit = "junit:junit:$versions.junit"
+deps.mock_web_server = "com.squareup.okhttp3:mockwebserver:$versions.mockwebserver"
+deps.rxjava2 = "io.reactivex.rxjava2:rxjava:$versions.rxjava2"
+deps.rx_android = "io.reactivex.rxjava2:rxandroid:$versions.rx_android"
+deps.hamcrest = "org.hamcrest:hamcrest-all:$versions.hamcrest"
+deps.android_gradle_plugin = "com.android.tools.build:gradle:$versions.android_gradle_plugin"
+deps.robolectric = "org.robolectric:robolectric:$versions.robolectric"
+ext.deps = deps
+
+
+/////////////////////////////////////////////////////////
+
 dependencies {
 
-    testImplementation 'junit:junit:4.13.2'
-    def multidex_version = "2.0.1"
-    implementation "androidx.multidex:multidex:$multidex_version"
+    implementation libs.junit
+    implementation libs.multidex
+    implementation libs.androidx.media
+    implementation libs.androidx.media3.exoplayer
+    implementation libs.androidx.legacy
+    implementation libs.androidx.lifecycle.extensions
+    implementation libs.androidx.lifecycle.viewmodel.ktx
 
-    implementation fileTree(dir: 'libs', include: ['*.jar'])
-    /*
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
-    implementation 'androidx.appcompat:appcompat:1.1.0'
-    implementation 'androidx.core:core-ktx:1.1.0'
-    implementation 'com.google.android.material:material:1.0.0'
-    implementation 'androidx.constraintlayout:constraintlayout:1.1.3'
-    implementation 'androidx.navigation:navigation-fragment-ktx:2.1.0'
-    implementation 'androidx.navigation:navigation-ui-ktx:2.1.0'
-    implementation 'androidx.vectordrawable:vectordrawable:1.1.0'
-
-    implementation 'androidx.lifecycle:lifecycle-extensions:2.1.0'
-    implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.1.0'
-
-
-
-     */
-    testImplementation 'junit:junit:4.13.2'
-    androidTestImplementation 'androidx.test.ext:junit:1.2.1'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.6.1'
-
-    implementation "androidx.media:media:1.5.0"
-    implementation 'androidx.media3:media3-exoplayer:1.1.1'
-    implementation 'androidx.legacy:legacy-support-v4:1.0.0'
-    implementation 'androidx.lifecycle:lifecycle-extensions:2.2.0'
-    implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.8.7'
-
-    implementation 'androidx.recyclerview:recyclerview:1.3.2'
-    implementation 'androidx.preference:preference-ktx:1.2.1'
-
-    // jsoup HTML parser library @ https://jsoup.org/
-    // implementation 'org.jsoup:jsoup:1.12.1'
-
-    // Note: version 2.10.0 and up can only support API 21+.
-    implementation "androidx.work:work-runtime-ktx:2.9.1"
-
-    implementation "androidx.activity:activity-ktx:1.9.3"
+    implementation libs.androidx.recyclerview
+    implementation libs.androidx.preference.ktx
+    implementation libs.androidx.work.runtime.ktx
+    implementation libs.androidx.activity.ktx
 
     // Note: updating androidx.fragment:fragment-ktx to 1.5.0 and up makes the app logo
     // imprinted over every fragment, for some reason. I would have to read the changelog for 1.5.0
     // to understand why this happens and how to fix it. One day.
     // TODO: must debug this
-    implementation "androidx.fragment:fragment-ktx:1.4.0"
+    implementation libs.androidx.fragment.ktx
+    implementation libs.kotlin.stdlib
 
-    // new implems
-    implementation deps.kotlin.stdlib
+    def support = [:]
+    support.annotations = "androidx.annotation:annotation:$versions.support"
+    support.app_compat = "androidx.appcompat:appcompat:$versions.appcompat"
+    support.recyclerview = "androidx.recyclerview:recyclerview:$versions.support"
+    support.cardview = "androidx.cardview:cardview:$versions.support"
+    support.design = "com.google.android.material:material:$versions.support"
+    support.core_utils = "androidx.legacy:legacy-support-core-utils:$versions.support"
+    support.core_ktx = "androidx.core:core-ktx:$versions.core_ktx"
+    support.fragment_runtime = "androidx.fragment:fragment:${versions.fragment}"
+    support.fragment_runtime_ktx = "androidx.fragment:fragment-ktx:${versions.fragment}"
+    support.fragment_testing = "androidx.fragment:fragment-testing:${versions.fragment}"
+    deps.support = support
     implementation deps.support.app_compat
     implementation deps.support.design
     implementation deps.support.core_ktx
+
+    deps.constraint_layout = "androidx.constraintlayout:constraintlayout:$versions.constraint_layout"
     implementation deps.constraint_layout
+
+    def arch_core = [:]
+    arch_core.runtime = "androidx.arch.core:core-runtime:$versions.arch_core"
+    arch_core.testing = "androidx.arch.core:core-testing:$versions.arch_core"
+    deps.arch_core = arch_core
     implementation deps.arch_core.runtime
 
     // Navigation
+    def navigation = [:]
+    navigation.runtime = "androidx.navigation:navigation-runtime:$versions.navigation"
+    navigation.runtime_ktx = "androidx.navigation:navigation-runtime-ktx:$versions.navigation"
+    navigation.fragment = "androidx.navigation:navigation-fragment:$versions.navigation"
+    navigation.fragment_ktx = "androidx.navigation:navigation-fragment-ktx:$versions.navigation"
+    navigation.ui = "androidx.navigation:navigation-ui:$versions.navigation"
+    navigation.ui_ktx = "androidx.navigation:navigation-ui-ktx:$versions.navigation"
+    navigation.safe_args_plugin = "androidx.navigation:navigation-safe-args-gradle-plugin:$versions.navigation"
+    deps.navigation = navigation
     implementation deps.navigation.runtime_ktx
     implementation deps.navigation.fragment_ktx
     implementation deps.navigation.ui_ktx
 
-    // Android Testing Support Library's runner and rules
 
-    /*
-    androidTestImplementation deps.atsl.runner
-    androidTestImplementation deps.atsl.rules
-    androidTestImplementation deps.room.testing
-    androidTestImplementation deps.arch_core.testing
-
-     */
 
     // Espresso UI Testing
-    androidTestImplementation deps.espresso.core
-    androidTestImplementation deps.espresso.contrib
-    androidTestImplementation deps.espresso.intents
+    // androidTestImplementation deps.espresso.core
+    // androidTestImplementation deps.espresso.contrib
+    // androidTestImplementation deps.espresso.intents
 
 }
