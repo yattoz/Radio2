@@ -30,6 +30,7 @@ class SongAdaptater(private val dataSet: ArrayList<Song>
     // Each data item is just a string in this case that is shown in a TextView.
     class MyViewHolder(private val binding: SongViewBinding) : RecyclerView.ViewHolder(binding.root)
     {
+        @SuppressLint("SetTextI18n")
         fun bind(dataSet: ArrayList<Song>, position: Int) {
             val hourPlayedTimestamp: Long = dataSet[position].startTime.value!!
             Log.d(tag,"$hourPlayedTimestamp")
