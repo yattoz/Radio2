@@ -4,6 +4,9 @@ gradle/*
 gradle*
 build/
 
+# kotlin build temporary files
+.kotlin/sessions
+
 # vscode
 .vscode
 
@@ -17,7 +20,6 @@ local.properties
 captures/
 .externalNativeBuild/
 .cxx/
-*.apk
 output.json
 
 # Built application files
