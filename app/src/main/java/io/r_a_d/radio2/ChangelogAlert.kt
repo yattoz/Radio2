@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.DialogInterface
 import android.content.pm.PackageManager.NameNotFoundException
 import android.content.res.AssetManager
+import android.text.Spanned
 import android.util.Log
 import androidx.appcompat.app.AlertDialog
 import androidx.core.text.HtmlCompat
@@ -59,9 +60,9 @@ class ChangelogAlert (private val context: Context)
         }
     }
 
-    private fun readChangelogs(versionList: List<String>?): String
+    private fun readChangelogs(versionList: List<String>?): Spanned
     {
-        var allChangelog: String = ""
+        var changelog: String = ""
         // Declare a StringBuilder for storing the file contents
         if (versionList != null) {
             for (version in versionList) {
@@ -85,17 +86,14 @@ class ChangelogAlert (private val context: Context)
                     // Handle the exception
                     e.printStackTrace()
                 }
-                val changelog = stringBuilder.toString()
-
-                val html =
-                    HtmlCompat.fromHtml(changelog, HtmlCompat.FROM_HTML_SEPARATOR_LINE_BREAK_PARAGRAPH)
-                allChangelog += html
+                changelog += stringBuilder.toString()
             }
         }
+        val allChangelog = HtmlCompat.fromHtml(changelog, HtmlCompat.FROM_HTML_SEPARATOR_LINE_BREAK_PARAGRAPH)
         return allChangelog
     }
 
-    private fun showChangelogAlert(thisVersion: String?, html: String, isFirstBoot: Boolean = false) {
+    private fun showChangelogAlert(thisVersion: String?, html: Spanned, isFirstBoot: Boolean = false) {
         val alert = AlertDialog.Builder(context).also {
             it.setIcon(R.drawable.lollipop_logo)
             it.setTitle(context.getString(R.string.new_in_version, thisVersion))
