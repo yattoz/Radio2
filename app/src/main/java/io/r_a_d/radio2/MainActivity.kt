@@ -192,7 +192,7 @@ class MainActivity : BaseActivity() {
 
         // initialize the UI
         if (BuildConfig.BUILD_TYPE == "debug" ) {
-            setTheme(R.style.AppThemeDebug)
+            setTheme(R.style.AppTheme)
         } else {
             setTheme(R.style.AppTheme)
         }
