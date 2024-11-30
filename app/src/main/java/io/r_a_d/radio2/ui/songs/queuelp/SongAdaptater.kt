@@ -1,15 +1,21 @@
 package io.r_a_d.radio2.ui.songs.queuelp
 
 import android.annotation.SuppressLint
+import android.content.ClipboardManager
+import android.content.Context
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.snackbar.BaseTransientBottomBar
+import com.google.android.material.snackbar.Snackbar
+import io.r_a_d.radio2.R
 import io.r_a_d.radio2.colorBlue
 import io.r_a_d.radio2.colorWhited
 import io.r_a_d.radio2.databinding.SongViewBinding
 import io.r_a_d.radio2.playerstore.Song
+import io.r_a_d.radio2.preferenceStore
 import io.r_a_d.radio2.tag
 import java.text.DateFormat
 import java.util.Date
@@ -17,10 +23,9 @@ import java.util.Locale
 import kotlin.collections.ArrayList
 
 class SongAdaptater(private val dataSet: ArrayList<Song>
-                    /*,
-                    context: Context,
-                    resource: Int,
-                    objects: Array<out Song>*/
+                    /* resource: Int,
+                    objects: Array<out Song>
+                     */
 ) : RecyclerView.Adapter<SongAdaptater.MyViewHolder>() /*ArrayAdapter<Song>(context, resource, objects)*/ {
 
 
@@ -28,7 +33,7 @@ class SongAdaptater(private val dataSet: ArrayList<Song>
     // Complex data items may need more than one view per item, and
     // you provide access to all the views for a data item in a view holder.
     // Each data item is just a string in this case that is shown in a TextView.
-    class MyViewHolder(private val binding: SongViewBinding) : RecyclerView.ViewHolder(binding.root)
+    class MyViewHolder(private val binding: SongViewBinding, private val context: Context) : RecyclerView.ViewHolder(binding.root)
     {
         @SuppressLint("SetTextI18n")
         fun bind(dataSet: ArrayList<Song>, position: Int) {
@@ -50,6 +55,30 @@ class SongAdaptater(private val dataSet: ArrayList<Song>
             }
             // if dataSet.size = 1, it means we display "No Queue".
             binding.itemTime.visibility = if (dataSet.size == 1) View.GONE else View.VISIBLE
+
+            val setClipboardListener: View.OnLongClickListener = View.OnLongClickListener {
+                val text = dataSet[position].artist.value + " - " + dataSet[position].title.value
+                val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                val clip = android.content.ClipData.newPlainText("Copied Text", text)
+                clipboard.setPrimaryClip(clip)
+                val snackBarLength = if (preferenceStore.getBoolean("snackbarPersistent", true))
+                    Snackbar.LENGTH_INDEFINITE
+                else Snackbar.LENGTH_LONG
+                val snackBar = Snackbar.make(it, "", snackBarLength)
+
+                if (snackBarLength == Snackbar.LENGTH_INDEFINITE)
+                    snackBar.setAction("OK") { snackBar.dismiss() }
+
+                snackBar.behavior = BaseTransientBottomBar.Behavior().apply {
+                    setSwipeDirection(BaseTransientBottomBar.Behavior.SWIPE_DIRECTION_ANY)
+                }
+                snackBar.setText(context.getString(R.string.song_to_clipboard))
+                snackBar.show()
+                true
+            }
+
+            binding.item.setOnLongClickListener(setClipboardListener)
+
         }
     }
 
@@ -61,7 +90,7 @@ class SongAdaptater(private val dataSet: ArrayList<Song>
         val binding = SongViewBinding.inflate(LayoutInflater.from(parent.context), parent, false)
         // set the view's size, margins, paddings and layout parameters
         //...
-        return MyViewHolder(binding)
+        return MyViewHolder(binding, parent.context)
     }
 
     // Replace the contents of a view (invoked by the layout manager)
