@@ -201,11 +201,10 @@ class NowPlayingFragment : Fragment() {
                     Log.d(tag, "Loading $res2 into threadImage via Glide...")
                     Glide.with(this).load(res2).into(threadImage);
                     reslink = "<a href=\"$res2\">$res2</a>" // unused
-                } else if (link.contains("https://")) {
+                } else if (link.startsWith("https://")) {
                     val reg = Regex("https:\\S*")
                     val res = reg.find(link)?.value
-                    val res2 = res?.substring(0, res.length - 1)
-                    reslink = "<a href=\"$res2\">res2</a>"
+                    reslink = "<a href=\"$res\">Thread up!</a>"
                 }
                 reslink
             } else {
