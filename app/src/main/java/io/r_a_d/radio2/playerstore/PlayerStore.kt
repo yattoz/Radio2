@@ -41,8 +41,8 @@ class PlayerStore {
     var thread: MutableLiveData<String> = MutableLiveData()
     var isAfkStream: Boolean = true
 
-    private val maxApiFetchRetry = 5;
-    private var curApiFetchRetry = 0;
+    private val maxApiFetchRetry = 5
+    private var curApiFetchRetry = 0
     private val sleepTime: Long = 4000
 
     init {
@@ -104,7 +104,7 @@ class PlayerStore {
         if (isApiUpToDate)
         {
             Log.d(playerStoreTag, "First call to fetchApi, and the API has something new. Updating Queue/LP...")
-            updateQueueAndLp(resMain);
+            updateQueueAndLp(resMain)
         }
         else if (isIcyChanged)
         {
@@ -223,12 +223,11 @@ class PlayerStore {
             {
                 val queueJSON = resMain.getJSONArray("lp")
                 val queueJSONLength = queueJSON.length()
-                val lpLatestSongs = if (lp.size >= queueJSONLength) lp.subList(0, queueJSONLength) else lp
-                Log.d(playerStoreTag, "last $queueJSONLength last played: $lpLatestSongs")
+
                 // get the new Last Played ArrayList
                 for (i in 0 until queueJSONLength) {
-                    val song = extractSong(queueJSON[i] as JSONObject)
-                    if (!lpLatestSongs.contains(song))
+                    val song = extractSong(queueJSON[(queueJSONLength - 1) - i] as JSONObject)
+                    if (!lp.contains(song))
                         lp.add(0, song)
                 }
             }
