@@ -127,7 +127,8 @@
         <!-- the width is in SP, it scales with font size.-->
         <TextView
             android:id="@+id/volume_text"
-            android:layout_width="36sp"
+            android:layout_width="wrap_content"
+            android:minWidth="36dp"
             android:layout_height="0dp"
             android:layout_marginEnd="8dp"
             android:gravity="end|center_vertical"
@@ -338,8 +339,9 @@
 
         <TextView
             android:id="@+id/endTime"
-            android:layout_width="44sp"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:minWidth="44dp"
             android:layout_marginTop="4dp"
             android:gravity="end"
             android:text=""
@@ -349,8 +351,9 @@
 
         <TextView
             android:id="@+id/currentTime"
-            android:layout_width="44sp"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:minWidth="44sp"
             android:layout_marginTop="4dp"
             android:gravity="start"
             android:text=""
