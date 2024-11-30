@@ -41,8 +41,9 @@ class PlayerStore {
     var thread: MutableLiveData<String> = MutableLiveData()
     var isAfkStream: Boolean = true
 
-    val maxApiFetchRetry = 4;
-    var curApiFetchRetry = 0;
+    private val maxApiFetchRetry = 5;
+    private var curApiFetchRetry = 0;
+    private val sleepTime: Long = 4000
 
     init {
         playbackState.value = PlaybackStateCompat.STATE_STOPPED
@@ -218,14 +219,16 @@ class PlayerStore {
         // - maybe, a new Queue
         if (resMain.has("lp"))
         {
-            val newLp = ArrayList<Song>()
             if (resMain.has("lp"))
             {
                 val queueJSON = resMain.getJSONArray("lp")
+                val queueJSONLength = queueJSON.length()
+                val lpLatestSongs = if (lp.size >= queueJSONLength) lp.subList(0, queueJSONLength) else lp
+                Log.d(playerStoreTag, "last $queueJSONLength last played: $lpLatestSongs")
                 // get the new Last Played ArrayList
-                for (i in 0 until queueJSON.length()) {
-                    val song = extractSong(queueJSON[(queueJSON.length() - 1) - i] as JSONObject)
-                    if (!lp.contains(song))
+                for (i in 0 until queueJSONLength) {
+                    val song = extractSong(queueJSON[i] as JSONObject)
+                    if (!lpLatestSongs.contains(song))
                         lp.add(0, song)
                 }
             }
@@ -272,7 +275,6 @@ class PlayerStore {
 
 
         val sleepScrape: (Any?) -> String = {
-            val sleepTime: Long = 3000
             Thread.sleep(sleepTime)
             URL(urlToScrape).readText()
         }
