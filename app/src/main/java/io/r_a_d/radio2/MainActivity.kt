@@ -229,6 +229,27 @@ class MainActivity : BaseActivity() {
         if (previousVersion == thisVersion) {
             Log.d(MainActivityTag, "Already shown changelog. Skipping Alert.")
         } else {
+            val changelogAlert = ChangelogAlert(this)
+            changelogAlert.showLastChangelog()
+        }
+        /*
+        val thisVersion  = try {
+            packageManager.getPackageInfo(
+                packageName,
+                0
+            ).versionName
+        } catch (e: NameNotFoundException) {
+            Log.e(MainActivityTag
+                , "could not get version name from manifest!")
+            e.printStackTrace()
+            ""
+        }
+
+        Log.d(MainActivityTag, "This version: $thisVersion, previous changelog shown: $previousVersion")
+
+        if (previousVersion == thisVersion) {
+            Log.d(MainActivityTag, "Already shown changelog. Skipping Alert.")
+        } else {
             // Get the AssetManager instance
             val assetManager = assets
 
@@ -285,6 +306,8 @@ class MainActivity : BaseActivity() {
             alert.create()
             alert.show()
         }
+
+         */
     }
 
     override fun onDestroy() {

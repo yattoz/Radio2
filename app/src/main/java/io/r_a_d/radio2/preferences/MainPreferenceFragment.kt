@@ -5,8 +5,11 @@ import android.net.Uri
 import android.os.Bundle
 import io.r_a_d.radio2.R
 import android.annotation.SuppressLint
+import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.preference.*
+import io.r_a_d.radio2.ChangelogAlert
+import io.r_a_d.radio2.MainActivityTag
 
 class MainPreferenceFragment : PreferenceFragmentCompat() {
 
@@ -26,6 +29,13 @@ class MainPreferenceFragment : PreferenceFragmentCompat() {
             val i = Intent(Intent.ACTION_VIEW)
             i.data = Uri.parse(url)
             startActivity(i)
+            true
+        }
+
+        val readChangelog = preferenceScreen.findPreference<Preference>("readChangelog")
+        readChangelog!!.setOnPreferenceClickListener {
+            val changelogAlert = ChangelogAlert(context!!)
+            changelogAlert.showAllChangelog()
             true
         }
 

@@ -32,6 +32,12 @@
         />
 
     <Preference
+        app:key="readChangelog"
+        app:title="Read the change log"
+        app:icon="@drawable/ic_newspaper"
+        />
+
+    <Preference
         app:key="submitBug"
         app:title="Submit a bug (opens GitHub in a web browser)"
         app:icon="@drawable/ic_bug"

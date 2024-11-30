@@ -85,5 +85,6 @@
     <string name="new_in_version">New in version %1$s</string>
     <string name="preferencestorelastversionchangelogshown">lastVersionChangelogShown</string>
     <string name="image_for_thread">Image for thread</string>
+    <string name="you_can_read_again_the_changelog_in_the_settings_top_right_three_dots_buttons">You can read again the changelog in the Settings (top-right three dots buttons).</string>
 
 </resources>
