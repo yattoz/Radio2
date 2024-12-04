@@ -1,8 +1,6 @@
 package io.r_a_d.radio2.ui.nowplaying
 
 import android.annotation.SuppressLint
-import android.content.ClipboardManager
-import android.content.Context
 import android.os.Bundle
 import android.support.v4.media.session.PlaybackStateCompat
 import android.text.method.LinkMovementMethod
@@ -19,8 +17,6 @@ import androidx.core.widget.TextViewCompat
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.bumptech.glide.Glide
-import com.google.android.material.snackbar.BaseTransientBottomBar
-import com.google.android.material.snackbar.Snackbar
 import io.r_a_d.radio2.*
 import io.r_a_d.radio2.alarm.RadioSleeper
 import io.r_a_d.radio2.databinding.FragmentNowplayingBinding
@@ -43,7 +39,7 @@ class NowPlayingFragment : Fragment() {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
 
         nowPlayingViewModel = ViewModelProvider(this)[NowPlayingViewModel::class.java]
         binding = FragmentNowplayingBinding.inflate(inflater, container, false)
@@ -100,6 +96,9 @@ class NowPlayingFragment : Fragment() {
             val t = if (PlayerStore.instance.queue.size > 0) PlayerStore.instance.queue[0] else Song("No queue - ") // (it.peekFirst != null ? it.peekFirst : Song() )
             songTitleNextText.text = t.title.value
             songArtistNextText.text = t.artist.value
+            val clipboardListenerNext = CreateClipboardListener(requireContext(), t)
+            songTitleNextText.setOnLongClickListener(clipboardListenerNext)
+            songArtistNextText.setOnLongClickListener(clipboardListenerNext)
         })
 
         fun volumeIcon(it: Int)
@@ -199,7 +198,7 @@ class NowPlayingFragment : Fragment() {
                     threadImage.visibility = View.VISIBLE
                     threadText.visibility = View.GONE
                     Log.d(tag, "Loading $res2 into threadImage via Glide...")
-                    Glide.with(this).load(res2).into(threadImage);
+                    Glide.with(this).load(res2).into(threadImage)
                     reslink = "<a href=\"$res2\">$res2</a>" // unused
                 } else if (link.startsWith("https://")) {
                     val reg = Regex("https:\\S*")
@@ -250,29 +249,9 @@ class NowPlayingFragment : Fragment() {
 
          */
 
-        val setClipboardListener: View.OnLongClickListener = View.OnLongClickListener {
-            val text = PlayerStore.instance.currentSong.artist.value + " - " + PlayerStore.instance.currentSong.title.value
-            val clipboard = requireContext().getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-            val clip = android.content.ClipData.newPlainText("Copied Text", text)
-            clipboard.setPrimaryClip(clip)
-            val snackBarLength = if (preferenceStore.getBoolean("snackbarPersistent", true))
-                Snackbar.LENGTH_INDEFINITE
-            else Snackbar.LENGTH_LONG
-            val snackBar = Snackbar.make(it, "", snackBarLength)
-
-            if (snackBarLength == Snackbar.LENGTH_INDEFINITE)
-                snackBar.setAction("OK") { snackBar.dismiss() }
-
-            snackBar.behavior = BaseTransientBottomBar.Behavior().apply {
-                setSwipeDirection(BaseTransientBottomBar.Behavior.SWIPE_DIRECTION_ANY)
-            }
-            snackBar.setText(getString(R.string.song_to_clipboard))
-            snackBar.show()
-            true
-        }
-
-        songTitleText.setOnLongClickListener(setClipboardListener)
-        songArtistText.setOnLongClickListener(setClipboardListener)
+        val clipboardListener = CreateClipboardListener(requireContext(), PlayerStore.instance.currentSong)
+        songTitleText.setOnLongClickListener(clipboardListener)
+        songArtistText.setOnLongClickListener(clipboardListener)
 
         val showTagsListener: View.OnClickListener = View.OnClickListener {
             tagsVisibilityToggle()

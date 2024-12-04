@@ -1,21 +1,17 @@
 package io.r_a_d.radio2.ui.songs.queuelp
 
 import android.annotation.SuppressLint
-import android.content.ClipboardManager
 import android.content.Context
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
-import com.google.android.material.snackbar.BaseTransientBottomBar
-import com.google.android.material.snackbar.Snackbar
-import io.r_a_d.radio2.R
+import io.r_a_d.radio2.CreateClipboardListener
 import io.r_a_d.radio2.colorBlue
 import io.r_a_d.radio2.colorWhited
 import io.r_a_d.radio2.databinding.SongViewBinding
 import io.r_a_d.radio2.playerstore.Song
-import io.r_a_d.radio2.preferenceStore
 import io.r_a_d.radio2.tag
 import java.text.DateFormat
 import java.util.Date
@@ -55,30 +51,7 @@ class SongAdaptater(private val dataSet: ArrayList<Song>
             }
             // if dataSet.size = 1, it means we display "No Queue".
             binding.itemTime.visibility = if (dataSet.size == 1) View.GONE else View.VISIBLE
-
-            val setClipboardListener: View.OnLongClickListener = View.OnLongClickListener {
-                val text = dataSet[position].artist.value + " - " + dataSet[position].title.value
-                val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-                val clip = android.content.ClipData.newPlainText("Copied Text", text)
-                clipboard.setPrimaryClip(clip)
-                val snackBarLength = if (preferenceStore.getBoolean("snackbarPersistent", true))
-                    Snackbar.LENGTH_INDEFINITE
-                else Snackbar.LENGTH_LONG
-                val snackBar = Snackbar.make(it, "", snackBarLength)
-
-                if (snackBarLength == Snackbar.LENGTH_INDEFINITE)
-                    snackBar.setAction("OK") { snackBar.dismiss() }
-
-                snackBar.behavior = BaseTransientBottomBar.Behavior().apply {
-                    setSwipeDirection(BaseTransientBottomBar.Behavior.SWIPE_DIRECTION_ANY)
-                }
-                snackBar.setText(context.getString(R.string.song_to_clipboard))
-                snackBar.show()
-                true
-            }
-
-            binding.item.setOnLongClickListener(setClipboardListener)
-
+            binding.item.setOnLongClickListener(CreateClipboardListener(context, dataSet[position]))
         }
     }
 
