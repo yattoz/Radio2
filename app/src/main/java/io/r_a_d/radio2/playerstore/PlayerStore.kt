@@ -77,8 +77,6 @@ class PlayerStore {
         currentSong.startTime.value = resMain.getLong("start_time")*1000
         currentSong.stopTime.value = resMain.getLong("end_time")*1000
         currentTime.value = (resMain.getLong("current"))*1000
-        thread.value = resMain.getString("thread")
-
         currentSongBackup.copy(currentSong)
         val newStreamer = resMain.getJSONObject("dj").getString("djname")
         if (newStreamer != streamerName.value)
@@ -90,7 +88,10 @@ class PlayerStore {
             streamerName.value = newStreamer
         }
         val listeners = resMain.getInt("listeners")
+        // THE ORDER MATTERS. We need to set isAfkStream BEFORE thread, because we're checking
+        // whether to display the thread when it changes based on the value of isAfkStream.
         isAfkStream = resMain.getBoolean("isafkstream")
+        thread.value = resMain.getString("thread")
         listenersCount.value = listeners
         val tagsJsonArr = resMain.getJSONArray("tags")
         tags.clear()

@@ -204,6 +204,11 @@ class NowPlayingFragment : Fragment() {
                     val reg = Regex("https:\\S*")
                     val res = reg.find(link)?.value
                     reslink = "<a href=\"$res\">Thread up!</a>"
+                } else {
+                    if (link.length > 4)
+                        reslink = link.substring(2, link.length - 1)
+                    else
+                        reslink = link
                 }
                 reslink
             } else {

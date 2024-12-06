@@ -34,7 +34,7 @@ class QueueFragment : Fragment()
     ): View? {
         // Inflate the layout for this fragment
         binding = FragmentLastPlayedBinding.inflate(inflater, container, false)
-        val dummySong = Song("No queue")
+        val dummySong = Song("No queue - ")
 
         viewManager = LinearLayoutManager(context)
         viewAdapter = SongAdaptater(
