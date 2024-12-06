@@ -31,7 +31,7 @@ android {
         applicationId "io.r_a_d.radio2"
         minSdkVersion 21        // API 21 is the minimum for media3 support.
         targetSdkVersion 35
-        versionCode 24120401
+        versionCode 24120602
         multiDexEnabled true
         versionName "2.4.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
