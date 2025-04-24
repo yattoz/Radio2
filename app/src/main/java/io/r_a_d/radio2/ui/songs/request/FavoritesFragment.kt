@@ -47,7 +47,7 @@ class FavoritesFragment : Fragment()  {
     private fun createView(binding: FragmentRequestBinding, isCallback: Boolean = false) : View?
     {
 
-        viewAdapter = RequestSongAdapter(Requestor.instance.favoritesSongArray)
+        viewAdapter = RequestSongAdapter(ArrayList(Requestor.instance.favoritesSongArray))
 
         val listener : SearchView.OnQueryTextListener = object : SearchView.OnQueryTextListener{
             override fun onQueryTextSubmit(query: String?): Boolean {
@@ -83,7 +83,7 @@ class FavoritesFragment : Fragment()  {
         recyclerSwipe.setOnRefreshListener {
             val userName1 = preferenceStore.getString("userName", null)
             Log.d(tag,"userName = $userName1")
-            if (userName1 != null && !userName1.isBlank())
+            if (!userName1.isNullOrBlank())
             {
                 noUserNameText.visibility = View.GONE
                 Requestor.instance.initFavorites()

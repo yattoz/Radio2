@@ -23,6 +23,10 @@ class Song(artistTitle: String = "", _id : Int = 0, _isRequestable : Boolean = f
         return "id=$id | ${artist.value} - ${title.value} | type=${type.value} | times ${startTime.value} - ${stopTime.value}\n"
     }
 
+    fun getArtistTitle(): String {
+        return "$artist - $title"
+    }
+
     fun setTitleArtist(data: String)
     {
         val hyphenPos = data.indexOf(" - ")

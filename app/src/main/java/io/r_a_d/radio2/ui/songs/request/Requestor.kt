@@ -6,6 +6,7 @@ import io.r_a_d.radio2.ActionOnError
 import io.r_a_d.radio2.Async
 import io.r_a_d.radio2.playerstore.Song
 import io.r_a_d.radio2.preferenceStore
+import io.r_a_d.radio2.tag
 import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
@@ -40,7 +41,7 @@ class Requestor {
     private val cookieManager: CookieManager = CookieManager()
     private val requestUrl = "https://r-a-d.io/request/%1\$d"
     private val searchUrl = "https://r-a-d.io/api/search/%1s?page=%2\$d"
-    private val favoritesUrl = "https://r-a-d.io/faves/%1s?dl=true"
+    private val favoritesUrl = "https://r-a-d.io/faves?nick=%1s&page=%2\$d&dl=true"
     private val songThresholdStep = 50
     private var songThreshold = songThresholdStep
     private var localQuery = ""
@@ -64,6 +65,7 @@ class Requestor {
 
     fun initFavorites(userName : String? = preferenceStore.getString("userName", null)){
         Log.d(requestorTag, "initializing favorites")
+        var isFavoritesReachingLastPage = false
         if (userName == null)
         {
             // Display is done by default in the XML.
@@ -71,33 +73,54 @@ class Requestor {
             isFavoritesUpdated.value = true
             return
         }
-        val favoritesUserUrl = String.format(Locale.getDefault(), favoritesUrl, userName)
-        val scrapeFavorites : (Any?) -> JSONArray = {
-            JSONArray(URL(favoritesUserUrl).readText())
-        }
-        val postFavorites :  (Any?) -> Unit = {
-            val res = it as JSONArray
-            favoritesSongArray.clear()
-            for (i in 0 until (res).length())
-            {
-                val item = res.getJSONObject(i)
-                val artistTitle = item.getString("meta")
-                val id : Int? = if (item.isNull("tracks_id"))
-                    null
-                else
-                    item.getInt("tracks_id")
+        favoritesSongArray.clear()
 
-                val lastRequested : Int? = if (item.isNull("lastrequested")) null else item.getInt("lastrequested")
-                val lastPlayed : Int? = if (item.isNull("lastplayed")) null else item.getInt("lastplayed")
-                val requestCount : Int? = if (item.isNull("requestcount")) null else item.getInt("requestcount")
-                val isRequestable = (coolDown(lastPlayed, lastRequested, requestCount) < 0)
-                //Log.d(requestorTag, "val : $id")
-                favoritesSongArray.add(Song(artistTitle, id ?: 0, isRequestable))
+
+        fun favesPage(page: Int)
+        {
+            val favoritesUserUrl = String.format(Locale.getDefault(), favoritesUrl, userName, page)
+            val scrapeFavorites : (Any?) -> JSONArray = {
+                JSONArray(URL(favoritesUserUrl).readText())
             }
-            Log.d(requestorTag, "favorites : $favoritesSongArray")
-            isFavoritesUpdated.value = true
+            val postFavorites :  (Any?) -> Unit = {
+                val res = it as JSONArray
+                if (res.length() > 0)
+                {
+                    favesPage(page + 1)
+                    for (i in 0 until (res).length()) {
+                        val item = res.getJSONObject(i)
+                        val artistTitle = item.getString("meta")
+                        val id: Int? = if (item.isNull("tracks_id"))
+                            null
+                        else
+                            item.getInt("tracks_id")
+
+                        val lastRequested: Int? =
+                            if (item.isNull("lastrequested")) null else item.getInt("lastrequested")
+                        val lastPlayed: Int? =
+                            if (item.isNull("lastplayed")) null else item.getInt("lastplayed")
+                        val requestCount: Int? =
+                            if (item.isNull("requestcount")) null else item.getInt("requestcount")
+                        val isRequestable = (coolDown(lastPlayed, lastRequested, requestCount) < 0)
+                        //Log.d(requestorTag, "val : $id")
+                        favoritesSongArray.add(Song(artistTitle, id ?: 0, isRequestable))
+                    }
+                    Log.d(requestorTag, "favorites : $favoritesSongArray")
+                    isFavoritesUpdated.value = false
+                }
+                else
+                {
+                    isFavoritesReachingLastPage = true
+                    isFavoritesUpdated.value = true
+                    Log.d(tag, "Reached page $page, faves don't exist. Finished")
+                }
+            }
+            Async(scrapeFavorites, postFavorites, ActionOnError.NOTIFY)
         }
-        Async(scrapeFavorites, postFavorites, ActionOnError.NOTIFY)
+
+        favesPage(1)
+
+        favoritesSongArray.sortBy { it.getArtistTitle() }
     }
 
     fun search(query: String)
