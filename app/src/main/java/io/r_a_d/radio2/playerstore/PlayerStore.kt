@@ -90,14 +90,16 @@ class PlayerStore {
         val listeners = resMain.getInt("listeners")
         // THE ORDER MATTERS. We need to set isAfkStream BEFORE thread, because we're checking
         // whether to display the thread when it changes based on the value of isAfkStream.
-        isAfkStream = resMain.getBoolean("isafkstream")
-        thread.value = resMain.getString("thread")
+        isAfkStream = if (resMain.has("isafkstream")) resMain.getBoolean("isafkstream") else false
+        thread.value = if (resMain.has("thread")) resMain.getString("thread") else "none"
         listenersCount.value = listeners
-        val tagsJsonArr = resMain.getJSONArray("tags")
-        tags.clear()
-        for (tagIndex in 0 until tagsJsonArr.length())
-        {
-            tags += tagsJsonArr.getString(tagIndex)
+        if (resMain.has("tags")) {
+            val tagsJsonArr = resMain.getJSONArray("tags")
+            tags.clear()
+            for (tagIndex in 0 until tagsJsonArr.length())
+            {
+                tags += tagsJsonArr.getString(tagIndex)
+            }
         }
 
         val isApiUpToDate = checkApiUpToDate(resMain)

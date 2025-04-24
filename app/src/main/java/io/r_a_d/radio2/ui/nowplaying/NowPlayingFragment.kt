@@ -174,41 +174,35 @@ class NowPlayingFragment : Fragment() {
         })
 
         PlayerStore.instance.thread.observe(viewLifecycleOwner, Observer {
-            val link = PlayerStore.instance.thread.value!!
+            val link = PlayerStore.instance.thread.value
 
-            val textLink = if (link.contains("https://ocv.me/up/") ) {
+            val textLink = if (link != null && link.contains("https://ocv.me/up/") ) {
                 threadText.visibility = View.VISIBLE
                 binding.upNext.visibility = View.GONE
                 binding.textSongTitleNext.visibility = View.GONE
                 binding.textSongArtistNext.visibility = View.GONE
                 "<a href=\"https://ocv.me/up/\">Upload your request!</a>"
-            } else if (link != "none" && !PlayerStore.instance.isAfkStream) {
+            } else if (link != null && link != "none" && !PlayerStore.instance.isAfkStream) {
                 threadText.visibility = View.VISIBLE
                 binding.upNext.visibility = View.GONE
                 binding.textSongTitleNext.visibility = View.GONE
                 binding.textSongArtistNext.visibility = View.GONE
                 var reslink = ""
-                if (link.contains("<img src"))
+                if (listOf(".jpg", ".jpeg", ".png", ".webp", ".gif").any { link.endsWith(it) })
                 {
-
                     val reg = Regex("https:\\S*")
-                    val res = reg.find(link)?.value
-                    val res2 = res?.substring(0, res.length - 1)
+                    val res = reg.find(link)?.value // eliminates heading in the field. The image link is preceded by "image:"
                     val threadImage = binding.threadImage
                     threadImage.visibility = View.VISIBLE
                     threadText.visibility = View.GONE
-                    Log.d(tag, "Loading $res2 into threadImage via Glide...")
-                    Glide.with(this).load(res2).into(threadImage)
-                    reslink = "<a href=\"$res2\">$res2</a>" // unused
+                    Log.d(tag, "Loading $res into threadImage via Glide...")
+                    Glide.with(this).load(res).into(threadImage)
                 } else if (link.startsWith("https://")) {
                     val reg = Regex("https:\\S*")
                     val res = reg.find(link)?.value
                     reslink = "<a href=\"$res\">Thread up!</a>"
                 } else {
-                    if (link.length > 4)
-                        reslink = link.substring(2, link.length - 1)
-                    else
-                        reslink = link
+                    reslink = link
                 }
                 reslink
             } else {
