@@ -65,7 +65,7 @@ class Requestor {
 
     fun initFavorites(userName : String? = preferenceStore.getString("userName", null)){
         Log.d(requestorTag, "initializing favorites")
-        var isFavoritesReachingLastPage = false
+
         if (userName == null)
         {
             // Display is done by default in the XML.
@@ -74,14 +74,14 @@ class Requestor {
             return
         }
         favoritesSongArray.clear()
-
-
         fun favesPage(page: Int)
         {
             val favoritesUserUrl = String.format(Locale.getDefault(), favoritesUrl, userName, page)
+
             val scrapeFavorites : (Any?) -> JSONArray = {
                 JSONArray(URL(favoritesUserUrl).readText())
             }
+
             val postFavorites :  (Any?) -> Unit = {
                 val res = it as JSONArray
                 if (res.length() > 0)
@@ -110,17 +110,18 @@ class Requestor {
                 }
                 else
                 {
-                    isFavoritesReachingLastPage = true
+                    if (preferenceStore.getBoolean("sortFavoritesAlphabetically", false)) {
+                        favoritesSongArray.sortBy { s -> s.getArtistTitle() }
+                    }
                     isFavoritesUpdated.value = true
                     Log.d(tag, "Reached page $page, faves don't exist. Finished")
+
                 }
             }
             Async(scrapeFavorites, postFavorites, ActionOnError.NOTIFY)
         }
 
         favesPage(1)
-
-        favoritesSongArray.sortBy { it.getArtistTitle() }
     }
 
     fun search(query: String)

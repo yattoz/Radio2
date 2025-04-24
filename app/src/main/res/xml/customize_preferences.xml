@@ -9,6 +9,14 @@
         app:key="userName"
         app:title="User name for favorite songs"
         />
+
+    <SwitchPreferenceCompat
+        app:key="sortFavoritesAlphabetically"
+        app:iconSpaceReserved="false"
+        app:title="Sort favorites alphabetically"
+        app:singleLineTitle="false"
+        app:defaultValue="false"
+    />
 <!--
     <SeekBarPreference
         app:key="volume"

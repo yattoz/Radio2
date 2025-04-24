@@ -24,7 +24,7 @@ class Song(artistTitle: String = "", _id : Int = 0, _isRequestable : Boolean = f
     }
 
     fun getArtistTitle(): String {
-        return "$artist - $title"
+        return "${artist.value} - ${title.value}"
     }
 
     fun setTitleArtist(data: String)

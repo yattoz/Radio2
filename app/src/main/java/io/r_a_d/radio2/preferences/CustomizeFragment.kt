@@ -29,6 +29,20 @@ class CustomizeFragment : PreferenceFragmentCompat() {
             true
         }
 
+        val sortFavorites = preferenceScreen.findPreference<SwitchPreferenceCompat>("sortFavoritesAlphabetically")
+        sortFavorites!!.summary = if (preferenceStore.getBoolean("sortFavoritesAlphabetically", false))
+            getString(R.string.sortFavoritesAlphabetically)
+        else
+            getString(R.string.sortFavoritesNot)
+        sortFavorites.setOnPreferenceChangeListener { preference, newValue ->
+            if (newValue as Boolean)
+                preference.setSummary(R.string.sortFavoritesAlphabetically)
+            else
+                preference.setSummary(R.string.sortFavoritesNot)
+            true
+        }
+
+
         val snackbarPersistent = preferenceScreen.findPreference<SwitchPreferenceCompat>("snackbarPersistent")
         snackbarPersistent!!.summary = if (preferenceStore.getBoolean("snackbarPersistent", false))
             getString(R.string.snackbarPersistent)
