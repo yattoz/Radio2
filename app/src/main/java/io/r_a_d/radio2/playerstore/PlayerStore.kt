@@ -91,7 +91,7 @@ class PlayerStore {
         // THE ORDER MATTERS. We need to set isAfkStream BEFORE thread, because we're checking
         // whether to display the thread when it changes based on the value of isAfkStream.
         isAfkStream = if (resMain.has("isafkstream")) resMain.getBoolean("isafkstream") else false
-        thread.value = if (resMain.has("thread")) resMain.getString("thread") else "none"
+        thread.value = if (resMain.has("thread") && !resMain.isNull("thread")) resMain.getString("thread") else "none"
         listenersCount.value = listeners
         try {
             if (resMain.has("tags") && !resMain.isNull("tags")) {
