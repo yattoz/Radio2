@@ -93,13 +93,18 @@ class PlayerStore {
         isAfkStream = if (resMain.has("isafkstream")) resMain.getBoolean("isafkstream") else false
         thread.value = if (resMain.has("thread")) resMain.getString("thread") else "none"
         listenersCount.value = listeners
-        if (resMain.has("tags")) {
-            val tagsJsonArr = resMain.getJSONArray("tags")
-            tags.clear()
-            for (tagIndex in 0 until tagsJsonArr.length())
-            {
-                tags += tagsJsonArr.getString(tagIndex)
+        try {
+            if (resMain.has("tags") && !resMain.isNull("tags")) {
+
+                val tagsJsonArr = resMain.getJSONArray("tags")
+                tags.clear()
+                for (tagIndex in 0 until tagsJsonArr.length()) {
+                    tags += tagsJsonArr.getString(tagIndex)
+                }
             }
+        } catch (e: Exception)
+        {
+            Log.d(tag, e.toString())
         }
 
         val isApiUpToDate = checkApiUpToDate(resMain)
