@@ -197,16 +197,33 @@ class RadioService : MediaBrowserServiceCompat() {
         // Bug from Android 13: the notification needs another update from the mediaSession with different metadata content
         // to update the notification picture. At the same time, we update the duration.
 
-        metadataBuilder
-            .putString(MediaMetadataCompat.METADATA_KEY_TITLE, PlayerStore.instance.currentSong.title.value)
-            .putString(MediaMetadataCompat.METADATA_KEY_ARTIST, PlayerStore.instance.currentSong.artist.value + " ")
-            .putString(MediaMetadataCompat.METADATA_KEY_MEDIA_ID, "id" + Random().nextInt(999))
-            .putBitmap(MediaMetadataCompat.METADATA_KEY_ALBUM_ART, PlayerStore.instance.streamerPicture.value)
-            .putBitmap(MediaMetadataCompat.METADATA_KEY_ART, PlayerStore.instance.streamerPicture.value)
+        try {
+            metadataBuilder
+                .putString(
+                    MediaMetadataCompat.METADATA_KEY_TITLE,
+                    PlayerStore.instance.currentSong.title.value
+                )
+                .putString(
+                    MediaMetadataCompat.METADATA_KEY_ARTIST,
+                    PlayerStore.instance.currentSong.artist.value + " "
+                )
+                .putString(MediaMetadataCompat.METADATA_KEY_MEDIA_ID, "id" + Random().nextInt(999))
+                .putBitmap(
+                    MediaMetadataCompat.METADATA_KEY_ALBUM_ART,
+                    PlayerStore.instance.streamerPicture.value
+                )
+                .putBitmap(
+                    MediaMetadataCompat.METADATA_KEY_ART,
+                    PlayerStore.instance.streamerPicture.value
+                )
 
 
-        mediaSession.setMetadata(metadataBuilder.build())
-        nowPlayingNotification.update(this, mediaSession = mediaSession)
+            mediaSession.setMetadata(metadataBuilder.build())
+            nowPlayingNotification.update(this, mediaSession = mediaSession)
+        } catch (e: Exception)
+        {
+            Log.e(tag, e.toString())
+        }
     }
 
     // ##################################################
