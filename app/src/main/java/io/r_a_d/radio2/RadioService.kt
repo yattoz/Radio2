@@ -224,7 +224,7 @@ class RadioService : MediaBrowserServiceCompat() {
         clientPackageName: String,
         clientUid: Int,
         rootHints: Bundle?
-    ): BrowserRoot? {
+    ): BrowserRoot {
         // Clients can connect, but you can't browse internet radio
         // so onLoadChildren returns nothing. This disables the ability to browse for content.
         return BrowserRoot(getString(R.string.MEDIA_ROOT_ID), null)
