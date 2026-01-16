@@ -3,6 +3,7 @@ package io.r_a_d.radio2.streamerNotificationService
 
 import android.app.Service
 import android.content.Intent
+import android.content.pm.ServiceInfo
 import android.os.Build
 import android.os.IBinder
 import android.util.Log
@@ -61,7 +62,10 @@ class StreamerMonitorService : Service() {
             streamerMonitorNotification.create(this)
             streamerMonitorNotification.update()
             streamerMonitorNotification.show()
-            startForeground(2, streamerMonitorNotification.notification)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
+                startForeground(2, streamerMonitorNotification.notification, ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE)
+            else
+                startForeground(2, streamerMonitorNotification.notification)
         }
 
         WorkerStore.instance.tickerPeriod = 60 *
